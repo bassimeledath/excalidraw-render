@@ -200,6 +200,42 @@ Call read_me first to learn the element format.`,
     },
   );
 
+  // ============================================================
+  // Tool 3: hello (simple test tool)
+  // ============================================================
+  server.registerTool(
+    "hello",
+    {
+      description: "A simple test tool that returns a greeting.",
+      inputSchema: z.object({
+        name: z.string().describe("Name to greet"),
+      }),
+      annotations: { readOnlyHint: true },
+    },
+    async ({ name }): Promise<CallToolResult> => {
+      return { content: [{ type: "text", text: `Hello, ${name}! 👋` }] };
+    },
+  );
+
+  // ============================================================
+  // Resource: hello world HTML (hardcoded, tiny)
+  // ============================================================
+  const helloUri = "ui://excalidraw/hello.html";
+  registerAppResource(server,
+    helloUri,
+    helloUri,
+    { mimeType: RESOURCE_MIME_TYPE },
+    async (): Promise<ReadResourceResult> => {
+      return {
+        contents: [{
+          uri: helloUri,
+          mimeType: RESOURCE_MIME_TYPE,
+          text: `<!DOCTYPE html><html><body><h1>Hello World</h1><p>This is a tiny test resource.</p></body></html>`,
+        }],
+      };
+    },
+  );
+
   // CSP: allow Excalidraw to load fonts from esm.sh
   const cspMeta = {
     ui: {
