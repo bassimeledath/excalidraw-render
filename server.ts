@@ -8,7 +8,7 @@ import { renderToPng } from "./renderer.js";
 // ============================================================
 const RECALL_CHEAT_SHEET = `# Excalidraw Element Format
 
-Thanks for calling read_me! Do NOT call it again in this conversation — you will not see anything new. Now use create_diagram to draw.
+Thanks for calling excalidraw_read_me! Do NOT call it again in this conversation — you will not see anything new. Now use create_excalidraw_diagram to draw.
 
 ## Color Palette (use consistently across all tools)
 
@@ -179,7 +179,7 @@ Common mistakes to avoid:
 - **Elements overlap when y-coordinates are close** — always check that text, boxes, and labels don't stack on top of each other
 
 ## Tips
-- Do NOT call read_me again — you already have everything you need
+- Do NOT call excalidraw_read_me again — you already have everything you need
 - Use the color palette consistently
 - Make sure text is readable (never use same text color as background color)
 - Do NOT use emoji in text — they don't render in Excalidraw's font
@@ -193,9 +193,9 @@ export function registerTools(server: McpServer): void {
   // Tool 1: read_me (call before drawing)
   // ============================================================
   server.registerTool(
-    "read_me",
+    "excalidraw_read_me",
     {
-      description: "Returns the Excalidraw element format reference with color palettes, examples, and tips. Call this BEFORE using create_diagram for the first time.",
+      description: "Returns the Excalidraw element format reference with color palettes, examples, and tips. Call this BEFORE using create_excalidraw_diagram for the first time.",
       annotations: { readOnlyHint: true },
     },
     async (): Promise<CallToolResult> => {
@@ -207,10 +207,10 @@ export function registerTools(server: McpServer): void {
   // Tool 2: create_diagram (headless PNG render)
   // ============================================================
   server.registerTool(
-    "create_diagram",
+    "create_excalidraw_diagram",
     {
       description: `Renders a hand-drawn Excalidraw diagram to a PNG file.
-Call read_me first to learn the element format.
+Call excalidraw_read_me first to learn the element format.
 Returns the file path of the saved PNG.`,
       inputSchema: z.object({
         elements: z.string().describe(
