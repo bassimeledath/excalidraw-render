@@ -1,6 +1,6 @@
 # excalidraw-render
 
-Headless Excalidraw diagram renderer for **Claude Code CLI** and other MCP clients. Renders hand-drawn diagrams as PNG or SVG locally — no data leaves your machine.
+Headless Excalidraw diagram renderer for **Claude Code CLI** and other MCP clients. Renders hand-drawn diagrams as PNG or SVG — diagrams are rendered locally, not on Excalidraw's servers.
 
 Uses headless Chromium (via [agent-browser](https://github.com/vercel-labs/agent-browser)) to render diagrams server-side. First render takes ~3s (browser launch + CDN import), subsequent renders ~60ms.
 
@@ -80,9 +80,9 @@ Claude will call `excalidraw_read_me` to learn the element format, then `create_
 
 ## Privacy
 
-All rendering happens locally in a headless Chromium instance on your machine. Your diagram data is never sent to Excalidraw's servers or any third party. The only network request is fetching the Excalidraw JavaScript library from esm.sh at startup — no diagram content is transmitted.
+Diagrams are rendered locally in a headless Chromium instance on your machine, not on Excalidraw's servers. The only network request is fetching the Excalidraw JavaScript library from esm.sh at startup — no diagram content is sent to third-party servers.
 
-This makes it safe for confidential work like internal architecture diagrams, security designs, or proprietary system documentation.
+This makes it suitable for internal architecture diagrams, security designs, or proprietary system documentation.
 
 ## Requirements
 
