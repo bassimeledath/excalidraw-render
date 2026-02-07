@@ -36,11 +36,11 @@ var require_code = __commonJS((exports) => {
   exports.IDENTIFIER = /^[a-z$_][a-z$_0-9]*$/i;
 
   class Name extends _CodeOrName {
-    constructor(s2) {
+    constructor(s) {
       super();
-      if (!exports.IDENTIFIER.test(s2))
+      if (!exports.IDENTIFIER.test(s))
         throw new Error("CodeGen: name must be a valid identifier");
-      this.str = s2;
+      this.str = s;
     }
     toString() {
       return this.str;
@@ -70,7 +70,7 @@ var require_code = __commonJS((exports) => {
     }
     get str() {
       var _a2;
-      return (_a2 = this._str) !== null && _a2 !== undefined ? _a2 : this._str = this._items.reduce((s2, c) => `${s2}${c}`, "");
+      return (_a2 = this._str) !== null && _a2 !== undefined ? _a2 : this._str = this._items.reduce((s, c) => `${s}${c}`, "");
     }
     get names() {
       var _a2;
@@ -129,37 +129,37 @@ var require_code = __commonJS((exports) => {
       i++;
     }
   }
-  function mergeExprItems(a2, b2) {
-    if (b2 === '""')
-      return a2;
-    if (a2 === '""')
-      return b2;
-    if (typeof a2 == "string") {
-      if (b2 instanceof Name || a2[a2.length - 1] !== '"')
+  function mergeExprItems(a, b) {
+    if (b === '""')
+      return a;
+    if (a === '""')
+      return b;
+    if (typeof a == "string") {
+      if (b instanceof Name || a[a.length - 1] !== '"')
         return;
-      if (typeof b2 != "string")
-        return `${a2.slice(0, -1)}${b2}"`;
-      if (b2[0] === '"')
-        return a2.slice(0, -1) + b2.slice(1);
+      if (typeof b != "string")
+        return `${a.slice(0, -1)}${b}"`;
+      if (b[0] === '"')
+        return a.slice(0, -1) + b.slice(1);
       return;
     }
-    if (typeof b2 == "string" && b2[0] === '"' && !(a2 instanceof Name))
-      return `"${a2}${b2.slice(1)}`;
+    if (typeof b == "string" && b[0] === '"' && !(a instanceof Name))
+      return `"${a}${b.slice(1)}`;
     return;
   }
   function strConcat(c1, c2) {
     return c2.emptyStr() ? c1 : c1.emptyStr() ? c2 : str`${c1}${c2}`;
   }
   exports.strConcat = strConcat;
-  function interpolate(x2) {
-    return typeof x2 == "number" || typeof x2 == "boolean" || x2 === null ? x2 : safeStringify(Array.isArray(x2) ? x2.join(",") : x2);
+  function interpolate(x) {
+    return typeof x == "number" || typeof x == "boolean" || x === null ? x : safeStringify(Array.isArray(x) ? x.join(",") : x);
   }
-  function stringify(x2) {
-    return new _Code(safeStringify(x2));
+  function stringify(x) {
+    return new _Code(safeStringify(x));
   }
   exports.stringify = stringify;
-  function safeStringify(x2) {
-    return JSON.stringify(x2).replace(/\u2028/g, "\\u2028").replace(/\u2029/g, "\\u2029");
+  function safeStringify(x) {
+    return JSON.stringify(x).replace(/\u2028/g, "\\u2028").replace(/\u2029/g, "\\u2029");
   }
   exports.safeStringify = safeStringify;
   function getProperty(key) {
@@ -215,8 +215,8 @@ var require_scope = __commonJS((exports) => {
       return new code_1.Name(this._newName(prefix));
     }
     _newName(prefix) {
-      const ng2 = this._names[prefix] || this._nameGroup(prefix);
-      return `${prefix}${ng2.index++}`;
+      const ng = this._names[prefix] || this._nameGroup(prefix);
+      return `${prefix}${ng.index++}`;
     }
     _nameGroup(prefix) {
       var _a2, _b;
@@ -270,9 +270,9 @@ var require_scope = __commonJS((exports) => {
         vs = this._values[prefix] = new Map;
       }
       vs.set(valueKey, name);
-      const s2 = this._scope[prefix] || (this._scope[prefix] = []);
-      const itemIndex = s2.length;
-      s2[itemIndex] = value.ref;
+      const s = this._scope[prefix] || (this._scope[prefix] = []);
+      const itemIndex = s.length;
+      s[itemIndex] = value.ref;
       name.setValue(value, { property: prefix, itemIndex });
       return name;
     }
@@ -398,10 +398,10 @@ var require_codegen = __commonJS((exports) => {
       this.name = name;
       this.rhs = rhs;
     }
-    render({ es5, _n: _n2 }) {
+    render({ es5, _n }) {
       const varKind = es5 ? scope_1.varKinds.var : this.varKind;
       const rhs = this.rhs === undefined ? "" : ` = ${this.rhs}`;
-      return `${varKind} ${this.name}${rhs};` + _n2;
+      return `${varKind} ${this.name}${rhs};` + _n;
     }
     optimizeNames(names, constants) {
       if (!names[this.name.str])
@@ -422,8 +422,8 @@ var require_codegen = __commonJS((exports) => {
       this.rhs = rhs;
       this.sideEffects = sideEffects;
     }
-    render({ _n: _n2 }) {
-      return `${this.lhs} = ${this.rhs};` + _n2;
+    render({ _n }) {
+      return `${this.lhs} = ${this.rhs};` + _n;
     }
     optimizeNames(names, constants) {
       if (this.lhs instanceof code_1.Name && !names[this.lhs.str] && !this.sideEffects)
@@ -442,8 +442,8 @@ var require_codegen = __commonJS((exports) => {
       super(lhs, rhs, sideEffects);
       this.op = op;
     }
-    render({ _n: _n2 }) {
-      return `${this.lhs} ${this.op}= ${this.rhs};` + _n2;
+    render({ _n }) {
+      return `${this.lhs} ${this.op}= ${this.rhs};` + _n;
     }
   }
 
@@ -453,8 +453,8 @@ var require_codegen = __commonJS((exports) => {
       this.label = label;
       this.names = {};
     }
-    render({ _n: _n2 }) {
-      return `${this.label}:` + _n2;
+    render({ _n }) {
+      return `${this.label}:` + _n;
     }
   }
 
@@ -464,9 +464,9 @@ var require_codegen = __commonJS((exports) => {
       this.label = label;
       this.names = {};
     }
-    render({ _n: _n2 }) {
+    render({ _n }) {
       const label = this.label ? ` ${this.label}` : "";
-      return `break${label};` + _n2;
+      return `break${label};` + _n;
     }
   }
 
@@ -475,8 +475,8 @@ var require_codegen = __commonJS((exports) => {
       super();
       this.error = error48;
     }
-    render({ _n: _n2 }) {
-      return `throw ${this.error};` + _n2;
+    render({ _n }) {
+      return `throw ${this.error};` + _n;
     }
     get names() {
       return this.error.names;
@@ -488,8 +488,8 @@ var require_codegen = __commonJS((exports) => {
       super();
       this.code = code;
     }
-    render({ _n: _n2 }) {
-      return `${this.code};` + _n2;
+    render({ _n }) {
+      return `${this.code};` + _n;
     }
     optimizeNodes() {
       return `${this.code}` ? this : undefined;
@@ -629,17 +629,17 @@ var require_codegen = __commonJS((exports) => {
   }
 
   class ForRange extends For {
-    constructor(varKind, name, from, to2) {
+    constructor(varKind, name, from, to) {
       super();
       this.varKind = varKind;
       this.name = name;
       this.from = from;
-      this.to = to2;
+      this.to = to;
     }
     render(opts) {
       const varKind = opts.es5 ? scope_1.varKinds.var : this.varKind;
-      const { name, from, to: to2 } = this;
-      return `for(${varKind} ${name}=${from}; ${name}<${to2}; ${name}++)` + super.render(opts);
+      const { name, from, to } = this;
+      return `for(${varKind} ${name}=${from}; ${name}<${to}; ${name}++)` + super.render(opts);
     }
     get names() {
       const names = addExprNames(super.names, this.from);
@@ -848,9 +848,9 @@ var require_codegen = __commonJS((exports) => {
     for(iteration, forBody) {
       return this._for(new ForLoop(iteration), forBody);
     }
-    forRange(nameOrPrefix, from, to2, forBody, varKind = this.opts.es5 ? scope_1.varKinds.var : scope_1.varKinds.let) {
+    forRange(nameOrPrefix, from, to, forBody, varKind = this.opts.es5 ? scope_1.varKinds.var : scope_1.varKinds.let) {
       const name = this._scope.toName(nameOrPrefix);
-      return this._for(new ForRange(varKind, name, from, to2), () => forBody(name));
+      return this._for(new ForRange(varKind, name, from, to), () => forBody(name));
     }
     forOf(nameOrPrefix, iterable, forBody, varKind = scope_1.varKinds.const) {
       const name = this._scope.toName(nameOrPrefix);
@@ -1013,8 +1013,8 @@ var require_codegen = __commonJS((exports) => {
     for (const n in from)
       names[n] = (names[n] || 0) - (from[n] || 0);
   }
-  function not(x2) {
-    return typeof x2 == "boolean" || typeof x2 == "number" || x2 === null ? !x2 : (0, code_1._)`!${par(x2)}`;
+  function not(x) {
+    return typeof x == "boolean" || typeof x == "number" || x === null ? !x : (0, code_1._)`!${par(x)}`;
   }
   exports.not = not;
   var andCode = mappend(exports.operators.AND);
@@ -1023,15 +1023,15 @@ var require_codegen = __commonJS((exports) => {
   }
   exports.and = and;
   var orCode = mappend(exports.operators.OR);
-  function or2(...args) {
+  function or(...args) {
     return args.reduce(orCode);
   }
-  exports.or = or2;
+  exports.or = or;
   function mappend(op) {
-    return (x2, y2) => x2 === code_1.nil ? y2 : y2 === code_1.nil ? x2 : (0, code_1._)`${par(x2)} ${op} ${par(y2)}`;
+    return (x, y) => x === code_1.nil ? y : y === code_1.nil ? x : (0, code_1._)`${par(x)} ${op} ${par(y)}`;
   }
-  function par(x2) {
-    return x2 instanceof code_1.Name ? x2 : (0, code_1._)`(${x2})`;
+  function par(x) {
+    return x instanceof code_1.Name ? x : (0, code_1._)`(${x})`;
   }
 });
 
@@ -1048,17 +1048,17 @@ var require_util = __commonJS((exports) => {
     return hash2;
   }
   exports.toHash = toHash;
-  function alwaysValidSchema(it2, schema) {
+  function alwaysValidSchema(it, schema) {
     if (typeof schema == "boolean")
       return schema;
     if (Object.keys(schema).length === 0)
       return true;
-    checkUnknownRules(it2, schema);
-    return !schemaHasRules(schema, it2.self.RULES.all);
+    checkUnknownRules(it, schema);
+    return !schemaHasRules(schema, it.self.RULES.all);
   }
   exports.alwaysValidSchema = alwaysValidSchema;
-  function checkUnknownRules(it2, schema = it2.schema) {
-    const { opts, self } = it2;
+  function checkUnknownRules(it, schema = it.schema) {
+    const { opts, self } = it;
     if (!opts.strictSchema)
       return;
     if (typeof schema === "boolean")
@@ -1066,7 +1066,7 @@ var require_util = __commonJS((exports) => {
     const rules = self.RULES.keywords;
     for (const key in schema) {
       if (!rules[key])
-        checkStrictMode(it2, `unknown keyword: "${key}"`);
+        checkStrictMode(it, `unknown keyword: "${key}"`);
     }
   }
   exports.checkUnknownRules = checkUnknownRules;
@@ -1116,41 +1116,41 @@ var require_util = __commonJS((exports) => {
     return str.replace(/~1/g, "/").replace(/~0/g, "~");
   }
   exports.unescapeJsonPointer = unescapeJsonPointer;
-  function eachItem(xs, f2) {
+  function eachItem(xs, f) {
     if (Array.isArray(xs)) {
-      for (const x2 of xs)
-        f2(x2);
+      for (const x of xs)
+        f(x);
     } else {
-      f2(xs);
+      f(xs);
     }
   }
   exports.eachItem = eachItem;
   function makeMergeEvaluated({ mergeNames, mergeToName, mergeValues: mergeValues3, resultToName }) {
-    return (gen, from, to2, toName) => {
-      const res = to2 === undefined ? from : to2 instanceof codegen_1.Name ? (from instanceof codegen_1.Name ? mergeNames(gen, from, to2) : mergeToName(gen, from, to2), to2) : from instanceof codegen_1.Name ? (mergeToName(gen, to2, from), from) : mergeValues3(from, to2);
+    return (gen, from, to, toName) => {
+      const res = to === undefined ? from : to instanceof codegen_1.Name ? (from instanceof codegen_1.Name ? mergeNames(gen, from, to) : mergeToName(gen, from, to), to) : from instanceof codegen_1.Name ? (mergeToName(gen, to, from), from) : mergeValues3(from, to);
       return toName === codegen_1.Name && !(res instanceof codegen_1.Name) ? resultToName(gen, res) : res;
     };
   }
   exports.mergeEvaluated = {
     props: makeMergeEvaluated({
-      mergeNames: (gen, from, to2) => gen.if((0, codegen_1._)`${to2} !== true && ${from} !== undefined`, () => {
-        gen.if((0, codegen_1._)`${from} === true`, () => gen.assign(to2, true), () => gen.assign(to2, (0, codegen_1._)`${to2} || {}`).code((0, codegen_1._)`Object.assign(${to2}, ${from})`));
+      mergeNames: (gen, from, to) => gen.if((0, codegen_1._)`${to} !== true && ${from} !== undefined`, () => {
+        gen.if((0, codegen_1._)`${from} === true`, () => gen.assign(to, true), () => gen.assign(to, (0, codegen_1._)`${to} || {}`).code((0, codegen_1._)`Object.assign(${to}, ${from})`));
       }),
-      mergeToName: (gen, from, to2) => gen.if((0, codegen_1._)`${to2} !== true`, () => {
+      mergeToName: (gen, from, to) => gen.if((0, codegen_1._)`${to} !== true`, () => {
         if (from === true) {
-          gen.assign(to2, true);
+          gen.assign(to, true);
         } else {
-          gen.assign(to2, (0, codegen_1._)`${to2} || {}`);
-          setEvaluated(gen, to2, from);
+          gen.assign(to, (0, codegen_1._)`${to} || {}`);
+          setEvaluated(gen, to, from);
         }
       }),
-      mergeValues: (from, to2) => from === true ? true : { ...from, ...to2 },
+      mergeValues: (from, to) => from === true ? true : { ...from, ...to },
       resultToName: evaluatedPropsToName
     }),
     items: makeMergeEvaluated({
-      mergeNames: (gen, from, to2) => gen.if((0, codegen_1._)`${to2} !== true && ${from} !== undefined`, () => gen.assign(to2, (0, codegen_1._)`${from} === true ? true : ${to2} > ${from} ? ${to2} : ${from}`)),
-      mergeToName: (gen, from, to2) => gen.if((0, codegen_1._)`${to2} !== true`, () => gen.assign(to2, from === true ? true : (0, codegen_1._)`${to2} > ${from} ? ${to2} : ${from}`)),
-      mergeValues: (from, to2) => from === true ? true : Math.max(from, to2),
+      mergeNames: (gen, from, to) => gen.if((0, codegen_1._)`${to} !== true && ${from} !== undefined`, () => gen.assign(to, (0, codegen_1._)`${from} === true ? true : ${to} > ${from} ? ${to} : ${from}`)),
+      mergeToName: (gen, from, to) => gen.if((0, codegen_1._)`${to} !== true`, () => gen.assign(to, from === true ? true : (0, codegen_1._)`${to} > ${from} ? ${to} : ${from}`)),
+      mergeValues: (from, to) => from === true ? true : Math.max(from, to),
       resultToName: (gen, items) => gen.var("items", items)
     })
   };
@@ -1164,14 +1164,14 @@ var require_util = __commonJS((exports) => {
   }
   exports.evaluatedPropsToName = evaluatedPropsToName;
   function setEvaluated(gen, props, ps) {
-    Object.keys(ps).forEach((p2) => gen.assign((0, codegen_1._)`${props}${(0, codegen_1.getProperty)(p2)}`, true));
+    Object.keys(ps).forEach((p) => gen.assign((0, codegen_1._)`${props}${(0, codegen_1.getProperty)(p)}`, true));
   }
   exports.setEvaluated = setEvaluated;
   var snippets = {};
-  function useFunc(gen, f2) {
+  function useFunc(gen, f) {
     return gen.scopeValue("func", {
-      ref: f2,
-      code: snippets[f2.code] || (snippets[f2.code] = new code_1._Code(f2.code))
+      ref: f,
+      code: snippets[f.code] || (snippets[f.code] = new code_1._Code(f.code))
     });
   }
   exports.useFunc = useFunc;
@@ -1188,13 +1188,13 @@ var require_util = __commonJS((exports) => {
     return jsPropertySyntax ? (0, codegen_1.getProperty)(dataProp).toString() : "/" + escapeJsonPointer(dataProp);
   }
   exports.getErrorPath = getErrorPath;
-  function checkStrictMode(it2, msg, mode = it2.opts.strictSchema) {
+  function checkStrictMode(it, msg, mode = it.opts.strictSchema) {
     if (!mode)
       return;
     msg = `strict mode: ${msg}`;
     if (mode === true)
       throw new Error(msg);
-    it2.self.logger.warn(msg);
+    it.self.logger.warn(msg);
   }
   exports.checkStrictMode = checkStrictMode;
 });
@@ -1238,23 +1238,23 @@ var require_errors = __commonJS((exports) => {
     message: ({ keyword, schemaType }) => schemaType ? (0, codegen_1.str)`"${keyword}" keyword must be ${schemaType} ($data)` : (0, codegen_1.str)`"${keyword}" keyword is invalid ($data)`
   };
   function reportError(cxt, error48 = exports.keywordError, errorPaths, overrideAllErrors) {
-    const { it: it2 } = cxt;
-    const { gen, compositeRule, allErrors } = it2;
+    const { it } = cxt;
+    const { gen, compositeRule, allErrors } = it;
     const errObj = errorObjectCode(cxt, error48, errorPaths);
     if (overrideAllErrors !== null && overrideAllErrors !== undefined ? overrideAllErrors : compositeRule || allErrors) {
       addError(gen, errObj);
     } else {
-      returnErrors(it2, (0, codegen_1._)`[${errObj}]`);
+      returnErrors(it, (0, codegen_1._)`[${errObj}]`);
     }
   }
   exports.reportError = reportError;
   function reportExtraError(cxt, error48 = exports.keywordError, errorPaths) {
-    const { it: it2 } = cxt;
-    const { gen, compositeRule, allErrors } = it2;
+    const { it } = cxt;
+    const { gen, compositeRule, allErrors } = it;
     const errObj = errorObjectCode(cxt, error48, errorPaths);
     addError(gen, errObj);
     if (!(compositeRule || allErrors)) {
-      returnErrors(it2, names_1.default.vErrors);
+      returnErrors(it, names_1.default.vErrors);
     }
   }
   exports.reportExtraError = reportExtraError;
@@ -1263,15 +1263,15 @@ var require_errors = __commonJS((exports) => {
     gen.if((0, codegen_1._)`${names_1.default.vErrors} !== null`, () => gen.if(errsCount, () => gen.assign((0, codegen_1._)`${names_1.default.vErrors}.length`, errsCount), () => gen.assign(names_1.default.vErrors, null)));
   }
   exports.resetErrorsCount = resetErrorsCount;
-  function extendErrors({ gen, keyword, schemaValue, data, errsCount, it: it2 }) {
+  function extendErrors({ gen, keyword, schemaValue, data, errsCount, it }) {
     if (errsCount === undefined)
       throw new Error("ajv implementation error");
     const err = gen.name("err");
     gen.forRange("i", errsCount, names_1.default.errors, (i) => {
       gen.const(err, (0, codegen_1._)`${names_1.default.vErrors}[${i}]`);
-      gen.if((0, codegen_1._)`${err}.instancePath === undefined`, () => gen.assign((0, codegen_1._)`${err}.instancePath`, (0, codegen_1.strConcat)(names_1.default.instancePath, it2.errorPath)));
-      gen.assign((0, codegen_1._)`${err}.schemaPath`, (0, codegen_1.str)`${it2.errSchemaPath}/${keyword}`);
-      if (it2.opts.verbose) {
+      gen.if((0, codegen_1._)`${err}.instancePath === undefined`, () => gen.assign((0, codegen_1._)`${err}.instancePath`, (0, codegen_1.strConcat)(names_1.default.instancePath, it.errorPath)));
+      gen.assign((0, codegen_1._)`${err}.schemaPath`, (0, codegen_1.str)`${it.errSchemaPath}/${keyword}`);
+      if (it.opts.verbose) {
         gen.assign((0, codegen_1._)`${err}.schema`, schemaValue);
         gen.assign((0, codegen_1._)`${err}.data`, data);
       }
@@ -1283,16 +1283,16 @@ var require_errors = __commonJS((exports) => {
     gen.if((0, codegen_1._)`${names_1.default.vErrors} === null`, () => gen.assign(names_1.default.vErrors, (0, codegen_1._)`[${err}]`), (0, codegen_1._)`${names_1.default.vErrors}.push(${err})`);
     gen.code((0, codegen_1._)`${names_1.default.errors}++`);
   }
-  function returnErrors(it2, errs) {
-    const { gen, validateName, schemaEnv } = it2;
+  function returnErrors(it, errs) {
+    const { gen, validateName, schemaEnv } = it;
     if (schemaEnv.$async) {
-      gen.throw((0, codegen_1._)`new ${it2.ValidationError}(${errs})`);
+      gen.throw((0, codegen_1._)`new ${it.ValidationError}(${errs})`);
     } else {
       gen.assign((0, codegen_1._)`${validateName}.errors`, errs);
       gen.return(false);
     }
   }
-  var E2 = {
+  var E = {
     keyword: new codegen_1.Name("keyword"),
     schemaPath: new codegen_1.Name("schemaPath"),
     params: new codegen_1.Name("params"),
@@ -1308,9 +1308,9 @@ var require_errors = __commonJS((exports) => {
     return errorObject(cxt, error48, errorPaths);
   }
   function errorObject(cxt, error48, errorPaths = {}) {
-    const { gen, it: it2 } = cxt;
+    const { gen, it } = cxt;
     const keyValues = [
-      errorInstancePath(it2, errorPaths),
+      errorInstancePath(it, errorPaths),
       errorSchemaPath(cxt, errorPaths)
     ];
     extraErrorProps(cxt, error48, keyValues);
@@ -1325,20 +1325,20 @@ var require_errors = __commonJS((exports) => {
     if (schemaPath) {
       schPath = (0, codegen_1.str)`${schPath}${(0, util_1.getErrorPath)(schemaPath, util_1.Type.Str)}`;
     }
-    return [E2.schemaPath, schPath];
+    return [E.schemaPath, schPath];
   }
   function extraErrorProps(cxt, { params, message }, keyValues) {
-    const { keyword, data, schemaValue, it: it2 } = cxt;
-    const { opts, propertyName, topSchemaRef, schemaPath } = it2;
-    keyValues.push([E2.keyword, keyword], [E2.params, typeof params == "function" ? params(cxt) : params || (0, codegen_1._)`{}`]);
+    const { keyword, data, schemaValue, it } = cxt;
+    const { opts, propertyName, topSchemaRef, schemaPath } = it;
+    keyValues.push([E.keyword, keyword], [E.params, typeof params == "function" ? params(cxt) : params || (0, codegen_1._)`{}`]);
     if (opts.messages) {
-      keyValues.push([E2.message, typeof message == "function" ? message(cxt) : message]);
+      keyValues.push([E.message, typeof message == "function" ? message(cxt) : message]);
     }
     if (opts.verbose) {
-      keyValues.push([E2.schema, schemaValue], [E2.parentSchema, (0, codegen_1._)`${topSchemaRef}${schemaPath}`], [names_1.default.data, data]);
+      keyValues.push([E.schema, schemaValue], [E.parentSchema, (0, codegen_1._)`${topSchemaRef}${schemaPath}`], [names_1.default.data, data]);
     }
     if (propertyName)
-      keyValues.push([E2.propertyName, propertyName]);
+      keyValues.push([E.propertyName, propertyName]);
   }
 });
 
@@ -1352,10 +1352,10 @@ var require_boolSchema = __commonJS((exports) => {
   var boolError = {
     message: "boolean schema is false"
   };
-  function topBoolOrEmptySchema(it2) {
-    const { gen, schema, validateName } = it2;
+  function topBoolOrEmptySchema(it) {
+    const { gen, schema, validateName } = it;
     if (schema === false) {
-      falseSchemaError(it2, false);
+      falseSchemaError(it, false);
     } else if (typeof schema == "object" && schema.$async === true) {
       gen.return(names_1.default.data);
     } else {
@@ -1364,18 +1364,18 @@ var require_boolSchema = __commonJS((exports) => {
     }
   }
   exports.topBoolOrEmptySchema = topBoolOrEmptySchema;
-  function boolOrEmptySchema(it2, valid) {
-    const { gen, schema } = it2;
+  function boolOrEmptySchema(it, valid) {
+    const { gen, schema } = it;
     if (schema === false) {
       gen.var(valid, false);
-      falseSchemaError(it2);
+      falseSchemaError(it);
     } else {
       gen.var(valid, true);
     }
   }
   exports.boolOrEmptySchema = boolOrEmptySchema;
-  function falseSchemaError(it2, overrideAllErrors) {
-    const { gen, data } = it2;
+  function falseSchemaError(it, overrideAllErrors) {
+    const { gen, data } = it;
     const cxt = {
       gen,
       keyword: "false schema",
@@ -1384,7 +1384,7 @@ var require_boolSchema = __commonJS((exports) => {
       schemaCode: false,
       schemaValue: false,
       params: {},
-      it: it2
+      it
     };
     (0, errors_1.reportError)(cxt, boolError, undefined, overrideAllErrors);
   }
@@ -1396,8 +1396,8 @@ var require_rules = __commonJS((exports) => {
   exports.getRules = exports.isJSONType = undefined;
   var _jsonTypes = ["string", "number", "integer", "boolean", "null", "object", "array"];
   var jsonTypes = new Set(_jsonTypes);
-  function isJSONType(x2) {
-    return typeof x2 == "string" && jsonTypes.has(x2);
+  function isJSONType(x) {
+    return typeof x == "string" && jsonTypes.has(x);
   }
   exports.isJSONType = isJSONType;
   function getRules() {
@@ -1475,17 +1475,17 @@ var require_dataType = __commonJS((exports) => {
     throw new Error("type must be JSONType or JSONType[]: " + types.join(","));
   }
   exports.getJSONTypes = getJSONTypes;
-  function coerceAndCheckDataType(it2, types) {
-    const { gen, data, opts } = it2;
+  function coerceAndCheckDataType(it, types) {
+    const { gen, data, opts } = it;
     const coerceTo = coerceToTypes(types, opts.coerceTypes);
-    const checkTypes = types.length > 0 && !(coerceTo.length === 0 && types.length === 1 && (0, applicability_1.schemaHasRulesForType)(it2, types[0]));
+    const checkTypes = types.length > 0 && !(coerceTo.length === 0 && types.length === 1 && (0, applicability_1.schemaHasRulesForType)(it, types[0]));
     if (checkTypes) {
       const wrongType = checkDataTypes(types, data, opts.strictNumbers, DataType.Wrong);
       gen.if(wrongType, () => {
         if (coerceTo.length)
-          coerceData(it2, types, coerceTo);
+          coerceData(it, types, coerceTo);
         else
-          reportTypeError(it2);
+          reportTypeError(it);
       });
     }
     return checkTypes;
@@ -1495,8 +1495,8 @@ var require_dataType = __commonJS((exports) => {
   function coerceToTypes(types, coerceTypes) {
     return coerceTypes ? types.filter((t) => COERCIBLE.has(t) || coerceTypes === "array" && t === "array") : [];
   }
-  function coerceData(it2, types, coerceTo) {
-    const { gen, data, opts } = it2;
+  function coerceData(it, types, coerceTo) {
+    const { gen, data, opts } = it;
     const dataType = gen.let("dataType", (0, codegen_1._)`typeof ${data}`);
     const coerced = gen.let("coerced", (0, codegen_1._)`undefined`);
     if (opts.coerceTypes === "array") {
@@ -1509,11 +1509,11 @@ var require_dataType = __commonJS((exports) => {
       }
     }
     gen.else();
-    reportTypeError(it2);
+    reportTypeError(it);
     gen.endIf();
     gen.if((0, codegen_1._)`${coerced} !== undefined`, () => {
       gen.assign(data, coerced);
-      assignParentData(it2, coerced);
+      assignParentData(it, coerced);
     });
     function coerceSpecificType(t) {
       switch (t) {
@@ -1597,14 +1597,14 @@ var require_dataType = __commonJS((exports) => {
     message: ({ schema }) => `must be ${schema}`,
     params: ({ schema, schemaValue }) => typeof schema == "string" ? (0, codegen_1._)`{type: ${schema}}` : (0, codegen_1._)`{type: ${schemaValue}}`
   };
-  function reportTypeError(it2) {
-    const cxt = getTypeErrorContext(it2);
+  function reportTypeError(it) {
+    const cxt = getTypeErrorContext(it);
     (0, errors_1.reportError)(cxt, typeError);
   }
   exports.reportTypeError = reportTypeError;
-  function getTypeErrorContext(it2) {
-    const { gen, data, schema } = it2;
-    const schemaCode = (0, util_1.schemaRefOrVal)(it2, schema, "type");
+  function getTypeErrorContext(it) {
+    const { gen, data, schema } = it;
+    const schemaCode = (0, util_1.schemaRefOrVal)(it, schema, "type");
     return {
       gen,
       keyword: "type",
@@ -1614,7 +1614,7 @@ var require_dataType = __commonJS((exports) => {
       schemaValue: schemaCode,
       parentSchema: schema,
       params: {},
-      it: it2
+      it
     };
   }
 });
@@ -1625,24 +1625,24 @@ var require_defaults = __commonJS((exports) => {
   exports.assignDefaults = undefined;
   var codegen_1 = require_codegen();
   var util_1 = require_util();
-  function assignDefaults(it2, ty) {
-    const { properties, items } = it2.schema;
+  function assignDefaults(it, ty) {
+    const { properties, items } = it.schema;
     if (ty === "object" && properties) {
       for (const key in properties) {
-        assignDefault(it2, key, properties[key].default);
+        assignDefault(it, key, properties[key].default);
       }
     } else if (ty === "array" && Array.isArray(items)) {
-      items.forEach((sch, i) => assignDefault(it2, i, sch.default));
+      items.forEach((sch, i) => assignDefault(it, i, sch.default));
     }
   }
   exports.assignDefaults = assignDefaults;
-  function assignDefault(it2, prop, defaultValue) {
-    const { gen, compositeRule, data, opts } = it2;
+  function assignDefault(it, prop, defaultValue) {
+    const { gen, compositeRule, data, opts } = it;
     if (defaultValue === undefined)
       return;
     const childData = (0, codegen_1._)`${data}${(0, codegen_1.getProperty)(prop)}`;
     if (compositeRule) {
-      (0, util_1.checkStrictMode)(it2, `default is ignored for: ${childData}`);
+      (0, util_1.checkStrictMode)(it, `default is ignored for: ${childData}`);
       return;
     }
     let condition = (0, codegen_1._)`${childData} === undefined`;
@@ -1662,8 +1662,8 @@ var require_code2 = __commonJS((exports) => {
   var names_1 = require_names();
   var util_2 = require_util();
   function checkReportMissingProp(cxt, prop) {
-    const { gen, data, it: it2 } = cxt;
-    gen.if(noPropertyInData(gen, data, prop, it2.opts.ownProperties), () => {
+    const { gen, data, it } = cxt;
+    gen.if(noPropertyInData(gen, data, prop, it.opts.ownProperties), () => {
       cxt.setParams({ missingProperty: (0, codegen_1._)`${prop}` }, true);
       cxt.error();
     });
@@ -1700,22 +1700,22 @@ var require_code2 = __commonJS((exports) => {
   }
   exports.noPropertyInData = noPropertyInData;
   function allSchemaProperties(schemaMap) {
-    return schemaMap ? Object.keys(schemaMap).filter((p2) => p2 !== "__proto__") : [];
+    return schemaMap ? Object.keys(schemaMap).filter((p) => p !== "__proto__") : [];
   }
   exports.allSchemaProperties = allSchemaProperties;
-  function schemaProperties(it2, schemaMap) {
-    return allSchemaProperties(schemaMap).filter((p2) => !(0, util_1.alwaysValidSchema)(it2, schemaMap[p2]));
+  function schemaProperties(it, schemaMap) {
+    return allSchemaProperties(schemaMap).filter((p) => !(0, util_1.alwaysValidSchema)(it, schemaMap[p]));
   }
   exports.schemaProperties = schemaProperties;
-  function callValidateCode({ schemaCode, data, it: { gen, topSchemaRef, schemaPath, errorPath }, it: it2 }, func, context, passSchema) {
+  function callValidateCode({ schemaCode, data, it: { gen, topSchemaRef, schemaPath, errorPath }, it }, func, context, passSchema) {
     const dataAndSchema = passSchema ? (0, codegen_1._)`${schemaCode}, ${data}, ${topSchemaRef}${schemaPath}` : data;
     const valCxt = [
       [names_1.default.instancePath, (0, codegen_1.strConcat)(names_1.default.instancePath, errorPath)],
-      [names_1.default.parentData, it2.parentData],
-      [names_1.default.parentDataProperty, it2.parentDataProperty],
+      [names_1.default.parentData, it.parentData],
+      [names_1.default.parentDataProperty, it.parentDataProperty],
       [names_1.default.rootData, names_1.default.rootData]
     ];
-    if (it2.opts.dynamicRef)
+    if (it.opts.dynamicRef)
       valCxt.push([names_1.default.dynamicAnchors, names_1.default.dynamicAnchors]);
     const args = (0, codegen_1._)`${dataAndSchema}, ${gen.object(...valCxt)}`;
     return context !== codegen_1.nil ? (0, codegen_1._)`${func}.call(${context}, ${args})` : (0, codegen_1._)`${func}(${args})`;
@@ -1734,9 +1734,9 @@ var require_code2 = __commonJS((exports) => {
   }
   exports.usePattern = usePattern;
   function validateArray(cxt) {
-    const { gen, data, keyword, it: it2 } = cxt;
+    const { gen, data, keyword, it } = cxt;
     const valid = gen.name("valid");
-    if (it2.allErrors) {
+    if (it.allErrors) {
       const validArr = gen.let("valid", true);
       validateItems(() => gen.assign(validArr, false));
       return validArr;
@@ -1758,11 +1758,11 @@ var require_code2 = __commonJS((exports) => {
   }
   exports.validateArray = validateArray;
   function validateUnion(cxt) {
-    const { gen, schema, keyword, it: it2 } = cxt;
+    const { gen, schema, keyword, it } = cxt;
     if (!Array.isArray(schema))
       throw new Error("ajv implementation error");
-    const alwaysValid = schema.some((sch) => (0, util_1.alwaysValidSchema)(it2, sch));
-    if (alwaysValid && !it2.opts.unevaluated)
+    const alwaysValid = schema.some((sch) => (0, util_1.alwaysValidSchema)(it, sch));
+    if (alwaysValid && !it.opts.unevaluated)
       return;
     const valid = gen.let("valid", false);
     const schValid = gen.name("_valid");
@@ -1791,16 +1791,16 @@ var require_keyword = __commonJS((exports) => {
   var code_1 = require_code2();
   var errors_1 = require_errors();
   function macroKeywordCode(cxt, def) {
-    const { gen, keyword, schema, parentSchema, it: it2 } = cxt;
-    const macroSchema = def.macro.call(it2.self, schema, parentSchema, it2);
+    const { gen, keyword, schema, parentSchema, it } = cxt;
+    const macroSchema = def.macro.call(it.self, schema, parentSchema, it);
     const schemaRef = useKeyword(gen, keyword, macroSchema);
-    if (it2.opts.validateSchema !== false)
-      it2.self.validateSchema(macroSchema, true);
+    if (it.opts.validateSchema !== false)
+      it.self.validateSchema(macroSchema, true);
     const valid = gen.name("valid");
     cxt.subschema({
       schema: macroSchema,
       schemaPath: codegen_1.nil,
-      errSchemaPath: `${it2.errSchemaPath}/${keyword}`,
+      errSchemaPath: `${it.errSchemaPath}/${keyword}`,
       topSchemaRef: schemaRef,
       compositeRule: true
     }, valid);
@@ -1809,9 +1809,9 @@ var require_keyword = __commonJS((exports) => {
   exports.macroKeywordCode = macroKeywordCode;
   function funcKeywordCode(cxt, def) {
     var _a2;
-    const { gen, keyword, schema, parentSchema, $data, it: it2 } = cxt;
-    checkAsyncKeyword(it2, def);
-    const validate = !$data && def.compile ? def.compile.call(it2.self, schema, parentSchema, it2) : def.validate;
+    const { gen, keyword, schema, parentSchema, $data, it } = cxt;
+    checkAsyncKeyword(it, def);
+    const validate = !$data && def.compile ? def.compile.call(it.self, schema, parentSchema, it) : def.validate;
     const validateRef = useKeyword(gen, keyword, validate);
     const valid = gen.let("valid");
     cxt.block$data(valid, validateKeyword);
@@ -1831,7 +1831,7 @@ var require_keyword = __commonJS((exports) => {
     }
     function validateAsync() {
       const ruleErrs = gen.let("ruleErrs", null);
-      gen.try(() => assignValid((0, codegen_1._)`await `), (e) => gen.assign(valid, false).if((0, codegen_1._)`${e} instanceof ${it2.ValidationError}`, () => gen.assign(ruleErrs, (0, codegen_1._)`${e}.errors`), () => gen.throw(e)));
+      gen.try(() => assignValid((0, codegen_1._)`await `), (e) => gen.assign(valid, false).if((0, codegen_1._)`${e} instanceof ${it.ValidationError}`, () => gen.assign(ruleErrs, (0, codegen_1._)`${e}.errors`), () => gen.throw(e)));
       return ruleErrs;
     }
     function validateSync() {
@@ -1841,7 +1841,7 @@ var require_keyword = __commonJS((exports) => {
       return validateErrs;
     }
     function assignValid(_await = def.async ? (0, codegen_1._)`await ` : codegen_1.nil) {
-      const passCxt = it2.opts.passContext ? names_1.default.this : names_1.default.self;
+      const passCxt = it.opts.passContext ? names_1.default.this : names_1.default.self;
       const passSchema = !(("compile" in def) && !$data || def.schema === false);
       gen.assign(valid, (0, codegen_1._)`${_await}${(0, code_1.callValidateCode)(cxt, validateRef, passCxt, passSchema)}`, def.modifying);
     }
@@ -1852,8 +1852,8 @@ var require_keyword = __commonJS((exports) => {
   }
   exports.funcKeywordCode = funcKeywordCode;
   function modifyData(cxt) {
-    const { gen, data, it: it2 } = cxt;
-    gen.if(it2.parentData, () => gen.assign(data, (0, codegen_1._)`${it2.parentData}[${it2.parentDataProperty}]`));
+    const { gen, data, it } = cxt;
+    gen.if(it.parentData, () => gen.assign(data, (0, codegen_1._)`${it.parentData}[${it.parentDataProperty}]`));
   }
   function addErrs(cxt, errs) {
     const { gen } = cxt;
@@ -1872,7 +1872,7 @@ var require_keyword = __commonJS((exports) => {
     return gen.scopeValue("keyword", typeof result == "function" ? { ref: result } : { ref: result, code: (0, codegen_1.stringify)(result) });
   }
   function validSchemaType(schema, schemaType, allowUndefined = false) {
-    return !schemaType.length || schemaType.some((st2) => st2 === "array" ? Array.isArray(schema) : st2 === "object" ? schema && typeof schema == "object" && !Array.isArray(schema) : typeof schema == st2 || allowUndefined && typeof schema == "undefined");
+    return !schemaType.length || schemaType.some((st) => st === "array" ? Array.isArray(schema) : st === "object" ? schema && typeof schema == "object" && !Array.isArray(schema) : typeof schema == st || allowUndefined && typeof schema == "undefined");
   }
   exports.validSchemaType = validSchemaType;
   function validateKeywordUsage({ schema, opts, self, errSchemaPath }, def, keyword) {
@@ -1903,20 +1903,20 @@ var require_subschema = __commonJS((exports) => {
   exports.extendSubschemaMode = exports.extendSubschemaData = exports.getSubschema = undefined;
   var codegen_1 = require_codegen();
   var util_1 = require_util();
-  function getSubschema(it2, { keyword, schemaProp, schema, schemaPath, errSchemaPath, topSchemaRef }) {
+  function getSubschema(it, { keyword, schemaProp, schema, schemaPath, errSchemaPath, topSchemaRef }) {
     if (keyword !== undefined && schema !== undefined) {
       throw new Error('both "keyword" and "schema" passed, only one allowed');
     }
     if (keyword !== undefined) {
-      const sch = it2.schema[keyword];
+      const sch = it.schema[keyword];
       return schemaProp === undefined ? {
         schema: sch,
-        schemaPath: (0, codegen_1._)`${it2.schemaPath}${(0, codegen_1.getProperty)(keyword)}`,
-        errSchemaPath: `${it2.errSchemaPath}/${keyword}`
+        schemaPath: (0, codegen_1._)`${it.schemaPath}${(0, codegen_1.getProperty)(keyword)}`,
+        errSchemaPath: `${it.errSchemaPath}/${keyword}`
       } : {
         schema: sch[schemaProp],
-        schemaPath: (0, codegen_1._)`${it2.schemaPath}${(0, codegen_1.getProperty)(keyword)}${(0, codegen_1.getProperty)(schemaProp)}`,
-        errSchemaPath: `${it2.errSchemaPath}/${keyword}/${(0, util_1.escapeFragment)(schemaProp)}`
+        schemaPath: (0, codegen_1._)`${it.schemaPath}${(0, codegen_1.getProperty)(keyword)}${(0, codegen_1.getProperty)(schemaProp)}`,
+        errSchemaPath: `${it.errSchemaPath}/${keyword}/${(0, util_1.escapeFragment)(schemaProp)}`
       };
     }
     if (schema !== undefined) {
@@ -1933,14 +1933,14 @@ var require_subschema = __commonJS((exports) => {
     throw new Error('either "keyword" or "schema" must be passed');
   }
   exports.getSubschema = getSubschema;
-  function extendSubschemaData(subschema, it2, { dataProp, dataPropType: dpType, data, dataTypes, propertyName }) {
+  function extendSubschemaData(subschema, it, { dataProp, dataPropType: dpType, data, dataTypes, propertyName }) {
     if (data !== undefined && dataProp !== undefined) {
       throw new Error('both "data" and "dataProp" passed, only one allowed');
     }
-    const { gen } = it2;
+    const { gen } = it;
     if (dataProp !== undefined) {
-      const { errorPath, dataPathArr, opts } = it2;
-      const nextData = gen.let("data", (0, codegen_1._)`${it2.data}${(0, codegen_1.getProperty)(dataProp)}`, true);
+      const { errorPath, dataPathArr, opts } = it;
+      const nextData = gen.let("data", (0, codegen_1._)`${it.data}${(0, codegen_1.getProperty)(dataProp)}`, true);
       dataContextProps(nextData);
       subschema.errorPath = (0, codegen_1.str)`${errorPath}${(0, util_1.getErrorPath)(dataProp, dpType, opts.jsPropertySyntax)}`;
       subschema.parentDataProperty = (0, codegen_1._)`${dataProp}`;
@@ -1956,11 +1956,11 @@ var require_subschema = __commonJS((exports) => {
       subschema.dataTypes = dataTypes;
     function dataContextProps(_nextData) {
       subschema.data = _nextData;
-      subschema.dataLevel = it2.dataLevel + 1;
+      subschema.dataLevel = it.dataLevel + 1;
       subschema.dataTypes = [];
-      it2.definedProperties = new Set;
-      subschema.parentData = it2.data;
-      subschema.dataNames = [...it2.dataNames, _nextData];
+      it.definedProperties = new Set;
+      subschema.parentData = it.data;
+      subschema.dataNames = [...it.dataNames, _nextData];
     }
   }
   exports.extendSubschemaData = extendSubschemaData;
@@ -1979,43 +1979,43 @@ var require_subschema = __commonJS((exports) => {
 
 // node_modules/fast-deep-equal/index.js
 var require_fast_deep_equal = __commonJS((exports, module) => {
-  module.exports = function equal(a2, b2) {
-    if (a2 === b2)
+  module.exports = function equal(a, b) {
+    if (a === b)
       return true;
-    if (a2 && b2 && typeof a2 == "object" && typeof b2 == "object") {
-      if (a2.constructor !== b2.constructor)
+    if (a && b && typeof a == "object" && typeof b == "object") {
+      if (a.constructor !== b.constructor)
         return false;
       var length, i, keys;
-      if (Array.isArray(a2)) {
-        length = a2.length;
-        if (length != b2.length)
+      if (Array.isArray(a)) {
+        length = a.length;
+        if (length != b.length)
           return false;
         for (i = length;i-- !== 0; )
-          if (!equal(a2[i], b2[i]))
+          if (!equal(a[i], b[i]))
             return false;
         return true;
       }
-      if (a2.constructor === RegExp)
-        return a2.source === b2.source && a2.flags === b2.flags;
-      if (a2.valueOf !== Object.prototype.valueOf)
-        return a2.valueOf() === b2.valueOf();
-      if (a2.toString !== Object.prototype.toString)
-        return a2.toString() === b2.toString();
-      keys = Object.keys(a2);
+      if (a.constructor === RegExp)
+        return a.source === b.source && a.flags === b.flags;
+      if (a.valueOf !== Object.prototype.valueOf)
+        return a.valueOf() === b.valueOf();
+      if (a.toString !== Object.prototype.toString)
+        return a.toString() === b.toString();
+      keys = Object.keys(a);
       length = keys.length;
-      if (length !== Object.keys(b2).length)
+      if (length !== Object.keys(b).length)
         return false;
       for (i = length;i-- !== 0; )
-        if (!Object.prototype.hasOwnProperty.call(b2, keys[i]))
+        if (!Object.prototype.hasOwnProperty.call(b, keys[i]))
           return false;
       for (i = length;i-- !== 0; ) {
         var key = keys[i];
-        if (!equal(a2[key], b2[key]))
+        if (!equal(a[key], b[key]))
           return false;
       }
       return true;
     }
-    return a2 !== a2 && b2 !== b2;
+    return a !== a && b !== b;
   };
 });
 
@@ -2175,12 +2175,12 @@ var require_resolve = __commonJS((exports) => {
   function getFullPath(resolver, id = "", normalize) {
     if (normalize !== false)
       id = normalizeId(id);
-    const p2 = resolver.parse(id);
-    return _getFullPath(resolver, p2);
+    const p = resolver.parse(id);
+    return _getFullPath(resolver, p);
   }
   exports.getFullPath = getFullPath;
-  function _getFullPath(resolver, p2) {
-    const serialized = resolver.serialize(p2);
+  function _getFullPath(resolver, p) {
+    const serialized = resolver.serialize(p);
     return serialized.split("#")[0] + "#";
   }
   exports._getFullPath = _getFullPath;
@@ -2271,15 +2271,15 @@ var require_validate = __commonJS((exports) => {
   var resolve_1 = require_resolve();
   var util_1 = require_util();
   var errors_1 = require_errors();
-  function validateFunctionCode(it2) {
-    if (isSchemaObj(it2)) {
-      checkKeywords(it2);
-      if (schemaCxtHasRules(it2)) {
-        topSchemaObjCode(it2);
+  function validateFunctionCode(it) {
+    if (isSchemaObj(it)) {
+      checkKeywords(it);
+      if (schemaCxtHasRules(it)) {
+        topSchemaObjCode(it);
         return;
       }
     }
-    validateFunction(it2, () => (0, boolSchema_1.topBoolOrEmptySchema)(it2));
+    validateFunction(it, () => (0, boolSchema_1.topBoolOrEmptySchema)(it));
   }
   exports.validateFunctionCode = validateFunctionCode;
   function validateFunction({ gen, validateName, schema, schemaEnv, opts }, body) {
@@ -2313,40 +2313,40 @@ var require_validate = __commonJS((exports) => {
         gen.var(names_1.default.dynamicAnchors, (0, codegen_1._)`{}`);
     });
   }
-  function topSchemaObjCode(it2) {
-    const { schema, opts, gen } = it2;
-    validateFunction(it2, () => {
+  function topSchemaObjCode(it) {
+    const { schema, opts, gen } = it;
+    validateFunction(it, () => {
       if (opts.$comment && schema.$comment)
-        commentKeyword(it2);
-      checkNoDefault(it2);
+        commentKeyword(it);
+      checkNoDefault(it);
       gen.let(names_1.default.vErrors, null);
       gen.let(names_1.default.errors, 0);
       if (opts.unevaluated)
-        resetEvaluated(it2);
-      typeAndKeywords(it2);
-      returnResults(it2);
+        resetEvaluated(it);
+      typeAndKeywords(it);
+      returnResults(it);
     });
     return;
   }
-  function resetEvaluated(it2) {
-    const { gen, validateName } = it2;
-    it2.evaluated = gen.const("evaluated", (0, codegen_1._)`${validateName}.evaluated`);
-    gen.if((0, codegen_1._)`${it2.evaluated}.dynamicProps`, () => gen.assign((0, codegen_1._)`${it2.evaluated}.props`, (0, codegen_1._)`undefined`));
-    gen.if((0, codegen_1._)`${it2.evaluated}.dynamicItems`, () => gen.assign((0, codegen_1._)`${it2.evaluated}.items`, (0, codegen_1._)`undefined`));
+  function resetEvaluated(it) {
+    const { gen, validateName } = it;
+    it.evaluated = gen.const("evaluated", (0, codegen_1._)`${validateName}.evaluated`);
+    gen.if((0, codegen_1._)`${it.evaluated}.dynamicProps`, () => gen.assign((0, codegen_1._)`${it.evaluated}.props`, (0, codegen_1._)`undefined`));
+    gen.if((0, codegen_1._)`${it.evaluated}.dynamicItems`, () => gen.assign((0, codegen_1._)`${it.evaluated}.items`, (0, codegen_1._)`undefined`));
   }
   function funcSourceUrl(schema, opts) {
     const schId = typeof schema == "object" && schema[opts.schemaId];
     return schId && (opts.code.source || opts.code.process) ? (0, codegen_1._)`/*# sourceURL=${schId} */` : codegen_1.nil;
   }
-  function subschemaCode(it2, valid) {
-    if (isSchemaObj(it2)) {
-      checkKeywords(it2);
-      if (schemaCxtHasRules(it2)) {
-        subSchemaObjCode(it2, valid);
+  function subschemaCode(it, valid) {
+    if (isSchemaObj(it)) {
+      checkKeywords(it);
+      if (schemaCxtHasRules(it)) {
+        subSchemaObjCode(it, valid);
         return;
       }
     }
-    (0, boolSchema_1.boolOrEmptySchema)(it2, valid);
+    (0, boolSchema_1.boolOrEmptySchema)(it, valid);
   }
   function schemaCxtHasRules({ schema, self }) {
     if (typeof schema == "boolean")
@@ -2356,49 +2356,49 @@ var require_validate = __commonJS((exports) => {
         return true;
     return false;
   }
-  function isSchemaObj(it2) {
-    return typeof it2.schema != "boolean";
+  function isSchemaObj(it) {
+    return typeof it.schema != "boolean";
   }
-  function subSchemaObjCode(it2, valid) {
-    const { schema, gen, opts } = it2;
+  function subSchemaObjCode(it, valid) {
+    const { schema, gen, opts } = it;
     if (opts.$comment && schema.$comment)
-      commentKeyword(it2);
-    updateContext(it2);
-    checkAsyncSchema(it2);
+      commentKeyword(it);
+    updateContext(it);
+    checkAsyncSchema(it);
     const errsCount = gen.const("_errs", names_1.default.errors);
-    typeAndKeywords(it2, errsCount);
+    typeAndKeywords(it, errsCount);
     gen.var(valid, (0, codegen_1._)`${errsCount} === ${names_1.default.errors}`);
   }
-  function checkKeywords(it2) {
-    (0, util_1.checkUnknownRules)(it2);
-    checkRefsAndKeywords(it2);
+  function checkKeywords(it) {
+    (0, util_1.checkUnknownRules)(it);
+    checkRefsAndKeywords(it);
   }
-  function typeAndKeywords(it2, errsCount) {
-    if (it2.opts.jtd)
-      return schemaKeywords(it2, [], false, errsCount);
-    const types = (0, dataType_1.getSchemaTypes)(it2.schema);
-    const checkedTypes = (0, dataType_1.coerceAndCheckDataType)(it2, types);
-    schemaKeywords(it2, types, !checkedTypes, errsCount);
+  function typeAndKeywords(it, errsCount) {
+    if (it.opts.jtd)
+      return schemaKeywords(it, [], false, errsCount);
+    const types = (0, dataType_1.getSchemaTypes)(it.schema);
+    const checkedTypes = (0, dataType_1.coerceAndCheckDataType)(it, types);
+    schemaKeywords(it, types, !checkedTypes, errsCount);
   }
-  function checkRefsAndKeywords(it2) {
-    const { schema, errSchemaPath, opts, self } = it2;
+  function checkRefsAndKeywords(it) {
+    const { schema, errSchemaPath, opts, self } = it;
     if (schema.$ref && opts.ignoreKeywordsWithRef && (0, util_1.schemaHasRulesButRef)(schema, self.RULES)) {
       self.logger.warn(`$ref: keywords ignored in schema at path "${errSchemaPath}"`);
     }
   }
-  function checkNoDefault(it2) {
-    const { schema, opts } = it2;
+  function checkNoDefault(it) {
+    const { schema, opts } = it;
     if (schema.default !== undefined && opts.useDefaults && opts.strictSchema) {
-      (0, util_1.checkStrictMode)(it2, "default is ignored in the schema root");
+      (0, util_1.checkStrictMode)(it, "default is ignored in the schema root");
     }
   }
-  function updateContext(it2) {
-    const schId = it2.schema[it2.opts.schemaId];
+  function updateContext(it) {
+    const schId = it.schema[it.opts.schemaId];
     if (schId)
-      it2.baseId = (0, resolve_1.resolveUrl)(it2.opts.uriResolver, it2.baseId, schId);
+      it.baseId = (0, resolve_1.resolveUrl)(it.opts.uriResolver, it.baseId, schId);
   }
-  function checkAsyncSchema(it2) {
-    if (it2.schema.$async && !it2.schemaEnv.$async)
+  function checkAsyncSchema(it) {
+    if (it.schema.$async && !it.schemaEnv.$async)
       throw new Error("async schema in sync schema");
   }
   function commentKeyword({ gen, schemaEnv, schema, errSchemaPath, opts }) {
@@ -2411,14 +2411,14 @@ var require_validate = __commonJS((exports) => {
       gen.code((0, codegen_1._)`${names_1.default.self}.opts.$comment(${msg}, ${schemaPath}, ${rootName}.schema)`);
     }
   }
-  function returnResults(it2) {
-    const { gen, schemaEnv, validateName, ValidationError, opts } = it2;
+  function returnResults(it) {
+    const { gen, schemaEnv, validateName, ValidationError, opts } = it;
     if (schemaEnv.$async) {
       gen.if((0, codegen_1._)`${names_1.default.errors} === 0`, () => gen.return(names_1.default.data), () => gen.throw((0, codegen_1._)`new ${ValidationError}(${names_1.default.vErrors})`));
     } else {
       gen.assign((0, codegen_1._)`${validateName}.errors`, names_1.default.vErrors);
       if (opts.unevaluated)
-        assignEvaluated(it2);
+        assignEvaluated(it);
       gen.return((0, codegen_1._)`${names_1.default.errors} === 0`);
     }
   }
@@ -2428,15 +2428,15 @@ var require_validate = __commonJS((exports) => {
     if (items instanceof codegen_1.Name)
       gen.assign((0, codegen_1._)`${evaluated}.items`, items);
   }
-  function schemaKeywords(it2, types, typeErrors, errsCount) {
-    const { gen, schema, data, allErrors, opts, self } = it2;
+  function schemaKeywords(it, types, typeErrors, errsCount) {
+    const { gen, schema, data, allErrors, opts, self } = it;
     const { RULES } = self;
     if (schema.$ref && (opts.ignoreKeywordsWithRef || !(0, util_1.schemaHasRulesButRef)(schema, RULES))) {
-      gen.block(() => keywordCode(it2, "$ref", RULES.all.$ref.definition));
+      gen.block(() => keywordCode(it, "$ref", RULES.all.$ref.definition));
       return;
     }
     if (!opts.jtd)
-      checkStrictTypes(it2, types);
+      checkStrictTypes(it, types);
     gen.block(() => {
       for (const group of RULES.rules)
         groupKeywords(group);
@@ -2447,66 +2447,66 @@ var require_validate = __commonJS((exports) => {
         return;
       if (group.type) {
         gen.if((0, dataType_2.checkDataType)(group.type, data, opts.strictNumbers));
-        iterateKeywords(it2, group);
+        iterateKeywords(it, group);
         if (types.length === 1 && types[0] === group.type && typeErrors) {
           gen.else();
-          (0, dataType_2.reportTypeError)(it2);
+          (0, dataType_2.reportTypeError)(it);
         }
         gen.endIf();
       } else {
-        iterateKeywords(it2, group);
+        iterateKeywords(it, group);
       }
       if (!allErrors)
         gen.if((0, codegen_1._)`${names_1.default.errors} === ${errsCount || 0}`);
     }
   }
-  function iterateKeywords(it2, group) {
-    const { gen, schema, opts: { useDefaults } } = it2;
+  function iterateKeywords(it, group) {
+    const { gen, schema, opts: { useDefaults } } = it;
     if (useDefaults)
-      (0, defaults_1.assignDefaults)(it2, group.type);
+      (0, defaults_1.assignDefaults)(it, group.type);
     gen.block(() => {
       for (const rule of group.rules) {
         if ((0, applicability_1.shouldUseRule)(schema, rule)) {
-          keywordCode(it2, rule.keyword, rule.definition, group.type);
+          keywordCode(it, rule.keyword, rule.definition, group.type);
         }
       }
     });
   }
-  function checkStrictTypes(it2, types) {
-    if (it2.schemaEnv.meta || !it2.opts.strictTypes)
+  function checkStrictTypes(it, types) {
+    if (it.schemaEnv.meta || !it.opts.strictTypes)
       return;
-    checkContextTypes(it2, types);
-    if (!it2.opts.allowUnionTypes)
-      checkMultipleTypes(it2, types);
-    checkKeywordTypes(it2, it2.dataTypes);
+    checkContextTypes(it, types);
+    if (!it.opts.allowUnionTypes)
+      checkMultipleTypes(it, types);
+    checkKeywordTypes(it, it.dataTypes);
   }
-  function checkContextTypes(it2, types) {
+  function checkContextTypes(it, types) {
     if (!types.length)
       return;
-    if (!it2.dataTypes.length) {
-      it2.dataTypes = types;
+    if (!it.dataTypes.length) {
+      it.dataTypes = types;
       return;
     }
     types.forEach((t) => {
-      if (!includesType(it2.dataTypes, t)) {
-        strictTypesError(it2, `type "${t}" not allowed by context "${it2.dataTypes.join(",")}"`);
+      if (!includesType(it.dataTypes, t)) {
+        strictTypesError(it, `type "${t}" not allowed by context "${it.dataTypes.join(",")}"`);
       }
     });
-    narrowSchemaTypes(it2, types);
+    narrowSchemaTypes(it, types);
   }
-  function checkMultipleTypes(it2, ts) {
+  function checkMultipleTypes(it, ts) {
     if (ts.length > 1 && !(ts.length === 2 && ts.includes("null"))) {
-      strictTypesError(it2, "use allowUnionTypes to allow union type keyword");
+      strictTypesError(it, "use allowUnionTypes to allow union type keyword");
     }
   }
-  function checkKeywordTypes(it2, ts) {
-    const rules = it2.self.RULES.all;
+  function checkKeywordTypes(it, ts) {
+    const rules = it.self.RULES.all;
     for (const keyword in rules) {
       const rule = rules[keyword];
-      if (typeof rule == "object" && (0, applicability_1.shouldUseRule)(it2.schema, rule)) {
+      if (typeof rule == "object" && (0, applicability_1.shouldUseRule)(it.schema, rule)) {
         const { type } = rule.definition;
         if (type.length && !type.some((t) => hasApplicableType(ts, t))) {
-          strictTypesError(it2, `missing type "${type.join(",")}" for keyword "${keyword}"`);
+          strictTypesError(it, `missing type "${type.join(",")}" for keyword "${keyword}"`);
         }
       }
     }
@@ -2517,39 +2517,39 @@ var require_validate = __commonJS((exports) => {
   function includesType(ts, t) {
     return ts.includes(t) || t === "integer" && ts.includes("number");
   }
-  function narrowSchemaTypes(it2, withTypes) {
+  function narrowSchemaTypes(it, withTypes) {
     const ts = [];
-    for (const t of it2.dataTypes) {
+    for (const t of it.dataTypes) {
       if (includesType(withTypes, t))
         ts.push(t);
       else if (withTypes.includes("integer") && t === "number")
         ts.push("integer");
     }
-    it2.dataTypes = ts;
+    it.dataTypes = ts;
   }
-  function strictTypesError(it2, msg) {
-    const schemaPath = it2.schemaEnv.baseId + it2.errSchemaPath;
+  function strictTypesError(it, msg) {
+    const schemaPath = it.schemaEnv.baseId + it.errSchemaPath;
     msg += ` at "${schemaPath}" (strictTypes)`;
-    (0, util_1.checkStrictMode)(it2, msg, it2.opts.strictTypes);
+    (0, util_1.checkStrictMode)(it, msg, it.opts.strictTypes);
   }
 
   class KeywordCxt {
-    constructor(it2, def, keyword) {
-      (0, keyword_1.validateKeywordUsage)(it2, def, keyword);
-      this.gen = it2.gen;
-      this.allErrors = it2.allErrors;
+    constructor(it, def, keyword) {
+      (0, keyword_1.validateKeywordUsage)(it, def, keyword);
+      this.gen = it.gen;
+      this.allErrors = it.allErrors;
       this.keyword = keyword;
-      this.data = it2.data;
-      this.schema = it2.schema[keyword];
-      this.$data = def.$data && it2.opts.$data && this.schema && this.schema.$data;
-      this.schemaValue = (0, util_1.schemaRefOrVal)(it2, this.schema, keyword, this.$data);
+      this.data = it.data;
+      this.schema = it.schema[keyword];
+      this.$data = def.$data && it.opts.$data && this.schema && this.schema.$data;
+      this.schemaValue = (0, util_1.schemaRefOrVal)(it, this.schema, keyword, this.$data);
       this.schemaType = def.schemaType;
-      this.parentSchema = it2.schema;
+      this.parentSchema = it.schema;
       this.params = {};
-      this.it = it2;
+      this.it = it;
       this.def = def;
       if (this.$data) {
-        this.schemaCode = it2.gen.const("vSchema", getData(this.$data, it2));
+        this.schemaCode = it.gen.const("vSchema", getData(this.$data, it));
       } else {
         this.schemaCode = this.schemaValue;
         if (!(0, keyword_1.validSchemaType)(this.schema, def.schemaType, def.allowUndefined)) {
@@ -2557,7 +2557,7 @@ var require_validate = __commonJS((exports) => {
         }
       }
       if ("code" in def ? def.trackErrors : def.errors !== false) {
-        this.errsCount = it2.gen.const("_errs", names_1.default.errors);
+        this.errsCount = it.gen.const("_errs", names_1.default.errors);
       }
     }
     result(condition, successAction, failAction) {
@@ -2656,14 +2656,14 @@ var require_validate = __commonJS((exports) => {
       gen.else();
     }
     invalid$data() {
-      const { gen, schemaCode, schemaType, def, it: it2 } = this;
+      const { gen, schemaCode, schemaType, def, it } = this;
       return (0, codegen_1.or)(wrong$DataType(), invalid$DataSchema());
       function wrong$DataType() {
         if (schemaType.length) {
           if (!(schemaCode instanceof codegen_1.Name))
             throw new Error("ajv implementation error");
-          const st2 = Array.isArray(schemaType) ? schemaType : [schemaType];
-          return (0, codegen_1._)`${(0, dataType_2.checkDataTypes)(st2, schemaCode, it2.opts.strictNumbers, dataType_2.DataType.Wrong)}`;
+          const st = Array.isArray(schemaType) ? schemaType : [schemaType];
+          return (0, codegen_1._)`${(0, dataType_2.checkDataTypes)(st, schemaCode, it.opts.strictNumbers, dataType_2.DataType.Wrong)}`;
         }
         return codegen_1.nil;
       }
@@ -2684,27 +2684,27 @@ var require_validate = __commonJS((exports) => {
       return nextContext;
     }
     mergeEvaluated(schemaCxt, toName) {
-      const { it: it2, gen } = this;
-      if (!it2.opts.unevaluated)
+      const { it, gen } = this;
+      if (!it.opts.unevaluated)
         return;
-      if (it2.props !== true && schemaCxt.props !== undefined) {
-        it2.props = util_1.mergeEvaluated.props(gen, schemaCxt.props, it2.props, toName);
+      if (it.props !== true && schemaCxt.props !== undefined) {
+        it.props = util_1.mergeEvaluated.props(gen, schemaCxt.props, it.props, toName);
       }
-      if (it2.items !== true && schemaCxt.items !== undefined) {
-        it2.items = util_1.mergeEvaluated.items(gen, schemaCxt.items, it2.items, toName);
+      if (it.items !== true && schemaCxt.items !== undefined) {
+        it.items = util_1.mergeEvaluated.items(gen, schemaCxt.items, it.items, toName);
       }
     }
     mergeValidEvaluated(schemaCxt, valid) {
-      const { it: it2, gen } = this;
-      if (it2.opts.unevaluated && (it2.props !== true || it2.items !== true)) {
+      const { it, gen } = this;
+      if (it.opts.unevaluated && (it.props !== true || it.items !== true)) {
         gen.if(valid, () => this.mergeEvaluated(schemaCxt, codegen_1.Name));
         return true;
       }
     }
   }
   exports.KeywordCxt = KeywordCxt;
-  function keywordCode(it2, keyword, def, ruleType) {
-    const cxt = new KeywordCxt(it2, def, keyword);
+  function keywordCode(it, keyword, def, ruleType) {
+    const cxt = new KeywordCxt(it, def, keyword);
     if ("code" in def) {
       def.code(cxt, ruleType);
     } else if (cxt.$data && def.validate) {
@@ -2945,11 +2945,11 @@ var require_compile = __commonJS((exports) => {
     return sch || this.schemas[ref] || resolveSchema.call(this, root, ref);
   }
   function resolveSchema(root, ref) {
-    const p2 = this.opts.uriResolver.parse(ref);
-    const refPath = (0, resolve_1._getFullPath)(this.opts.uriResolver, p2);
+    const p = this.opts.uriResolver.parse(ref);
+    const refPath = (0, resolve_1._getFullPath)(this.opts.uriResolver, p);
     let baseId = (0, resolve_1.getFullPath)(this.opts.uriResolver, root.baseId, undefined);
     if (Object.keys(root.schema).length > 0 && refPath === baseId) {
-      return getJsonPointer.call(this, p2, root);
+      return getJsonPointer.call(this, p, root);
     }
     const id = (0, resolve_1.normalizeId)(refPath);
     const schOrRef = this.refs[id] || this.schemas[id];
@@ -2957,7 +2957,7 @@ var require_compile = __commonJS((exports) => {
       const sch = resolveSchema.call(this, root, schOrRef);
       if (typeof (sch === null || sch === undefined ? undefined : sch.schema) !== "object")
         return;
-      return getJsonPointer.call(this, p2, sch);
+      return getJsonPointer.call(this, p, sch);
     }
     if (typeof (schOrRef === null || schOrRef === undefined ? undefined : schOrRef.schema) !== "object")
       return;
@@ -2971,7 +2971,7 @@ var require_compile = __commonJS((exports) => {
         baseId = (0, resolve_1.resolveUrl)(this.opts.uriResolver, baseId, schId);
       return new SchemaEnv({ schema, schemaId, root, baseId });
     }
-    return getJsonPointer.call(this, p2, schOrRef);
+    return getJsonPointer.call(this, p, schOrRef);
   }
   exports.resolveSchema = resolveSchema;
   var PREVENT_SCOPE_CHANGE = new Set([
@@ -3149,8 +3149,8 @@ var require_utils = __commonJS((exports, module) => {
     }
     return ind;
   }
-  function removeDotSegments(path) {
-    let input = path;
+  function removeDotSegments(path2) {
+    let input = path2;
     const output = [];
     let nextSlash = -1;
     let len = 0;
@@ -3340,8 +3340,8 @@ var require_schemes = __commonJS((exports, module) => {
       wsComponent.secure = undefined;
     }
     if (wsComponent.resourceName) {
-      const [path, query] = wsComponent.resourceName.split("?");
-      wsComponent.path = path && path !== "/" ? path : undefined;
+      const [path2, query] = wsComponent.resourceName.split("?");
+      wsComponent.path = path2 && path2 !== "/" ? path2 : undefined;
       wsComponent.query = query;
       wsComponent.resourceName = undefined;
     }
@@ -3588,14 +3588,14 @@ var require_fast_uri = __commonJS((exports, module) => {
       }
     }
     if (component.path !== undefined) {
-      let s2 = component.path;
+      let s = component.path;
       if (!options.absolutePath && (!schemeHandler || !schemeHandler.absolutePath)) {
-        s2 = removeDotSegments(s2);
+        s = removeDotSegments(s);
       }
-      if (authority === undefined && s2[0] === "/" && s2[1] === "/") {
-        s2 = "/%2F" + s2.slice(2);
+      if (authority === undefined && s[0] === "/" && s[1] === "/") {
+        s = "/%2F" + s.slice(2);
       }
-      uriTokens.push(s2);
+      uriTokens.push(s);
     }
     if (component.query !== undefined) {
       uriTokens.push("?", component.query);
@@ -3794,25 +3794,25 @@ var require_core = __commonJS((exports) => {
   };
   var MAX_EXPRESSION = 200;
   function requiredOptions(o) {
-    var _a2, _b, _c2, _d, _e2, _f, _g2, _h, _j, _k, _l2, _m, _o2, _p, _q, _r2, _s, _t2, _u2, _v2, _w, _x, _y, _z, _0;
-    const s2 = o.strict;
+    var _a2, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s, _t, _u, _v, _w, _x, _y, _z, _0;
+    const s = o.strict;
     const _optz = (_a2 = o.code) === null || _a2 === undefined ? undefined : _a2.optimize;
     const optimize = _optz === true || _optz === undefined ? 1 : _optz || 0;
-    const regExp = (_c2 = (_b = o.code) === null || _b === undefined ? undefined : _b.regExp) !== null && _c2 !== undefined ? _c2 : defaultRegExp;
+    const regExp = (_c = (_b = o.code) === null || _b === undefined ? undefined : _b.regExp) !== null && _c !== undefined ? _c : defaultRegExp;
     const uriResolver = (_d = o.uriResolver) !== null && _d !== undefined ? _d : uri_1.default;
     return {
-      strictSchema: (_f = (_e2 = o.strictSchema) !== null && _e2 !== undefined ? _e2 : s2) !== null && _f !== undefined ? _f : true,
-      strictNumbers: (_h = (_g2 = o.strictNumbers) !== null && _g2 !== undefined ? _g2 : s2) !== null && _h !== undefined ? _h : true,
-      strictTypes: (_k = (_j = o.strictTypes) !== null && _j !== undefined ? _j : s2) !== null && _k !== undefined ? _k : "log",
-      strictTuples: (_m = (_l2 = o.strictTuples) !== null && _l2 !== undefined ? _l2 : s2) !== null && _m !== undefined ? _m : "log",
-      strictRequired: (_p = (_o2 = o.strictRequired) !== null && _o2 !== undefined ? _o2 : s2) !== null && _p !== undefined ? _p : false,
+      strictSchema: (_f = (_e = o.strictSchema) !== null && _e !== undefined ? _e : s) !== null && _f !== undefined ? _f : true,
+      strictNumbers: (_h = (_g = o.strictNumbers) !== null && _g !== undefined ? _g : s) !== null && _h !== undefined ? _h : true,
+      strictTypes: (_k = (_j = o.strictTypes) !== null && _j !== undefined ? _j : s) !== null && _k !== undefined ? _k : "log",
+      strictTuples: (_m = (_l = o.strictTuples) !== null && _l !== undefined ? _l : s) !== null && _m !== undefined ? _m : "log",
+      strictRequired: (_p = (_o = o.strictRequired) !== null && _o !== undefined ? _o : s) !== null && _p !== undefined ? _p : false,
       code: o.code ? { ...o.code, optimize, regExp } : { optimize, regExp },
       loopRequired: (_q = o.loopRequired) !== null && _q !== undefined ? _q : MAX_EXPRESSION,
-      loopEnum: (_r2 = o.loopEnum) !== null && _r2 !== undefined ? _r2 : MAX_EXPRESSION,
+      loopEnum: (_r = o.loopEnum) !== null && _r !== undefined ? _r : MAX_EXPRESSION,
       meta: (_s = o.meta) !== null && _s !== undefined ? _s : true,
-      messages: (_t2 = o.messages) !== null && _t2 !== undefined ? _t2 : true,
-      inlineRefs: (_u2 = o.inlineRefs) !== null && _u2 !== undefined ? _u2 : true,
-      schemaId: (_v2 = o.schemaId) !== null && _v2 !== undefined ? _v2 : "$id",
+      messages: (_t = o.messages) !== null && _t !== undefined ? _t : true,
+      inlineRefs: (_u = o.inlineRefs) !== null && _u !== undefined ? _u : true,
+      schemaId: (_v = o.schemaId) !== null && _v !== undefined ? _v : "$id",
       addUsedSchema: (_w = o.addUsedSchema) !== null && _w !== undefined ? _w : true,
       validateSchema: (_x = o.validateSchema) !== null && _x !== undefined ? _x : true,
       validateFormats: (_y = o.validateFormats) !== null && _y !== undefined ? _y : true,
@@ -3927,9 +3927,9 @@ var require_core = __commonJS((exports) => {
           this.addSchema(_schema, ref, meta3);
       }
       async function _loadSchema(ref) {
-        const p2 = this._loading[ref];
-        if (p2)
-          return p2;
+        const p = this._loading[ref];
+        if (p)
+          return p;
         try {
           return await (this._loading[ref] = loadSchema(ref));
         } finally {
@@ -4066,7 +4066,7 @@ var require_core = __commonJS((exports) => {
         type: (0, dataType_1.getJSONTypes)(def.type),
         schemaType: (0, dataType_1.getJSONTypes)(def.schemaType)
       };
-      (0, util_1.eachItem)(keyword, definition.type.length === 0 ? (k2) => addRule.call(this, k2, definition) : (k2) => definition.type.forEach((t) => addRule.call(this, k2, definition, t)));
+      (0, util_1.eachItem)(keyword, definition.type.length === 0 ? (k) => addRule.call(this, k, definition) : (k) => definition.type.forEach((t) => addRule.call(this, k, definition, t)));
       return this;
     }
     getKeyword(keyword) {
@@ -4334,14 +4334,14 @@ var require_ref = __commonJS((exports) => {
     keyword: "$ref",
     schemaType: "string",
     code(cxt) {
-      const { gen, schema: $ref, it: it2 } = cxt;
-      const { baseId, schemaEnv: env, validateName, opts, self } = it2;
+      const { gen, schema: $ref, it } = cxt;
+      const { baseId, schemaEnv: env, validateName, opts, self } = it;
       const { root } = env;
       if (($ref === "#" || $ref === "#/") && baseId === root.baseId)
         return callRootRef();
       const schOrEnv = compile_1.resolveRef.call(self, root, baseId, $ref);
       if (schOrEnv === undefined)
-        throw new ref_error_1.default(it2.opts.uriResolver, baseId, $ref);
+        throw new ref_error_1.default(it.opts.uriResolver, baseId, $ref);
       if (schOrEnv instanceof compile_1.SchemaEnv)
         return callValidate(schOrEnv);
       return inlineRefSchema(schOrEnv);
@@ -4376,8 +4376,8 @@ var require_ref = __commonJS((exports) => {
   }
   exports.getValidate = getValidate;
   function callRef(cxt, v, sch, $async) {
-    const { gen, it: it2 } = cxt;
-    const { allErrors, schemaEnv: env, opts } = it2;
+    const { gen, it } = cxt;
+    const { allErrors, schemaEnv: env, opts } = it;
     const passCxt = opts.passContext ? names_1.default.this : codegen_1.nil;
     if ($async)
       callAsyncRef();
@@ -4393,7 +4393,7 @@ var require_ref = __commonJS((exports) => {
         if (!allErrors)
           gen.assign(valid, true);
       }, (e) => {
-        gen.if((0, codegen_1._)`!(${e} instanceof ${it2.ValidationError})`, () => gen.throw(e));
+        gen.if((0, codegen_1._)`!(${e} instanceof ${it.ValidationError})`, () => gen.throw(e));
         addErrorsFrom(e);
         if (!allErrors)
           gen.assign(valid, false);
@@ -4410,27 +4410,27 @@ var require_ref = __commonJS((exports) => {
     }
     function addEvaluatedFrom(source) {
       var _a2;
-      if (!it2.opts.unevaluated)
+      if (!it.opts.unevaluated)
         return;
       const schEvaluated = (_a2 = sch === null || sch === undefined ? undefined : sch.validate) === null || _a2 === undefined ? undefined : _a2.evaluated;
-      if (it2.props !== true) {
+      if (it.props !== true) {
         if (schEvaluated && !schEvaluated.dynamicProps) {
           if (schEvaluated.props !== undefined) {
-            it2.props = util_1.mergeEvaluated.props(gen, schEvaluated.props, it2.props);
+            it.props = util_1.mergeEvaluated.props(gen, schEvaluated.props, it.props);
           }
         } else {
           const props = gen.var("props", (0, codegen_1._)`${source}.evaluated.props`);
-          it2.props = util_1.mergeEvaluated.props(gen, props, it2.props, codegen_1.Name);
+          it.props = util_1.mergeEvaluated.props(gen, props, it.props, codegen_1.Name);
         }
       }
-      if (it2.items !== true) {
+      if (it.items !== true) {
         if (schEvaluated && !schEvaluated.dynamicItems) {
           if (schEvaluated.items !== undefined) {
-            it2.items = util_1.mergeEvaluated.items(gen, schEvaluated.items, it2.items);
+            it.items = util_1.mergeEvaluated.items(gen, schEvaluated.items, it.items);
           }
         } else {
           const items = gen.var("items", (0, codegen_1._)`${source}.evaluated.items`);
-          it2.items = util_1.mergeEvaluated.items(gen, items, it2.items, codegen_1.Name);
+          it.items = util_1.mergeEvaluated.items(gen, items, it.items, codegen_1.Name);
         }
       }
     }
@@ -4501,8 +4501,8 @@ var require_multipleOf = __commonJS((exports) => {
     $data: true,
     error: error48,
     code(cxt) {
-      const { gen, data, schemaCode, it: it2 } = cxt;
-      const prec = it2.opts.multipleOfPrecision;
+      const { gen, data, schemaCode, it } = cxt;
+      const prec = it.opts.multipleOfPrecision;
       const res = gen.let("res");
       const invalid = prec ? (0, codegen_1._)`Math.abs(Math.round(${res}) - ${res}) > 1e-${prec}` : (0, codegen_1._)`${res} !== parseInt(${res})`;
       cxt.fail$data((0, codegen_1._)`(${schemaCode} === 0 || (${res} = ${data}/${schemaCode}, ${invalid}))`);
@@ -4554,9 +4554,9 @@ var require_limitLength = __commonJS((exports) => {
     $data: true,
     error: error48,
     code(cxt) {
-      const { keyword, data, schemaCode, it: it2 } = cxt;
+      const { keyword, data, schemaCode, it } = cxt;
       const op = keyword === "maxLength" ? codegen_1.operators.GT : codegen_1.operators.LT;
-      const len = it2.opts.unicode === false ? (0, codegen_1._)`${data}.length` : (0, codegen_1._)`${(0, util_1.useFunc)(cxt.gen, ucs2length_1.default)}(${data})`;
+      const len = it.opts.unicode === false ? (0, codegen_1._)`${data}.length` : (0, codegen_1._)`${(0, util_1.useFunc)(cxt.gen, ucs2length_1.default)}(${data})`;
       cxt.fail$data((0, codegen_1._)`${len} ${op} ${schemaCode}`);
     }
   };
@@ -4579,8 +4579,8 @@ var require_pattern = __commonJS((exports) => {
     $data: true,
     error: error48,
     code(cxt) {
-      const { data, $data, schema, schemaCode, it: it2 } = cxt;
-      const u = it2.opts.unicodeRegExp ? "u" : "";
+      const { data, $data, schema, schemaCode, it } = cxt;
+      const u = it.opts.unicodeRegExp ? "u" : "";
       const regExp = $data ? (0, codegen_1._)`(new RegExp(${schemaCode}, ${u}))` : (0, code_1.usePattern)(cxt, schema);
       cxt.fail$data((0, codegen_1._)`!${regExp}.test(${data})`);
     }
@@ -4631,12 +4631,12 @@ var require_required = __commonJS((exports) => {
     $data: true,
     error: error48,
     code(cxt) {
-      const { gen, schema, schemaCode, data, $data, it: it2 } = cxt;
-      const { opts } = it2;
+      const { gen, schema, schemaCode, data, $data, it } = cxt;
+      const { opts } = it;
       if (!$data && schema.length === 0)
         return;
       const useLoop = schema.length >= opts.loopRequired;
-      if (it2.allErrors)
+      if (it.allErrors)
         allErrorsMode();
       else
         exitOnErrorMode();
@@ -4645,9 +4645,9 @@ var require_required = __commonJS((exports) => {
         const { definedProperties } = cxt.it;
         for (const requiredKey of schema) {
           if ((props === null || props === undefined ? undefined : props[requiredKey]) === undefined && !definedProperties.has(requiredKey)) {
-            const schemaPath = it2.schemaEnv.baseId + it2.errSchemaPath;
+            const schemaPath = it.schemaEnv.baseId + it.errSchemaPath;
             const msg = `required property "${requiredKey}" is not defined at "${schemaPath}" (strictRequired)`;
-            (0, util_1.checkStrictMode)(it2, msg, it2.opts.strictRequired);
+            (0, util_1.checkStrictMode)(it, msg, it.opts.strictRequired);
           }
         }
       }
@@ -4735,8 +4735,8 @@ var require_uniqueItems = __commonJS((exports) => {
   var util_1 = require_util();
   var equal_1 = require_equal();
   var error48 = {
-    message: ({ params: { i, j: j2 } }) => (0, codegen_1.str)`must NOT have duplicate items (items ## ${j2} and ${i} are identical)`,
-    params: ({ params: { i, j: j2 } }) => (0, codegen_1._)`{i: ${i}, j: ${j2}}`
+    message: ({ params: { i, j } }) => (0, codegen_1.str)`must NOT have duplicate items (items ## ${j} and ${i} are identical)`,
+    params: ({ params: { i, j } }) => (0, codegen_1._)`{i: ${i}, j: ${j}}`
   };
   var def = {
     keyword: "uniqueItems",
@@ -4745,7 +4745,7 @@ var require_uniqueItems = __commonJS((exports) => {
     $data: true,
     error: error48,
     code(cxt) {
-      const { gen, data, $data, schema, parentSchema, schemaCode, it: it2 } = cxt;
+      const { gen, data, $data, schema, parentSchema, schemaCode, it } = cxt;
       if (!$data && !schema)
         return;
       const valid = gen.let("valid");
@@ -4754,17 +4754,17 @@ var require_uniqueItems = __commonJS((exports) => {
       cxt.ok(valid);
       function validateUniqueItems() {
         const i = gen.let("i", (0, codegen_1._)`${data}.length`);
-        const j2 = gen.let("j");
-        cxt.setParams({ i, j: j2 });
+        const j = gen.let("j");
+        cxt.setParams({ i, j });
         gen.assign(valid, true);
-        gen.if((0, codegen_1._)`${i} > 1`, () => (canOptimize() ? loopN : loopN2)(i, j2));
+        gen.if((0, codegen_1._)`${i} > 1`, () => (canOptimize() ? loopN : loopN2)(i, j));
       }
       function canOptimize() {
         return itemTypes.length > 0 && !itemTypes.some((t) => t === "object" || t === "array");
       }
-      function loopN(i, j2) {
+      function loopN(i, j) {
         const item = gen.name("item");
-        const wrongType = (0, dataType_1.checkDataTypes)(itemTypes, item, it2.opts.strictNumbers, dataType_1.DataType.Wrong);
+        const wrongType = (0, dataType_1.checkDataTypes)(itemTypes, item, it.opts.strictNumbers, dataType_1.DataType.Wrong);
         const indices = gen.const("indices", (0, codegen_1._)`{}`);
         gen.for((0, codegen_1._)`;${i}--;`, () => {
           gen.let(item, (0, codegen_1._)`${data}[${i}]`);
@@ -4772,16 +4772,16 @@ var require_uniqueItems = __commonJS((exports) => {
           if (itemTypes.length > 1)
             gen.if((0, codegen_1._)`typeof ${item} == "string"`, (0, codegen_1._)`${item} += "_"`);
           gen.if((0, codegen_1._)`typeof ${indices}[${item}] == "number"`, () => {
-            gen.assign(j2, (0, codegen_1._)`${indices}[${item}]`);
+            gen.assign(j, (0, codegen_1._)`${indices}[${item}]`);
             cxt.error();
             gen.assign(valid, false).break();
           }).code((0, codegen_1._)`${indices}[${item}] = ${i}`);
         });
       }
-      function loopN2(i, j2) {
+      function loopN2(i, j) {
         const eql = (0, util_1.useFunc)(gen, equal_1.default);
         const outer = gen.name("outer");
-        gen.label(outer).for((0, codegen_1._)`;${i}--;`, () => gen.for((0, codegen_1._)`${j2} = ${i}; ${j2}--;`, () => gen.if((0, codegen_1._)`${eql}(${data}[${i}], ${data}[${j2}])`, () => {
+        gen.label(outer).for((0, codegen_1._)`;${i}--;`, () => gen.for((0, codegen_1._)`${j} = ${i}; ${j}--;`, () => gen.if((0, codegen_1._)`${eql}(${data}[${i}], ${data}[${j}])`, () => {
           cxt.error();
           gen.assign(valid, false).break(outer);
         })));
@@ -4833,10 +4833,10 @@ var require_enum = __commonJS((exports) => {
     $data: true,
     error: error48,
     code(cxt) {
-      const { gen, data, $data, schema, schemaCode, it: it2 } = cxt;
+      const { gen, data, $data, schema, schemaCode, it } = cxt;
       if (!$data && schema.length === 0)
         throw new Error("enum must have non-empty array");
-      const useLoop = schema.length >= it2.opts.loopEnum;
+      const useLoop = schema.length >= it.opts.loopEnum;
       let eql;
       const getEql = () => eql !== null && eql !== undefined ? eql : eql = (0, util_1.useFunc)(gen, equal_1.default);
       let valid;
@@ -4910,23 +4910,23 @@ var require_additionalItems = __commonJS((exports) => {
     before: "uniqueItems",
     error: error48,
     code(cxt) {
-      const { parentSchema, it: it2 } = cxt;
+      const { parentSchema, it } = cxt;
       const { items } = parentSchema;
       if (!Array.isArray(items)) {
-        (0, util_1.checkStrictMode)(it2, '"additionalItems" is ignored when "items" is not an array of schemas');
+        (0, util_1.checkStrictMode)(it, '"additionalItems" is ignored when "items" is not an array of schemas');
         return;
       }
       validateAdditionalItems(cxt, items);
     }
   };
   function validateAdditionalItems(cxt, items) {
-    const { gen, schema, data, keyword, it: it2 } = cxt;
-    it2.items = true;
+    const { gen, schema, data, keyword, it } = cxt;
+    it.items = true;
     const len = gen.const("len", (0, codegen_1._)`${data}.length`);
     if (schema === false) {
       cxt.setParams({ len: items.length });
       cxt.pass((0, codegen_1._)`${len} <= ${items.length}`);
-    } else if (typeof schema == "object" && !(0, util_1.alwaysValidSchema)(it2, schema)) {
+    } else if (typeof schema == "object" && !(0, util_1.alwaysValidSchema)(it, schema)) {
       const valid = gen.var("valid", (0, codegen_1._)`${len} <= ${items.length}`);
       gen.if((0, codegen_1.not)(valid), () => validateItems(valid));
       cxt.ok(valid);
@@ -4934,7 +4934,7 @@ var require_additionalItems = __commonJS((exports) => {
     function validateItems(valid) {
       gen.forRange("i", items.length, len, (i) => {
         cxt.subschema({ keyword, dataProp: i, dataPropType: util_1.Type.Num }, valid);
-        if (!it2.allErrors)
+        if (!it.allErrors)
           gen.if((0, codegen_1.not)(valid), () => gen.break());
       });
     }
@@ -4956,25 +4956,25 @@ var require_items = __commonJS((exports) => {
     schemaType: ["object", "array", "boolean"],
     before: "uniqueItems",
     code(cxt) {
-      const { schema, it: it2 } = cxt;
+      const { schema, it } = cxt;
       if (Array.isArray(schema))
         return validateTuple(cxt, "additionalItems", schema);
-      it2.items = true;
-      if ((0, util_1.alwaysValidSchema)(it2, schema))
+      it.items = true;
+      if ((0, util_1.alwaysValidSchema)(it, schema))
         return;
       cxt.ok((0, code_1.validateArray)(cxt));
     }
   };
   function validateTuple(cxt, extraItems, schArr = cxt.schema) {
-    const { gen, parentSchema, data, keyword, it: it2 } = cxt;
+    const { gen, parentSchema, data, keyword, it } = cxt;
     checkStrictTuple(parentSchema);
-    if (it2.opts.unevaluated && schArr.length && it2.items !== true) {
-      it2.items = util_1.mergeEvaluated.items(gen, schArr.length, it2.items);
+    if (it.opts.unevaluated && schArr.length && it.items !== true) {
+      it.items = util_1.mergeEvaluated.items(gen, schArr.length, it.items);
     }
     const valid = gen.name("valid");
     const len = gen.const("len", (0, codegen_1._)`${data}.length`);
     schArr.forEach((sch, i) => {
-      if ((0, util_1.alwaysValidSchema)(it2, sch))
+      if ((0, util_1.alwaysValidSchema)(it, sch))
         return;
       gen.if((0, codegen_1._)`${len} > ${i}`, () => cxt.subschema({
         keyword,
@@ -4984,12 +4984,12 @@ var require_items = __commonJS((exports) => {
       cxt.ok(valid);
     });
     function checkStrictTuple(sch) {
-      const { opts, errSchemaPath } = it2;
+      const { opts, errSchemaPath } = it;
       const l = schArr.length;
       const fullTuple = l === sch.minItems && (l === sch.maxItems || sch[extraItems] === false);
       if (opts.strictTuples && !fullTuple) {
         const msg = `"${keyword}" is ${l}-tuple, but minItems or maxItems/${extraItems} are not specified or different at path "${errSchemaPath}"`;
-        (0, util_1.checkStrictMode)(it2, msg, opts.strictTuples);
+        (0, util_1.checkStrictMode)(it, msg, opts.strictTuples);
       }
     }
   }
@@ -5029,10 +5029,10 @@ var require_items2020 = __commonJS((exports) => {
     before: "uniqueItems",
     error: error48,
     code(cxt) {
-      const { schema, parentSchema, it: it2 } = cxt;
+      const { schema, parentSchema, it } = cxt;
       const { prefixItems } = parentSchema;
-      it2.items = true;
-      if ((0, util_1.alwaysValidSchema)(it2, schema))
+      it.items = true;
+      if ((0, util_1.alwaysValidSchema)(it, schema))
         return;
       if (prefixItems)
         (0, additionalItems_1.validateAdditionalItems)(cxt, prefixItems);
@@ -5060,11 +5060,11 @@ var require_contains = __commonJS((exports) => {
     trackErrors: true,
     error: error48,
     code(cxt) {
-      const { gen, schema, parentSchema, data, it: it2 } = cxt;
+      const { gen, schema, parentSchema, data, it } = cxt;
       let min;
       let max;
       const { minContains, maxContains } = parentSchema;
-      if (it2.opts.next) {
+      if (it.opts.next) {
         min = minContains === undefined ? 1 : minContains;
         max = maxContains;
       } else {
@@ -5073,22 +5073,22 @@ var require_contains = __commonJS((exports) => {
       const len = gen.const("len", (0, codegen_1._)`${data}.length`);
       cxt.setParams({ min, max });
       if (max === undefined && min === 0) {
-        (0, util_1.checkStrictMode)(it2, `"minContains" == 0 without "maxContains": "contains" keyword ignored`);
+        (0, util_1.checkStrictMode)(it, `"minContains" == 0 without "maxContains": "contains" keyword ignored`);
         return;
       }
       if (max !== undefined && min > max) {
-        (0, util_1.checkStrictMode)(it2, `"minContains" > "maxContains" is always invalid`);
+        (0, util_1.checkStrictMode)(it, `"minContains" > "maxContains" is always invalid`);
         cxt.fail();
         return;
       }
-      if ((0, util_1.alwaysValidSchema)(it2, schema)) {
+      if ((0, util_1.alwaysValidSchema)(it, schema)) {
         let cond = (0, codegen_1._)`${len} >= ${min}`;
         if (max !== undefined)
           cond = (0, codegen_1._)`${cond} && ${len} <= ${max}`;
         cxt.pass(cond);
         return;
       }
-      it2.items = true;
+      it.items = true;
       const valid = gen.name("valid");
       if (max === undefined && min === 1) {
         validateItems(valid, () => gen.if(valid, () => gen.break()));
@@ -5174,7 +5174,7 @@ var require_dependencies = __commonJS((exports) => {
     return [propertyDeps, schemaDeps];
   }
   function validatePropertyDeps(cxt, propertyDeps = cxt.schema) {
-    const { gen, data, it: it2 } = cxt;
+    const { gen, data, it } = cxt;
     if (Object.keys(propertyDeps).length === 0)
       return;
     const missing = gen.let("missing");
@@ -5182,13 +5182,13 @@ var require_dependencies = __commonJS((exports) => {
       const deps = propertyDeps[prop];
       if (deps.length === 0)
         continue;
-      const hasProperty = (0, code_1.propertyInData)(gen, data, prop, it2.opts.ownProperties);
+      const hasProperty = (0, code_1.propertyInData)(gen, data, prop, it.opts.ownProperties);
       cxt.setParams({
         property: prop,
         depsCount: deps.length,
         deps: deps.join(", ")
       });
-      if (it2.allErrors) {
+      if (it.allErrors) {
         gen.if(hasProperty, () => {
           for (const depProp of deps) {
             (0, code_1.checkReportMissingProp)(cxt, depProp);
@@ -5203,12 +5203,12 @@ var require_dependencies = __commonJS((exports) => {
   }
   exports.validatePropertyDeps = validatePropertyDeps;
   function validateSchemaDeps(cxt, schemaDeps = cxt.schema) {
-    const { gen, data, keyword, it: it2 } = cxt;
+    const { gen, data, keyword, it } = cxt;
     const valid = gen.name("valid");
     for (const prop in schemaDeps) {
-      if ((0, util_1.alwaysValidSchema)(it2, schemaDeps[prop]))
+      if ((0, util_1.alwaysValidSchema)(it, schemaDeps[prop]))
         continue;
-      gen.if((0, code_1.propertyInData)(gen, data, prop, it2.opts.ownProperties), () => {
+      gen.if((0, code_1.propertyInData)(gen, data, prop, it.opts.ownProperties), () => {
         const schCxt = cxt.subschema({ keyword, schemaProp: prop }, valid);
         cxt.mergeValidEvaluated(schCxt, valid);
       }, () => gen.var(valid, true));
@@ -5234,8 +5234,8 @@ var require_propertyNames = __commonJS((exports) => {
     schemaType: ["object", "boolean"],
     error: error48,
     code(cxt) {
-      const { gen, schema, data, it: it2 } = cxt;
-      if ((0, util_1.alwaysValidSchema)(it2, schema))
+      const { gen, schema, data, it } = cxt;
+      if ((0, util_1.alwaysValidSchema)(it, schema))
         return;
       const valid = gen.name("valid");
       gen.forIn("key", data, (key) => {
@@ -5249,7 +5249,7 @@ var require_propertyNames = __commonJS((exports) => {
         }, valid);
         gen.if((0, codegen_1.not)(valid), () => {
           cxt.error(true);
-          if (!it2.allErrors)
+          if (!it.allErrors)
             gen.break();
         });
       });
@@ -5278,12 +5278,12 @@ var require_additionalProperties = __commonJS((exports) => {
     trackErrors: true,
     error: error48,
     code(cxt) {
-      const { gen, schema, parentSchema, data, errsCount, it: it2 } = cxt;
+      const { gen, schema, parentSchema, data, errsCount, it } = cxt;
       if (!errsCount)
         throw new Error("ajv implementation error");
-      const { allErrors, opts } = it2;
-      it2.props = true;
-      if (opts.removeAdditional !== "all" && (0, util_1.alwaysValidSchema)(it2, schema))
+      const { allErrors, opts } = it;
+      it.props = true;
+      if (opts.removeAdditional !== "all" && (0, util_1.alwaysValidSchema)(it, schema))
         return;
       const props = (0, code_1.allSchemaProperties)(parentSchema.properties);
       const patProps = (0, code_1.allSchemaProperties)(parentSchema.patternProperties);
@@ -5300,15 +5300,15 @@ var require_additionalProperties = __commonJS((exports) => {
       function isAdditional(key) {
         let definedProp;
         if (props.length > 8) {
-          const propsSchema = (0, util_1.schemaRefOrVal)(it2, parentSchema.properties, "properties");
+          const propsSchema = (0, util_1.schemaRefOrVal)(it, parentSchema.properties, "properties");
           definedProp = (0, code_1.isOwnProperty)(gen, propsSchema, key);
         } else if (props.length) {
-          definedProp = (0, codegen_1.or)(...props.map((p2) => (0, codegen_1._)`${key} === ${p2}`));
+          definedProp = (0, codegen_1.or)(...props.map((p) => (0, codegen_1._)`${key} === ${p}`));
         } else {
           definedProp = codegen_1.nil;
         }
         if (patProps.length) {
-          definedProp = (0, codegen_1.or)(definedProp, ...patProps.map((p2) => (0, codegen_1._)`${(0, code_1.usePattern)(cxt, p2)}.test(${key})`));
+          definedProp = (0, codegen_1.or)(definedProp, ...patProps.map((p) => (0, codegen_1._)`${(0, code_1.usePattern)(cxt, p)}.test(${key})`));
         }
         return (0, codegen_1.not)(definedProp);
       }
@@ -5327,7 +5327,7 @@ var require_additionalProperties = __commonJS((exports) => {
             gen.break();
           return;
         }
-        if (typeof schema == "object" && !(0, util_1.alwaysValidSchema)(it2, schema)) {
+        if (typeof schema == "object" && !(0, util_1.alwaysValidSchema)(it, schema)) {
           const valid = gen.name("valid");
           if (opts.removeAdditional === "failing") {
             applyAdditionalSchema(key, valid, false);
@@ -5374,18 +5374,18 @@ var require_properties = __commonJS((exports) => {
     type: "object",
     schemaType: "object",
     code(cxt) {
-      const { gen, schema, parentSchema, data, it: it2 } = cxt;
-      if (it2.opts.removeAdditional === "all" && parentSchema.additionalProperties === undefined) {
-        additionalProperties_1.default.code(new validate_1.KeywordCxt(it2, additionalProperties_1.default, "additionalProperties"));
+      const { gen, schema, parentSchema, data, it } = cxt;
+      if (it.opts.removeAdditional === "all" && parentSchema.additionalProperties === undefined) {
+        additionalProperties_1.default.code(new validate_1.KeywordCxt(it, additionalProperties_1.default, "additionalProperties"));
       }
       const allProps = (0, code_1.allSchemaProperties)(schema);
       for (const prop of allProps) {
-        it2.definedProperties.add(prop);
+        it.definedProperties.add(prop);
       }
-      if (it2.opts.unevaluated && allProps.length && it2.props !== true) {
-        it2.props = util_1.mergeEvaluated.props(gen, (0, util_1.toHash)(allProps), it2.props);
+      if (it.opts.unevaluated && allProps.length && it.props !== true) {
+        it.props = util_1.mergeEvaluated.props(gen, (0, util_1.toHash)(allProps), it.props);
       }
-      const properties = allProps.filter((p2) => !(0, util_1.alwaysValidSchema)(it2, schema[p2]));
+      const properties = allProps.filter((p) => !(0, util_1.alwaysValidSchema)(it, schema[p]));
       if (properties.length === 0)
         return;
       const valid = gen.name("valid");
@@ -5393,9 +5393,9 @@ var require_properties = __commonJS((exports) => {
         if (hasDefault(prop)) {
           applyPropertySchema(prop);
         } else {
-          gen.if((0, code_1.propertyInData)(gen, data, prop, it2.opts.ownProperties));
+          gen.if((0, code_1.propertyInData)(gen, data, prop, it.opts.ownProperties));
           applyPropertySchema(prop);
-          if (!it2.allErrors)
+          if (!it.allErrors)
             gen.else().var(valid, true);
           gen.endIf();
         }
@@ -5403,7 +5403,7 @@ var require_properties = __commonJS((exports) => {
         cxt.ok(valid);
       }
       function hasDefault(prop) {
-        return it2.opts.useDefaults && !it2.compositeRule && schema[prop].default !== undefined;
+        return it.opts.useDefaults && !it.compositeRule && schema[prop].default !== undefined;
       }
       function applyPropertySchema(prop) {
         cxt.subschema({
@@ -5429,25 +5429,25 @@ var require_patternProperties = __commonJS((exports) => {
     type: "object",
     schemaType: "object",
     code(cxt) {
-      const { gen, schema, data, parentSchema, it: it2 } = cxt;
-      const { opts } = it2;
+      const { gen, schema, data, parentSchema, it } = cxt;
+      const { opts } = it;
       const patterns = (0, code_1.allSchemaProperties)(schema);
-      const alwaysValidPatterns = patterns.filter((p2) => (0, util_1.alwaysValidSchema)(it2, schema[p2]));
-      if (patterns.length === 0 || alwaysValidPatterns.length === patterns.length && (!it2.opts.unevaluated || it2.props === true)) {
+      const alwaysValidPatterns = patterns.filter((p) => (0, util_1.alwaysValidSchema)(it, schema[p]));
+      if (patterns.length === 0 || alwaysValidPatterns.length === patterns.length && (!it.opts.unevaluated || it.props === true)) {
         return;
       }
       const checkProperties = opts.strictSchema && !opts.allowMatchingProperties && parentSchema.properties;
       const valid = gen.name("valid");
-      if (it2.props !== true && !(it2.props instanceof codegen_1.Name)) {
-        it2.props = (0, util_2.evaluatedPropsToName)(gen, it2.props);
+      if (it.props !== true && !(it.props instanceof codegen_1.Name)) {
+        it.props = (0, util_2.evaluatedPropsToName)(gen, it.props);
       }
-      const { props } = it2;
+      const { props } = it;
       validatePatternProperties();
       function validatePatternProperties() {
         for (const pat of patterns) {
           if (checkProperties)
             checkMatchingProperties(pat);
-          if (it2.allErrors) {
+          if (it.allErrors) {
             validateProperties(pat);
           } else {
             gen.var(valid, true);
@@ -5459,7 +5459,7 @@ var require_patternProperties = __commonJS((exports) => {
       function checkMatchingProperties(pat) {
         for (const prop in checkProperties) {
           if (new RegExp(pat).test(prop)) {
-            (0, util_1.checkStrictMode)(it2, `property ${prop} matches pattern ${pat} (use allowMatchingProperties)`);
+            (0, util_1.checkStrictMode)(it, `property ${prop} matches pattern ${pat} (use allowMatchingProperties)`);
           }
         }
       }
@@ -5475,9 +5475,9 @@ var require_patternProperties = __commonJS((exports) => {
                 dataPropType: util_2.Type.Str
               }, valid);
             }
-            if (it2.opts.unevaluated && props !== true) {
+            if (it.opts.unevaluated && props !== true) {
               gen.assign((0, codegen_1._)`${props}[${key}]`, true);
-            } else if (!alwaysValid && !it2.allErrors) {
+            } else if (!alwaysValid && !it.allErrors) {
               gen.if((0, codegen_1.not)(valid), () => gen.break());
             }
           });
@@ -5497,8 +5497,8 @@ var require_not = __commonJS((exports) => {
     schemaType: ["object", "boolean"],
     trackErrors: true,
     code(cxt) {
-      const { gen, schema, it: it2 } = cxt;
-      if ((0, util_1.alwaysValidSchema)(it2, schema)) {
+      const { gen, schema, it } = cxt;
+      if ((0, util_1.alwaysValidSchema)(it, schema)) {
         cxt.fail();
         return;
       }
@@ -5545,10 +5545,10 @@ var require_oneOf = __commonJS((exports) => {
     trackErrors: true,
     error: error48,
     code(cxt) {
-      const { gen, schema, parentSchema, it: it2 } = cxt;
+      const { gen, schema, parentSchema, it } = cxt;
       if (!Array.isArray(schema))
         throw new Error("ajv implementation error");
-      if (it2.opts.discriminator && parentSchema.discriminator)
+      if (it.opts.discriminator && parentSchema.discriminator)
         return;
       const schArr = schema;
       const valid = gen.let("valid", false);
@@ -5560,7 +5560,7 @@ var require_oneOf = __commonJS((exports) => {
       function validateOneOf() {
         schArr.forEach((sch, i) => {
           let schCxt;
-          if ((0, util_1.alwaysValidSchema)(it2, sch)) {
+          if ((0, util_1.alwaysValidSchema)(it, sch)) {
             gen.var(schValid, true);
           } else {
             schCxt = cxt.subschema({
@@ -5593,12 +5593,12 @@ var require_allOf = __commonJS((exports) => {
     keyword: "allOf",
     schemaType: "array",
     code(cxt) {
-      const { gen, schema, it: it2 } = cxt;
+      const { gen, schema, it } = cxt;
       if (!Array.isArray(schema))
         throw new Error("ajv implementation error");
       const valid = gen.name("valid");
       schema.forEach((sch, i) => {
-        if ((0, util_1.alwaysValidSchema)(it2, sch))
+        if ((0, util_1.alwaysValidSchema)(it, sch))
           return;
         const schCxt = cxt.subschema({ keyword: "allOf", schemaProp: i }, valid);
         cxt.ok(valid);
@@ -5624,12 +5624,12 @@ var require_if = __commonJS((exports) => {
     trackErrors: true,
     error: error48,
     code(cxt) {
-      const { gen, parentSchema, it: it2 } = cxt;
+      const { gen, parentSchema, it } = cxt;
       if (parentSchema.then === undefined && parentSchema.else === undefined) {
-        (0, util_1.checkStrictMode)(it2, '"if" without "then" and "else" is ignored');
+        (0, util_1.checkStrictMode)(it, '"if" without "then" and "else" is ignored');
       }
-      const hasThen = hasSchema(it2, "then");
-      const hasElse = hasSchema(it2, "else");
+      const hasThen = hasSchema(it, "then");
+      const hasElse = hasSchema(it, "else");
       if (!hasThen && !hasElse)
         return;
       const valid = gen.let("valid", true);
@@ -5668,9 +5668,9 @@ var require_if = __commonJS((exports) => {
       }
     }
   };
-  function hasSchema(it2, keyword) {
-    const schema = it2.schema[keyword];
-    return schema !== undefined && !(0, util_1.alwaysValidSchema)(it2, schema);
+  function hasSchema(it, keyword) {
+    const schema = it.schema[keyword];
+    return schema !== undefined && !(0, util_1.alwaysValidSchema)(it, schema);
   }
   exports.default = def;
 });
@@ -5682,9 +5682,9 @@ var require_thenElse = __commonJS((exports) => {
   var def = {
     keyword: ["then", "else"],
     schemaType: ["object", "boolean"],
-    code({ keyword, parentSchema, it: it2 }) {
+    code({ keyword, parentSchema, it }) {
       if (parentSchema.if === undefined)
-        (0, util_1.checkStrictMode)(it2, `"${keyword}" without "if" is ignored`);
+        (0, util_1.checkStrictMode)(it, `"${keyword}" without "if" is ignored`);
     }
   };
   exports.default = def;
@@ -5748,8 +5748,8 @@ var require_format = __commonJS((exports) => {
     $data: true,
     error: error48,
     code(cxt, ruleType) {
-      const { gen, data, $data, schema, schemaCode, it: it2 } = cxt;
-      const { opts, errSchemaPath, schemaEnv, self } = it2;
+      const { gen, data, $data, schema, schemaCode, it } = cxt;
+      const { opts, errSchemaPath, schemaEnv, self } = it;
       if (!opts.validateFormats)
         return;
       if ($data)
@@ -5896,9 +5896,9 @@ var require_discriminator = __commonJS((exports) => {
     schemaType: "object",
     error: error48,
     code(cxt) {
-      const { gen, data, schema, parentSchema, it: it2 } = cxt;
+      const { gen, data, schema, parentSchema, it } = cxt;
       const { oneOf } = parentSchema;
-      if (!it2.opts.discriminator) {
+      if (!it.opts.discriminator) {
         throw new Error("discriminator: requires discriminator option");
       }
       const tagName = schema.propertyName;
@@ -5936,13 +5936,13 @@ var require_discriminator = __commonJS((exports) => {
         let tagRequired = true;
         for (let i = 0;i < oneOf.length; i++) {
           let sch = oneOf[i];
-          if ((sch === null || sch === undefined ? undefined : sch.$ref) && !(0, util_1.schemaHasRulesButRef)(sch, it2.self.RULES)) {
+          if ((sch === null || sch === undefined ? undefined : sch.$ref) && !(0, util_1.schemaHasRulesButRef)(sch, it.self.RULES)) {
             const ref = sch.$ref;
-            sch = compile_1.resolveRef.call(it2.self, it2.schemaEnv.root, it2.baseId, ref);
+            sch = compile_1.resolveRef.call(it.self, it.schemaEnv.root, it.baseId, ref);
             if (sch instanceof compile_1.SchemaEnv)
               sch = sch.schema;
             if (sch === undefined)
-              throw new ref_error_1.default(it2.opts.uriResolver, it2.baseId, ref);
+              throw new ref_error_1.default(it.opts.uriResolver, it.baseId, ref);
           }
           const propSch = (_a2 = sch === null || sch === undefined ? undefined : sch.properties) === null || _a2 === undefined ? undefined : _a2[tagName];
           if (typeof propSch != "object") {
@@ -6275,11 +6275,11 @@ var require_formats = __commonJS((exports) => {
   }
   var TIME = /^(\d\d):(\d\d):(\d\d(?:\.\d+)?)(z|([+-])(\d\d)(?::?(\d\d))?)?$/i;
   function getTime(strictTimeZone) {
-    return function time(str) {
+    return function time3(str) {
       const matches = TIME.exec(str);
       if (!matches)
         return false;
-      const hr2 = +matches[1];
+      const hr = +matches[1];
       const min = +matches[2];
       const sec = +matches[3];
       const tz = matches[4];
@@ -6288,10 +6288,10 @@ var require_formats = __commonJS((exports) => {
       const tzM = +(matches[7] || 0);
       if (tzH > 23 || tzM > 59 || strictTimeZone && !tz)
         return false;
-      if (hr2 <= 23 && min <= 59 && sec < 60)
+      if (hr <= 23 && min <= 59 && sec < 60)
         return true;
       const utcMin = min - tzM * tzSign;
-      const utcHr = hr2 - tzH * tzSign - (utcMin < 0 ? 1 : 0);
+      const utcHr = hr - tzH * tzSign - (utcMin < 0 ? 1 : 0);
       return (utcHr === 23 || utcHr === -1) && (utcMin === 59 || utcMin === -1) && sec < 61;
     };
   }
@@ -6404,11 +6404,11 @@ var require_limit = __commonJS((exports) => {
     $data: true,
     error: error48,
     code(cxt) {
-      const { gen, data, schemaCode, keyword, it: it2 } = cxt;
-      const { opts, self } = it2;
+      const { gen, data, schemaCode, keyword, it } = cxt;
+      const { opts, self } = it;
       if (!opts.validateFormats)
         return;
-      const fCxt = new ajv_1.KeywordCxt(it2, self.RULES.all.format.definition, "format");
+      const fCxt = new ajv_1.KeywordCxt(it, self.RULES.all.format.definition, "format");
       if (fCxt.$data)
         validate$DataFormat();
       else
@@ -6471,22 +6471,183 @@ var require_dist = __commonJS((exports, module) => {
   };
   formatsPlugin.get = (name, mode = "full") => {
     const formats = mode === "fast" ? formats_1.fastFormats : formats_1.fullFormats;
-    const f2 = formats[name];
-    if (!f2)
+    const f = formats[name];
+    if (!f)
       throw new Error(`Unknown format "${name}"`);
-    return f2;
+    return f;
   };
-  function addFormats(ajv, list, fs, exportName) {
+  function addFormats(ajv, list, fs2, exportName) {
     var _a2;
     var _b;
     (_a2 = (_b = ajv.opts.code).formats) !== null && _a2 !== undefined || (_b.formats = (0, codegen_1._)`require("ajv-formats/dist/formats").${exportName}`);
-    for (const f2 of list)
-      ajv.addFormat(f2, fs[f2]);
+    for (const f of list)
+      ajv.addFormat(f, fs2[f]);
   }
   module.exports = exports = formatsPlugin;
   Object.defineProperty(exports, "__esModule", { value: true });
   exports.default = formatsPlugin;
 });
+
+// renderer.ts
+import { BrowserManager } from "agent-browser/dist/browser.js";
+import fs from "node:fs";
+import os from "node:os";
+import path from "node:path";
+var browser = null;
+var pageReady = false;
+var BROWSER_INIT_SCRIPT = `
+(async () => {
+  document.body.innerHTML = '<div id="canvas" style="display:inline-block"></div>';
+  document.body.style.margin = "0";
+  document.body.style.padding = "0";
+  document.body.style.background = "white";
+
+  const { convertToExcalidrawElements, exportToSvg } = await import(
+    "https://esm.sh/@excalidraw/excalidraw@0.18.0"
+  );
+
+  // Virgil font is loaded by Excalidraw internally and inlined by exportToSvg.
+  // Wait briefly for Excalidraw's font loader to finish.
+  await new Promise(function(r) { setTimeout(r, 1000); });
+
+  const EXPORT_PADDING = 20;
+
+  function computeSceneBounds(elements) {
+    let minX = Infinity, minY = Infinity;
+    for (const el of elements) {
+      if (el.x != null) {
+        minX = Math.min(minX, el.x);
+        minY = Math.min(minY, el.y);
+        if (el.points && Array.isArray(el.points)) {
+          for (const pt of el.points) {
+            minX = Math.min(minX, el.x + pt[0]);
+            minY = Math.min(minY, el.y + pt[1]);
+          }
+        }
+      }
+    }
+    return {
+      minX: isFinite(minX) ? minX : 0,
+      minY: isFinite(minY) ? minY : 0,
+    };
+  }
+
+  function sceneToSvgViewBox(vp, sceneMinX, sceneMinY) {
+    return {
+      x: vp.x - sceneMinX + EXPORT_PADDING,
+      y: vp.y - sceneMinY + EXPORT_PADDING,
+      w: vp.width,
+      h: vp.height,
+    };
+  }
+
+  window.renderDiagram = async function(elementsJson, options) {
+    options = options || {};
+    const scale = options.scale || 2;
+    const elements = JSON.parse(elementsJson);
+
+    let viewport = null;
+    const drawElements = [];
+    for (const el of elements) {
+      if (el.type === "cameraUpdate" || el.type === "viewportUpdate") {
+        viewport = { x: el.x, y: el.y, width: el.width, height: el.height };
+      } else {
+        drawElements.push(el);
+      }
+    }
+
+    if (drawElements.length === 0) throw new Error("No drawable elements provided");
+
+    const withLabelDefaults = drawElements.map(function(el) {
+      return el.label ? Object.assign({}, el, { label: Object.assign({ textAlign: "center", verticalAlign: "middle" }, el.label) }) : el;
+    });
+
+    const excalidrawEls = convertToExcalidrawElements(withLabelDefaults, { regenerateIds: false })
+      .map(function(el) { return el.type === "text" ? Object.assign({}, el, { fontFamily: 1 }) : el; });
+
+    const svg = await exportToSvg({
+      elements: excalidrawEls,
+      appState: { viewBackgroundColor: "#ffffff", exportBackground: true },
+      files: null,
+      exportPadding: EXPORT_PADDING,
+      skipInliningFonts: false,
+    });
+
+    if (viewport) {
+      const bounds = computeSceneBounds(drawElements);
+      const vb = sceneToSvgViewBox(viewport, bounds.minX, bounds.minY);
+      svg.setAttribute("viewBox", vb.x + " " + vb.y + " " + vb.w + " " + vb.h);
+    }
+
+    const w = viewport ? viewport.width * scale : parseInt(svg.getAttribute("width") || "800");
+    const h = viewport ? viewport.height * scale : parseInt(svg.getAttribute("height") || "600");
+    svg.setAttribute("width", String(w));
+    svg.setAttribute("height", String(h));
+    svg.style.width = w + "px";
+    svg.style.height = h + "px";
+
+    const canvas = document.getElementById("canvas");
+    canvas.innerHTML = "";
+    canvas.appendChild(svg);
+
+    return { width: w, height: h };
+  };
+
+  window.__RENDER_READY__ = true;
+})()
+`;
+async function ensureBrowser() {
+  if (browser) {
+    try {
+      const page2 = browser.getPage();
+      await page2.evaluate(() => true);
+      return browser;
+    } catch {
+      try {
+        await browser.close();
+      } catch {}
+      browser = null;
+      pageReady = false;
+    }
+  }
+  browser = new BrowserManager;
+  await browser.launch({ id: "excalidraw", action: "launch", headless: true });
+  const page = browser.getPage();
+  await page.goto("https://esm.sh", { waitUntil: "domcontentloaded" });
+  await page.evaluate(BROWSER_INIT_SCRIPT);
+  const ready = await page.evaluate(() => globalThis.__RENDER_READY__ === true);
+  if (!ready) {
+    throw new Error("Excalidraw initialization failed in headless browser");
+  }
+  pageReady = true;
+  return browser;
+}
+async function renderToPng(elementsJson, outputPath, options) {
+  const mgr = await ensureBrowser();
+  const page = mgr.getPage();
+  const scale = options?.scale ?? 2;
+  await page.evaluate(async ({ json, opts }) => {
+    await globalThis.renderDiagram(json, opts);
+  }, { json: elementsJson, opts: { scale } });
+  const svgLocator = page.locator("#canvas > svg");
+  await svgLocator.waitFor({ state: "visible", timeout: 1e4 });
+  const dest = outputPath ? path.resolve(outputPath) : path.join(os.tmpdir(), `excalidraw-${Date.now()}.png`);
+  const dir = path.dirname(dest);
+  if (!fs.existsSync(dir)) {
+    fs.mkdirSync(dir, { recursive: true });
+  }
+  await svgLocator.screenshot({ path: dest, type: "png" });
+  return dest;
+}
+async function closeBrowser() {
+  if (browser) {
+    try {
+      await browser.close();
+    } catch {}
+    browser = null;
+    pageReady = false;
+  }
+}
 
 // node_modules/zod/v3/helpers/util.js
 var util;
@@ -6844,8 +7005,8 @@ function getErrorMap() {
 
 // node_modules/zod/v3/helpers/parseUtil.js
 var makeIssue = (params) => {
-  const { data, path, errorMaps, issueData } = params;
-  const fullPath = [...path, ...issueData.path || []];
+  const { data, path: path2, errorMaps, issueData } = params;
+  const fullPath = [...path2, ...issueData.path || []];
   const fullIssue = {
     ...issueData,
     path: fullPath
@@ -6957,11 +7118,11 @@ var errorUtil;
 
 // node_modules/zod/v3/types.js
 class ParseInputLazyPath {
-  constructor(parent, value, path, key) {
+  constructor(parent, value, path2, key) {
     this._cachedPath = [];
     this.parent = parent;
     this.data = value;
-    this._path = path;
+    this._path = path2;
     this._key = key;
   }
   get path() {
@@ -10823,10 +10984,10 @@ function mergeDefs(...defs) {
 function cloneDef(schema) {
   return mergeDefs(schema._zod.def);
 }
-function getElementAtPath(obj, path) {
-  if (!path)
+function getElementAtPath(obj, path2) {
+  if (!path2)
     return obj;
-  return path.reduce((acc, key) => acc?.[key], obj);
+  return path2.reduce((acc, key) => acc?.[key], obj);
 }
 function promiseAllObject(promisesObj) {
   const keys = Object.keys(promisesObj);
@@ -11207,11 +11368,11 @@ function aborted(x, startIndex = 0) {
   }
   return false;
 }
-function prefixIssues(path, issues) {
+function prefixIssues(path2, issues) {
   return issues.map((iss) => {
     var _a;
     (_a = iss).path ?? (_a.path = []);
-    iss.path.unshift(path);
+    iss.path.unshift(path2);
     return iss;
   });
 }
@@ -11394,7 +11555,7 @@ function formatError(error, mapper = (issue2) => issue2.message) {
 }
 function treeifyError(error, mapper = (issue2) => issue2.message) {
   const result = { errors: [] };
-  const processError = (error2, path = []) => {
+  const processError = (error2, path2 = []) => {
     var _a, _b;
     for (const issue2 of error2.issues) {
       if (issue2.code === "invalid_union" && issue2.errors.length) {
@@ -11404,7 +11565,7 @@ function treeifyError(error, mapper = (issue2) => issue2.message) {
       } else if (issue2.code === "invalid_element") {
         processError({ issues: issue2.issues }, issue2.path);
       } else {
-        const fullpath = [...path, ...issue2.path];
+        const fullpath = [...path2, ...issue2.path];
         if (fullpath.length === 0) {
           result.errors.push(mapper(issue2));
           continue;
@@ -11436,8 +11597,8 @@ function treeifyError(error, mapper = (issue2) => issue2.message) {
 }
 function toDotPath(_path) {
   const segs = [];
-  const path = _path.map((seg) => typeof seg === "object" ? seg.key : seg);
-  for (const seg of path) {
+  const path2 = _path.map((seg) => typeof seg === "object" ? seg.key : seg);
+  for (const seg of path2) {
     if (typeof seg === "number")
       segs.push(`[${seg}]`);
     else if (typeof seg === "symbol")
@@ -23611,13 +23772,13 @@ function resolveRef(ref, ctx) {
   if (!ref.startsWith("#")) {
     throw new Error("External $ref is not supported, only local refs (#/...) are allowed");
   }
-  const path = ref.slice(1).split("/").filter(Boolean);
-  if (path.length === 0) {
+  const path2 = ref.slice(1).split("/").filter(Boolean);
+  if (path2.length === 0) {
     return ctx.rootSchema;
   }
   const defsKey = ctx.version === "draft-2020-12" ? "$defs" : "definitions";
-  if (path[0] === defsKey) {
-    const key = path[1];
+  if (path2[0] === defsKey) {
+    const key = path2[1];
     if (!key || !ctx.defs[key]) {
       throw new Error(`Reference not found: ${ref}`);
     }
@@ -26311,6 +26472,9 @@ class Protocol {
     }
   }
   async connect(transport) {
+    if (this._transport) {
+      throw new Error("Already connected to a transport. Call close() before connecting to a new transport, or use a separate Protocol instance per connection.");
+    }
     this._transport = transport;
     const _onclose = this.transport?.onclose;
     this._transport.onclose = () => {
@@ -26343,6 +26507,10 @@ class Protocol {
     this._progressHandlers.clear();
     this._taskProgressTokens.clear();
     this._pendingDebouncedNotifications.clear();
+    for (const controller of this._requestHandlerAbortControllers.values()) {
+      controller.abort();
+    }
+    this._requestHandlerAbortControllers.clear();
     const error48 = McpError.fromError(ErrorCode.ConnectionClosed, "Connection closed");
     this._transport = undefined;
     this.onclose?.();
@@ -26393,6 +26561,8 @@ class Protocol {
       sessionId: capturedTransport?.sessionId,
       _meta: request.params?._meta,
       sendNotification: async (notification) => {
+        if (abortController.signal.aborted)
+          return;
         const notificationOptions = { relatedRequestId: request.id };
         if (relatedTaskId) {
           notificationOptions.relatedTask = { taskId: relatedTaskId };
@@ -26400,6 +26570,9 @@ class Protocol {
         await this.notification(notification, notificationOptions);
       },
       sendRequest: async (r, resultSchema, options) => {
+        if (abortController.signal.aborted) {
+          throw new McpError(ErrorCode.ConnectionClosed, "Request was cancelled");
+        }
         const requestOptions = { ...options, relatedRequestId: request.id };
         if (relatedTaskId && !requestOptions.relatedTask) {
           requestOptions.relatedTask = { taskId: relatedTaskId };
@@ -26963,7559 +27136,6 @@ function mergeCapabilities(base, additional) {
     }
   }
   return result;
-}
-
-// node_modules/@modelcontextprotocol/ext-apps/dist/src/server/index.js
-var QI = Object.defineProperty;
-var s = (r, i) => {
-  for (var o in i)
-    QI(r, o, { get: i[o], enumerable: true, configurable: true, set: (t) => i[o] = () => t });
-};
-
-class Qn {
-  eventTarget;
-  eventSource;
-  messageListener;
-  constructor(r = window.parent, i) {
-    this.eventTarget = r;
-    this.eventSource = i;
-    this.messageListener = (o) => {
-      if (i && o.source !== this.eventSource) {
-        console.debug("Ignoring message from unknown source", o);
-        return;
-      }
-      let t = JSONRPCMessageSchema.safeParse(o.data);
-      if (t.success)
-        console.debug("Parsed message", t.data), this.onmessage?.(t.data);
-      else
-        console.error("Failed to parse message", t.error.message, o), this.onerror?.(Error("Invalid JSON-RPC message received: " + t.error.message));
-    };
-  }
-  async start() {
-    window.addEventListener("message", this.messageListener);
-  }
-  async send(r, i) {
-    console.debug("Sending message", r), this.eventTarget.postMessage(r, "*");
-  }
-  async close() {
-    window.removeEventListener("message", this.messageListener), this.onclose?.();
-  }
-  onclose;
-  onerror;
-  onmessage;
-  sessionId;
-  setProtocolVersion;
-}
-var wv = "2025-11-21";
-var g = {};
-s(g, { xor: () => al, xid: () => Ol, void: () => Zl, uuidv7: () => cl, uuidv6: () => Il, uuidv4: () => ll, uuid: () => el, util: () => D, url: () => bl, uppercase: () => Kr, unknown: () => Nr, union: () => ev, undefined: () => Rl, ulid: () => Nl, uint64: () => Tl, uint32: () => Bl, tuple: () => Yg, trim: () => mr, treeifyError: () => Xv, transform: () => Iv, toUpperCase: () => Tr, toLowerCase: () => Hr, toJSONSchema: () => Yi, templateLiteral: () => lI, symbol: () => Ml, superRefine: () => ee, success: () => uI, stringbool: () => wI, stringFormat: () => El, string: () => Mi, strictObject: () => yl, startsWith: () => Qr, slugify: () => Mr, size: () => kr, setErrorMap: () => b6, set: () => iI, safeParseAsync: () => lg, safeParse: () => eg, safeEncodeAsync: () => Dg, safeEncode: () => Ug, safeDecodeAsync: () => wg, safeDecode: () => kg, registry: () => ui, regexes: () => x, regex: () => Er, refine: () => ge, record: () => Fg, readonly: () => ie, property: () => Ai, promise: () => II, prettifyError: () => Ev, preprocess: () => OI, prefault: () => yg, positive: () => Wi, pipe: () => Gn, partialRecord: () => sl, parseAsync: () => gg, parse: () => ug, overwrite: () => d, optional: () => Jn, object: () => fl, number: () => Og, nullish: () => $I, nullable: () => Ln, null: () => Jg, normalize: () => Br, nonpositive: () => Xi, nonoptional: () => hg, nonnegative: () => Ei, never: () => gv, negative: () => Vi, nativeEnum: () => vI, nanoid: () => kl, nan: () => gI, multipleOf: () => ur, minSize: () => a, minLength: () => nr, mime: () => Fr, meta: () => kI, maxSize: () => gr, maxLength: () => Dr, map: () => nI, mac: () => Pl, lte: () => M, lt: () => y, lowercase: () => Ar, looseRecord: () => rI, looseObject: () => hl, locales: () => On, literal: () => oI, length: () => wr, lazy: () => te, ksuid: () => zl, keyof: () => Cl, jwt: () => Xl, json: () => NI, iso: () => Zr, ipv6: () => jl, ipv4: () => Sl, intersection: () => qg, int64: () => Hl, int32: () => Fl, int: () => Ri, instanceof: () => DI, includes: () => qr, httpUrl: () => _l, hostname: () => Al, hex: () => Kl, hash: () => ql, guid: () => gl, gte: () => Q, gt: () => h, globalRegistry: () => A, getErrorMap: () => _6, function: () => cI, fromJSONSchema: () => SI, formatError: () => en, float64: () => Yl, float32: () => Ql, flattenError: () => gn, file: () => tI, exactOptional: () => xg, enum: () => lv, endsWith: () => Yr, encodeAsync: () => bg, encode: () => Ig, emoji: () => Ul, email: () => ul, e164: () => Vl, discriminatedUnion: () => pl, describe: () => UI, decodeAsync: () => _g, decode: () => cg, date: () => dl, custom: () => _I, cuid2: () => wl, cuid: () => Dl, core: () => ir, config: () => E, coerce: () => Ie, codec: () => eI, clone: () => q, cidrv6: () => Ll, cidrv4: () => Jl, check: () => bI, catch: () => sg, boolean: () => zg, bigint: () => ml, base64url: () => Wl, base64: () => Gl, array: () => Xn, any: () => xl, _function: () => cI, _default: () => Cg, _ZodString: () => xi, ZodXor: () => Eg, ZodXID: () => ai, ZodVoid: () => Vg, ZodUnknown: () => Gg, ZodUnion: () => An, ZodUndefined: () => Pg, ZodUUID: () => p, ZodURL: () => Wn, ZodULID: () => hi, ZodType: () => P, ZodTuple: () => Qg, ZodTransform: () => Mg, ZodTemplateLiteral: () => ve, ZodSymbol: () => Sg, ZodSuccess: () => ag, ZodStringFormat: () => W, ZodString: () => Cr, ZodSet: () => mg, ZodRecord: () => Kn, ZodRealError: () => H, ZodReadonly: () => ne, ZodPromise: () => $e, ZodPrefault: () => fg, ZodPipe: () => _v, ZodOptional: () => cv, ZodObject: () => En, ZodNumberFormat: () => Or, ZodNumber: () => yr, ZodNullable: () => Zg, ZodNull: () => jg, ZodNonOptional: () => bv, ZodNever: () => Wg, ZodNanoID: () => Ci, ZodNaN: () => re, ZodMap: () => Bg, ZodMAC: () => Ng, ZodLiteral: () => Hg, ZodLazy: () => oe, ZodKSUID: () => pi, ZodJWT: () => $v, ZodIssueCode: () => c6, ZodIntersection: () => Kg, ZodISOTime: () => Hi, ZodISODuration: () => Ti, ZodISODateTime: () => Bi, ZodISODate: () => mi, ZodIPv6: () => rv, ZodIPv4: () => si, ZodGUID: () => jn, ZodFunction: () => ue, ZodFirstPartyTypeKind: () => le, ZodFile: () => Tg, ZodExactOptional: () => Rg, ZodError: () => l6, ZodEnum: () => dr, ZodEmoji: () => di, ZodEmail: () => Zi, ZodE164: () => tv, ZodDiscriminatedUnion: () => Ag, ZodDefault: () => dg, ZodDate: () => Vn, ZodCustomStringFormat: () => fr, ZodCustom: () => qn, ZodCodec: () => Uv, ZodCatch: () => pg, ZodCUID2: () => yi, ZodCUID: () => fi, ZodCIDRv6: () => iv, ZodCIDRv4: () => nv, ZodBoolean: () => hr, ZodBigIntFormat: () => uv, ZodBigInt: () => ar, ZodBase64URL: () => ov, ZodBase64: () => vv, ZodArray: () => Xg, ZodAny: () => Lg, TimePrecision: () => Y$, NEVER: () => Nv, $output: () => X$, $input: () => E$, $brand: () => Ov });
-var ir = {};
-s(ir, { version: () => Lo, util: () => D, treeifyError: () => Xv, toJSONSchema: () => Yi, toDotPath: () => Xe, safeParseAsync: () => Kv, safeParse: () => Av, safeEncodeAsync: () => Uc, safeEncode: () => bc, safeDecodeAsync: () => kc, safeDecode: () => _c, registry: () => ui, regexes: () => x, process: () => L, prettifyError: () => Ev, parseAsync: () => mn, parse: () => Bn, meta: () => ku, locales: () => On, isValidJWT: () => ye, isValidBase64URL: () => fe, isValidBase64: () => yo, initializeContext: () => er, globalRegistry: () => A, globalConfig: () => sr, formatError: () => en, flattenError: () => gn, finalize: () => Ir, extractDefs: () => lr, encodeAsync: () => Ic, encode: () => ec, describe: () => Uu, decodeAsync: () => cc, decode: () => lc, createToJSONSchemaMethod: () => wu, createStandardJSONSchemaMethod: () => xr, config: () => E, clone: () => q, _xor: () => H4, _xid: () => wi, _void: () => $u, _uuidv7: () => ci, _uuidv6: () => Ii, _uuidv4: () => li, _uuid: () => ei, _url: () => Sn, _uppercase: () => Kr, _unknown: () => ou, _union: () => m4, _undefined: () => nu, _ulid: () => Di, _uint64: () => s$, _uint32: () => C$, _tuple: () => R4, _trim: () => mr, _transform: () => h4, _toUpperCase: () => Tr, _toLowerCase: () => Hr, _templateLiteral: () => t6, _symbol: () => ru, _superRefine: () => _u, _success: () => n6, _stringbool: () => Du, _stringFormat: () => Rr, _string: () => K$, _startsWith: () => Qr, _slugify: () => Mr, _size: () => kr, _set: () => d4, _safeParseAsync: () => Wr, _safeParse: () => Gr, _safeEncodeAsync: () => dn, _safeEncode: () => xn, _safeDecodeAsync: () => Cn, _safeDecode: () => Zn, _regex: () => Er, _refine: () => bu, _record: () => x4, _readonly: () => o6, _property: () => Ai, _promise: () => u6, _positive: () => Wi, _pipe: () => v6, _parseAsync: () => Lr, _parse: () => Jr, _overwrite: () => d, _optional: () => a4, _number: () => T$, _nullable: () => p4, _null: () => iu, _normalize: () => Br, _nonpositive: () => Xi, _nonoptional: () => r6, _nonnegative: () => Ei, _never: () => tu, _negative: () => Vi, _nativeEnum: () => f4, _nanoid: () => _i, _nan: () => eu, _multipleOf: () => ur, _minSize: () => a, _minLength: () => nr, _min: () => Q, _mime: () => Fr, _maxSize: () => gr, _maxLength: () => Dr, _max: () => M, _map: () => Z4, _mac: () => Q$, _lte: () => M, _lt: () => y, _lowercase: () => Ar, _literal: () => y4, _length: () => wr, _lazy: () => $6, _ksuid: () => Ni, _jwt: () => Gi, _isoTime: () => m$, _isoDuration: () => H$, _isoDateTime: () => F$, _isoDate: () => B$, _ipv6: () => zi, _ipv4: () => Oi, _intersection: () => M4, _int64: () => p$, _int32: () => d$, _int: () => R$, _includes: () => qr, _guid: () => zn, _gte: () => Q, _gt: () => h, _float64: () => Z$, _float32: () => x$, _file: () => Iu, _enum: () => C4, _endsWith: () => Yr, _encodeAsync: () => Mn, _encode: () => Hn, _emoji: () => bi, _email: () => gi, _e164: () => Li, _discriminatedUnion: () => T4, _default: () => s4, _decodeAsync: () => Rn, _decode: () => Tn, _date: () => uu, _custom: () => cu, _cuid2: () => ki, _cuid: () => Ui, _coercedString: () => q$, _coercedNumber: () => M$, _coercedDate: () => gu, _coercedBoolean: () => y$, _coercedBigint: () => a$, _cidrv6: () => Pi, _cidrv4: () => Si, _check: () => ol, _catch: () => i6, _boolean: () => f$, _bigint: () => h$, _base64url: () => Ji, _base64: () => ji, _array: () => lu, _any: () => vu, TimePrecision: () => Y$, NEVER: () => Nv, JSONSchemaGenerator: () => ig, JSONSchema: () => tl, Doc: () => an, $output: () => X$, $input: () => E$, $constructor: () => I, $brand: () => Ov, $ZodXor: () => bt, $ZodXID: () => Fo, $ZodVoid: () => et, $ZodUnknown: () => ut, $ZodUnion: () => _n, $ZodUndefined: () => ot, $ZodUUID: () => Vo, $ZodURL: () => Eo, $ZodULID: () => Yo, $ZodType: () => S, $ZodTuple: () => ti, $ZodTransform: () => St, $ZodTemplateLiteral: () => Kt, $ZodSymbol: () => vt, $ZodSuccess: () => Wt, $ZodStringFormat: () => G, $ZodString: () => Ur, $ZodSet: () => wt, $ZodRegistry: () => A$, $ZodRecord: () => kt, $ZodRealError: () => m, $ZodReadonly: () => At, $ZodPromise: () => Qt, $ZodPrefault: () => Lt, $ZodPipe: () => Et, $ZodOptional: () => $i, $ZodObjectJIT: () => ct, $ZodObject: () => pe, $ZodNumberFormat: () => nt, $ZodNumber: () => vi, $ZodNullable: () => jt, $ZodNull: () => tt, $ZodNonOptional: () => Gt, $ZodNever: () => gt, $ZodNanoID: () => Ko, $ZodNaN: () => Xt, $ZodMap: () => Dt, $ZodMAC: () => Zo, $ZodLiteral: () => Ot, $ZodLazy: () => Yt, $ZodKSUID: () => Bo, $ZodJWT: () => so, $ZodIntersection: () => Ut, $ZodISOTime: () => To, $ZodISODuration: () => Mo, $ZodISODateTime: () => mo, $ZodISODate: () => Ho, $ZodIPv6: () => xo, $ZodIPv4: () => Ro, $ZodGUID: () => Wo, $ZodFunction: () => qt, $ZodFile: () => zt, $ZodExactOptional: () => Pt, $ZodError: () => un, $ZodEnum: () => Nt, $ZodEncodeError: () => cr, $ZodEmoji: () => Ao, $ZodEmail: () => Xo, $ZodE164: () => po, $ZodDiscriminatedUnion: () => _t, $ZodDefault: () => Jt, $ZodDate: () => lt, $ZodCustomStringFormat: () => rt, $ZodCustom: () => Ft, $ZodCodec: () => Un, $ZodCheckUpperCase: () => No, $ZodCheckStringFormat: () => Vr, $ZodCheckStartsWith: () => zo, $ZodCheckSizeEquals: () => bo, $ZodCheckRegex: () => Do, $ZodCheckProperty: () => Po, $ZodCheckOverwrite: () => Jo, $ZodCheckNumberFormat: () => eo, $ZodCheckMultipleOf: () => go, $ZodCheckMinSize: () => co, $ZodCheckMinLength: () => Uo, $ZodCheckMimeType: () => jo, $ZodCheckMaxSize: () => Io, $ZodCheckMaxLength: () => _o, $ZodCheckLowerCase: () => wo, $ZodCheckLessThan: () => yn, $ZodCheckLengthEquals: () => ko, $ZodCheckIncludes: () => Oo, $ZodCheckGreaterThan: () => hn, $ZodCheckEndsWith: () => So, $ZodCheckBigIntFormat: () => lo, $ZodCheck: () => V, $ZodCatch: () => Vt, $ZodCUID2: () => Qo, $ZodCUID: () => qo, $ZodCIDRv6: () => fo, $ZodCIDRv4: () => Co, $ZodBoolean: () => bn, $ZodBigIntFormat: () => it, $ZodBigInt: () => oi, $ZodBase64URL: () => ao, $ZodBase64: () => ho, $ZodAsyncError: () => f, $ZodArray: () => It, $ZodAny: () => $t });
-var Nv = Object.freeze({ status: "aborted" });
-function I(r, i, o) {
-  function t(u, l) {
-    if (!u._zod)
-      Object.defineProperty(u, "_zod", { value: { def: l, constr: $, traits: new Set }, enumerable: false });
-    if (u._zod.traits.has(r))
-      return;
-    u._zod.traits.add(r), i(u, l);
-    let e = $.prototype, c = Object.keys(e);
-    for (let _ = 0;_ < c.length; _++) {
-      let N = c[_];
-      if (!(N in u))
-        u[N] = e[N].bind(u);
-    }
-  }
-  let n = o?.Parent ?? Object;
-
-  class v extends n {
-  }
-  Object.defineProperty(v, "name", { value: r });
-  function $(u) {
-    var l;
-    let e = o?.Parent ? new v : this;
-    t(e, u), (l = e._zod).deferred ?? (l.deferred = []);
-    for (let c of e._zod.deferred)
-      c();
-    return e;
-  }
-  return Object.defineProperty($, "init", { value: t }), Object.defineProperty($, Symbol.hasInstance, { value: (u) => {
-    if (o?.Parent && u instanceof o.Parent)
-      return true;
-    return u?._zod?.traits?.has(r);
-  } }), Object.defineProperty($, "name", { value: r }), $;
-}
-var Ov = Symbol("zod_brand");
-
-class f extends Error {
-  constructor() {
-    super("Encountered Promise during synchronous parse. Use .parseAsync() instead.");
-  }
-}
-
-class cr extends Error {
-  constructor(r) {
-    super(`Encountered unidirectional transform during encode: ${r}`);
-    this.name = "ZodEncodeError";
-  }
-}
-var sr = {};
-function E(r) {
-  if (r)
-    Object.assign(sr, r);
-  return sr;
-}
-var D = {};
-s(D, { unwrapMessage: () => rn, uint8ArrayToHex: () => uc, uint8ArrayToBase64url: () => tc, uint8ArrayToBase64: () => Ge, stringifyPrimitive: () => U, slugify: () => Pv, shallowClone: () => Jv, safeExtend: () => sI, required: () => ic, randomString: () => dI, propertyKeyTypes: () => on, promiseAllObject: () => ZI, primitiveTypes: () => Lv, prefixIssues: () => T, pick: () => hI, partial: () => nc, parsedType: () => k, optionalKeys: () => Gv, omit: () => aI, objectClone: () => MI, numKeys: () => CI, nullish: () => vr, normalizeParams: () => w, mergeDefs: () => rr, merge: () => rc, jsonStringifyReplacer: () => Sr, joinValues: () => b, issue: () => jr, isPlainObject: () => tr, isObject: () => br, hexToUint8Array: () => $c, getSizableOrigin: () => tn, getParsedType: () => fI, getLengthableOrigin: () => $n, getEnumValues: () => nn, getElementAtPath: () => xI, floatSafeRemainder: () => Sv, finalizeIssue: () => B, extend: () => pI, escapeRegex: () => R, esc: () => Yn, defineLazy: () => j, createTransparentProxy: () => yI, cloneDef: () => RI, clone: () => q, cleanRegex: () => vn, cleanEnum: () => vc, captureStackTrace: () => Fn, cached: () => Pr, base64urlToUint8Array: () => oc, base64ToUint8Array: () => Le, assignProp: () => or, assertNotEqual: () => BI, assertNever: () => HI, assertIs: () => mI, assertEqual: () => FI, assert: () => TI, allowsEval: () => jv, aborted: () => $r, NUMBER_FORMAT_RANGES: () => Wv, Class: () => We, BIGINT_FORMAT_RANGES: () => Vv });
-function FI(r) {
-  return r;
-}
-function BI(r) {
-  return r;
-}
-function mI(r) {}
-function HI(r) {
-  throw Error("Unexpected value in exhaustive check");
-}
-function TI(r) {}
-function nn(r) {
-  let i = Object.values(r).filter((t) => typeof t === "number");
-  return Object.entries(r).filter(([t, n]) => i.indexOf(+t) === -1).map(([t, n]) => n);
-}
-function b(r, i = "|") {
-  return r.map((o) => U(o)).join(i);
-}
-function Sr(r, i) {
-  if (typeof i === "bigint")
-    return i.toString();
-  return i;
-}
-function Pr(r) {
-  return { get value() {
-    {
-      let o = r();
-      return Object.defineProperty(this, "value", { value: o }), o;
-    }
-    throw Error("cached value already set");
-  } };
-}
-function vr(r) {
-  return r === null || r === undefined;
-}
-function vn(r) {
-  let i = r.startsWith("^") ? 1 : 0, o = r.endsWith("$") ? r.length - 1 : r.length;
-  return r.slice(i, o);
-}
-function Sv(r, i) {
-  let o = (r.toString().split(".")[1] || "").length, t = i.toString(), n = (t.split(".")[1] || "").length;
-  if (n === 0 && /\d?e-\d?/.test(t)) {
-    let l = t.match(/\d?e-(\d?)/);
-    if (l?.[1])
-      n = Number.parseInt(l[1]);
-  }
-  let v = o > n ? o : n, $ = Number.parseInt(r.toFixed(v).replace(".", "")), u = Number.parseInt(i.toFixed(v).replace(".", ""));
-  return $ % u / 10 ** v;
-}
-var Je = Symbol("evaluating");
-function j(r, i, o) {
-  let t = undefined;
-  Object.defineProperty(r, i, { get() {
-    if (t === Je)
-      return;
-    if (t === undefined)
-      t = Je, t = o();
-    return t;
-  }, set(n) {
-    Object.defineProperty(r, i, { value: n });
-  }, configurable: true });
-}
-function MI(r) {
-  return Object.create(Object.getPrototypeOf(r), Object.getOwnPropertyDescriptors(r));
-}
-function or(r, i, o) {
-  Object.defineProperty(r, i, { value: o, writable: true, enumerable: true, configurable: true });
-}
-function rr(...r) {
-  let i = {};
-  for (let o of r) {
-    let t = Object.getOwnPropertyDescriptors(o);
-    Object.assign(i, t);
-  }
-  return Object.defineProperties({}, i);
-}
-function RI(r) {
-  return rr(r._zod.def);
-}
-function xI(r, i) {
-  if (!i)
-    return r;
-  return i.reduce((o, t) => o?.[t], r);
-}
-function ZI(r) {
-  let i = Object.keys(r), o = i.map((t) => r[t]);
-  return Promise.all(o).then((t) => {
-    let n = {};
-    for (let v = 0;v < i.length; v++)
-      n[i[v]] = t[v];
-    return n;
-  });
-}
-function dI(r = 10) {
-  let o = "";
-  for (let t = 0;t < r; t++)
-    o += "abcdefghijklmnopqrstuvwxyz"[Math.floor(Math.random() * 26)];
-  return o;
-}
-function Yn(r) {
-  return JSON.stringify(r);
-}
-function Pv(r) {
-  return r.toLowerCase().trim().replace(/[^\w\s-]/g, "").replace(/[\s_-]+/g, "-").replace(/^-+|-+$/g, "");
-}
-var Fn = "captureStackTrace" in Error ? Error.captureStackTrace : (...r) => {};
-function br(r) {
-  return typeof r === "object" && r !== null && !Array.isArray(r);
-}
-var jv = Pr(() => {
-  if (typeof navigator < "u" && navigator?.userAgent?.includes("Cloudflare"))
-    return false;
-  try {
-    return new Function(""), true;
-  } catch (r) {
-    return false;
-  }
-});
-function tr(r) {
-  if (br(r) === false)
-    return false;
-  let i = r.constructor;
-  if (i === undefined)
-    return true;
-  if (typeof i !== "function")
-    return true;
-  let o = i.prototype;
-  if (br(o) === false)
-    return false;
-  if (Object.prototype.hasOwnProperty.call(o, "isPrototypeOf") === false)
-    return false;
-  return true;
-}
-function Jv(r) {
-  if (tr(r))
-    return { ...r };
-  if (Array.isArray(r))
-    return [...r];
-  return r;
-}
-function CI(r) {
-  let i = 0;
-  for (let o in r)
-    if (Object.prototype.hasOwnProperty.call(r, o))
-      i++;
-  return i;
-}
-var fI = (r) => {
-  let i = typeof r;
-  switch (i) {
-    case "undefined":
-      return "undefined";
-    case "string":
-      return "string";
-    case "number":
-      return Number.isNaN(r) ? "nan" : "number";
-    case "boolean":
-      return "boolean";
-    case "function":
-      return "function";
-    case "bigint":
-      return "bigint";
-    case "symbol":
-      return "symbol";
-    case "object":
-      if (Array.isArray(r))
-        return "array";
-      if (r === null)
-        return "null";
-      if (r.then && typeof r.then === "function" && r.catch && typeof r.catch === "function")
-        return "promise";
-      if (typeof Map < "u" && r instanceof Map)
-        return "map";
-      if (typeof Set < "u" && r instanceof Set)
-        return "set";
-      if (typeof Date < "u" && r instanceof Date)
-        return "date";
-      if (typeof File < "u" && r instanceof File)
-        return "file";
-      return "object";
-    default:
-      throw Error(`Unknown data type: ${i}`);
-  }
-};
-var on = new Set(["string", "number", "symbol"]);
-var Lv = new Set(["string", "number", "bigint", "boolean", "symbol", "undefined"]);
-function R(r) {
-  return r.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-}
-function q(r, i, o) {
-  let t = new r._zod.constr(i ?? r._zod.def);
-  if (!i || o?.parent)
-    t._zod.parent = r;
-  return t;
-}
-function w(r) {
-  let i = r;
-  if (!i)
-    return {};
-  if (typeof i === "string")
-    return { error: () => i };
-  if (i?.message !== undefined) {
-    if (i?.error !== undefined)
-      throw Error("Cannot specify both `message` and `error` params");
-    i.error = i.message;
-  }
-  if (delete i.message, typeof i.error === "string")
-    return { ...i, error: () => i.error };
-  return i;
-}
-function yI(r) {
-  let i;
-  return new Proxy({}, { get(o, t, n) {
-    return i ?? (i = r()), Reflect.get(i, t, n);
-  }, set(o, t, n, v) {
-    return i ?? (i = r()), Reflect.set(i, t, n, v);
-  }, has(o, t) {
-    return i ?? (i = r()), Reflect.has(i, t);
-  }, deleteProperty(o, t) {
-    return i ?? (i = r()), Reflect.deleteProperty(i, t);
-  }, ownKeys(o) {
-    return i ?? (i = r()), Reflect.ownKeys(i);
-  }, getOwnPropertyDescriptor(o, t) {
-    return i ?? (i = r()), Reflect.getOwnPropertyDescriptor(i, t);
-  }, defineProperty(o, t, n) {
-    return i ?? (i = r()), Reflect.defineProperty(i, t, n);
-  } });
-}
-function U(r) {
-  if (typeof r === "bigint")
-    return r.toString() + "n";
-  if (typeof r === "string")
-    return `"${r}"`;
-  return `${r}`;
-}
-function Gv(r) {
-  return Object.keys(r).filter((i) => {
-    return r[i]._zod.optin === "optional" && r[i]._zod.optout === "optional";
-  });
-}
-var Wv = { safeint: [Number.MIN_SAFE_INTEGER, Number.MAX_SAFE_INTEGER], int32: [-2147483648, 2147483647], uint32: [0, 4294967295], float32: [-340282346638528860000000000000000000000, 340282346638528860000000000000000000000], float64: [-Number.MAX_VALUE, Number.MAX_VALUE] };
-var Vv = { int64: [BigInt("-9223372036854775808"), BigInt("9223372036854775807")], uint64: [BigInt(0), BigInt("18446744073709551615")] };
-function hI(r, i) {
-  let o = r._zod.def, t = o.checks;
-  if (t && t.length > 0)
-    throw Error(".pick() cannot be used on object schemas containing refinements");
-  let v = rr(r._zod.def, { get shape() {
-    let $ = {};
-    for (let u in i) {
-      if (!(u in o.shape))
-        throw Error(`Unrecognized key: "${u}"`);
-      if (!i[u])
-        continue;
-      $[u] = o.shape[u];
-    }
-    return or(this, "shape", $), $;
-  }, checks: [] });
-  return q(r, v);
-}
-function aI(r, i) {
-  let o = r._zod.def, t = o.checks;
-  if (t && t.length > 0)
-    throw Error(".omit() cannot be used on object schemas containing refinements");
-  let v = rr(r._zod.def, { get shape() {
-    let $ = { ...r._zod.def.shape };
-    for (let u in i) {
-      if (!(u in o.shape))
-        throw Error(`Unrecognized key: "${u}"`);
-      if (!i[u])
-        continue;
-      delete $[u];
-    }
-    return or(this, "shape", $), $;
-  }, checks: [] });
-  return q(r, v);
-}
-function pI(r, i) {
-  if (!tr(i))
-    throw Error("Invalid input to extend: expected a plain object");
-  let o = r._zod.def.checks;
-  if (o && o.length > 0) {
-    let v = r._zod.def.shape;
-    for (let $ in i)
-      if (Object.getOwnPropertyDescriptor(v, $) !== undefined)
-        throw Error("Cannot overwrite keys on object schemas containing refinements. Use `.safeExtend()` instead.");
-  }
-  let n = rr(r._zod.def, { get shape() {
-    let v = { ...r._zod.def.shape, ...i };
-    return or(this, "shape", v), v;
-  } });
-  return q(r, n);
-}
-function sI(r, i) {
-  if (!tr(i))
-    throw Error("Invalid input to safeExtend: expected a plain object");
-  let o = rr(r._zod.def, { get shape() {
-    let t = { ...r._zod.def.shape, ...i };
-    return or(this, "shape", t), t;
-  } });
-  return q(r, o);
-}
-function rc(r, i) {
-  let o = rr(r._zod.def, { get shape() {
-    let t = { ...r._zod.def.shape, ...i._zod.def.shape };
-    return or(this, "shape", t), t;
-  }, get catchall() {
-    return i._zod.def.catchall;
-  }, checks: [] });
-  return q(r, o);
-}
-function nc(r, i, o) {
-  let n = i._zod.def.checks;
-  if (n && n.length > 0)
-    throw Error(".partial() cannot be used on object schemas containing refinements");
-  let $ = rr(i._zod.def, { get shape() {
-    let u = i._zod.def.shape, l = { ...u };
-    if (o)
-      for (let e in o) {
-        if (!(e in u))
-          throw Error(`Unrecognized key: "${e}"`);
-        if (!o[e])
-          continue;
-        l[e] = r ? new r({ type: "optional", innerType: u[e] }) : u[e];
-      }
-    else
-      for (let e in u)
-        l[e] = r ? new r({ type: "optional", innerType: u[e] }) : u[e];
-    return or(this, "shape", l), l;
-  }, checks: [] });
-  return q(i, $);
-}
-function ic(r, i, o) {
-  let t = rr(i._zod.def, { get shape() {
-    let n = i._zod.def.shape, v = { ...n };
-    if (o)
-      for (let $ in o) {
-        if (!($ in v))
-          throw Error(`Unrecognized key: "${$}"`);
-        if (!o[$])
-          continue;
-        v[$] = new r({ type: "nonoptional", innerType: n[$] });
-      }
-    else
-      for (let $ in n)
-        v[$] = new r({ type: "nonoptional", innerType: n[$] });
-    return or(this, "shape", v), v;
-  } });
-  return q(i, t);
-}
-function $r(r, i = 0) {
-  if (r.aborted === true)
-    return true;
-  for (let o = i;o < r.issues.length; o++)
-    if (r.issues[o]?.continue !== true)
-      return true;
-  return false;
-}
-function T(r, i) {
-  return i.map((o) => {
-    var t;
-    return (t = o).path ?? (t.path = []), o.path.unshift(r), o;
-  });
-}
-function rn(r) {
-  return typeof r === "string" ? r : r?.message;
-}
-function B(r, i, o) {
-  let t = { ...r, path: r.path ?? [] };
-  if (!r.message) {
-    let n = rn(r.inst?._zod.def?.error?.(r)) ?? rn(i?.error?.(r)) ?? rn(o.customError?.(r)) ?? rn(o.localeError?.(r)) ?? "Invalid input";
-    t.message = n;
-  }
-  if (delete t.inst, delete t.continue, !i?.reportInput)
-    delete t.input;
-  return t;
-}
-function tn(r) {
-  if (r instanceof Set)
-    return "set";
-  if (r instanceof Map)
-    return "map";
-  if (r instanceof File)
-    return "file";
-  return "unknown";
-}
-function $n(r) {
-  if (Array.isArray(r))
-    return "array";
-  if (typeof r === "string")
-    return "string";
-  return "unknown";
-}
-function k(r) {
-  let i = typeof r;
-  switch (i) {
-    case "number":
-      return Number.isNaN(r) ? "nan" : "number";
-    case "object": {
-      if (r === null)
-        return "null";
-      if (Array.isArray(r))
-        return "array";
-      let o = r;
-      if (o && Object.getPrototypeOf(o) !== Object.prototype && "constructor" in o && o.constructor)
-        return o.constructor.name;
-    }
-  }
-  return i;
-}
-function jr(...r) {
-  let [i, o, t] = r;
-  if (typeof i === "string")
-    return { message: i, code: "custom", input: o, inst: t };
-  return { ...i };
-}
-function vc(r) {
-  return Object.entries(r).filter(([i, o]) => {
-    return Number.isNaN(Number.parseInt(i, 10));
-  }).map((i) => i[1]);
-}
-function Le(r) {
-  let i = atob(r), o = new Uint8Array(i.length);
-  for (let t = 0;t < i.length; t++)
-    o[t] = i.charCodeAt(t);
-  return o;
-}
-function Ge(r) {
-  let i = "";
-  for (let o = 0;o < r.length; o++)
-    i += String.fromCharCode(r[o]);
-  return btoa(i);
-}
-function oc(r) {
-  let i = r.replace(/-/g, "+").replace(/_/g, "/"), o = "=".repeat((4 - i.length % 4) % 4);
-  return Le(i + o);
-}
-function tc(r) {
-  return Ge(r).replace(/\+/g, "-").replace(/\//g, "_").replace(/=/g, "");
-}
-function $c(r) {
-  let i = r.replace(/^0x/, "");
-  if (i.length % 2 !== 0)
-    throw Error("Invalid hex string length");
-  let o = new Uint8Array(i.length / 2);
-  for (let t = 0;t < i.length; t += 2)
-    o[t / 2] = Number.parseInt(i.slice(t, t + 2), 16);
-  return o;
-}
-function uc(r) {
-  return Array.from(r).map((i) => i.toString(16).padStart(2, "0")).join("");
-}
-
-class We {
-  constructor(...r) {}
-}
-var Ve = (r, i) => {
-  r.name = "$ZodError", Object.defineProperty(r, "_zod", { value: r._zod, enumerable: false }), Object.defineProperty(r, "issues", { value: i, enumerable: false }), r.message = JSON.stringify(i, Sr, 2), Object.defineProperty(r, "toString", { value: () => r.message, enumerable: false });
-};
-var un = I("$ZodError", Ve);
-var m = I("$ZodError", Ve, { Parent: Error });
-function gn(r, i = (o) => o.message) {
-  let o = {}, t = [];
-  for (let n of r.issues)
-    if (n.path.length > 0)
-      o[n.path[0]] = o[n.path[0]] || [], o[n.path[0]].push(i(n));
-    else
-      t.push(i(n));
-  return { formErrors: t, fieldErrors: o };
-}
-function en(r, i = (o) => o.message) {
-  let o = { _errors: [] }, t = (n) => {
-    for (let v of n.issues)
-      if (v.code === "invalid_union" && v.errors.length)
-        v.errors.map(($) => t({ issues: $ }));
-      else if (v.code === "invalid_key")
-        t({ issues: v.issues });
-      else if (v.code === "invalid_element")
-        t({ issues: v.issues });
-      else if (v.path.length === 0)
-        o._errors.push(i(v));
-      else {
-        let $ = o, u = 0;
-        while (u < v.path.length) {
-          let l = v.path[u];
-          if (u !== v.path.length - 1)
-            $[l] = $[l] || { _errors: [] };
-          else
-            $[l] = $[l] || { _errors: [] }, $[l]._errors.push(i(v));
-          $ = $[l], u++;
-        }
-      }
-  };
-  return t(r), o;
-}
-function Xv(r, i = (o) => o.message) {
-  let o = { errors: [] }, t = (n, v = []) => {
-    var $, u;
-    for (let l of n.issues)
-      if (l.code === "invalid_union" && l.errors.length)
-        l.errors.map((e) => t({ issues: e }, l.path));
-      else if (l.code === "invalid_key")
-        t({ issues: l.issues }, l.path);
-      else if (l.code === "invalid_element")
-        t({ issues: l.issues }, l.path);
-      else {
-        let e = [...v, ...l.path];
-        if (e.length === 0) {
-          o.errors.push(i(l));
-          continue;
-        }
-        let c = o, _ = 0;
-        while (_ < e.length) {
-          let N = e[_], O = _ === e.length - 1;
-          if (typeof N === "string")
-            c.properties ?? (c.properties = {}), ($ = c.properties)[N] ?? ($[N] = { errors: [] }), c = c.properties[N];
-          else
-            c.items ?? (c.items = []), (u = c.items)[N] ?? (u[N] = { errors: [] }), c = c.items[N];
-          if (O)
-            c.errors.push(i(l));
-          _++;
-        }
-      }
-  };
-  return t(r), o;
-}
-function Xe(r) {
-  let i = [], o = r.map((t) => typeof t === "object" ? t.key : t);
-  for (let t of o)
-    if (typeof t === "number")
-      i.push(`[${t}]`);
-    else if (typeof t === "symbol")
-      i.push(`[${JSON.stringify(String(t))}]`);
-    else if (/[^\w$]/.test(t))
-      i.push(`[${JSON.stringify(t)}]`);
-    else {
-      if (i.length)
-        i.push(".");
-      i.push(t);
-    }
-  return i.join("");
-}
-function Ev(r) {
-  let i = [], o = [...r.issues].sort((t, n) => (t.path ?? []).length - (n.path ?? []).length);
-  for (let t of o)
-    if (i.push(`✖ ${t.message}`), t.path?.length)
-      i.push(`  → at ${Xe(t.path)}`);
-  return i.join(`
-`);
-}
-var Jr = (r) => (i, o, t, n) => {
-  let v = t ? Object.assign(t, { async: false }) : { async: false }, $ = i._zod.run({ value: o, issues: [] }, v);
-  if ($ instanceof Promise)
-    throw new f;
-  if ($.issues.length) {
-    let u = new (n?.Err ?? r)($.issues.map((l) => B(l, v, E())));
-    throw Fn(u, n?.callee), u;
-  }
-  return $.value;
-};
-var Bn = Jr(m);
-var Lr = (r) => async (i, o, t, n) => {
-  let v = t ? Object.assign(t, { async: true }) : { async: true }, $ = i._zod.run({ value: o, issues: [] }, v);
-  if ($ instanceof Promise)
-    $ = await $;
-  if ($.issues.length) {
-    let u = new (n?.Err ?? r)($.issues.map((l) => B(l, v, E())));
-    throw Fn(u, n?.callee), u;
-  }
-  return $.value;
-};
-var mn = Lr(m);
-var Gr = (r) => (i, o, t) => {
-  let n = t ? { ...t, async: false } : { async: false }, v = i._zod.run({ value: o, issues: [] }, n);
-  if (v instanceof Promise)
-    throw new f;
-  return v.issues.length ? { success: false, error: new (r ?? un)(v.issues.map(($) => B($, n, E()))) } : { success: true, data: v.value };
-};
-var Av = Gr(m);
-var Wr = (r) => async (i, o, t) => {
-  let n = t ? Object.assign(t, { async: true }) : { async: true }, v = i._zod.run({ value: o, issues: [] }, n);
-  if (v instanceof Promise)
-    v = await v;
-  return v.issues.length ? { success: false, error: new r(v.issues.map(($) => B($, n, E()))) } : { success: true, data: v.value };
-};
-var Kv = Wr(m);
-var Hn = (r) => (i, o, t) => {
-  let n = t ? Object.assign(t, { direction: "backward" }) : { direction: "backward" };
-  return Jr(r)(i, o, n);
-};
-var ec = Hn(m);
-var Tn = (r) => (i, o, t) => {
-  return Jr(r)(i, o, t);
-};
-var lc = Tn(m);
-var Mn = (r) => async (i, o, t) => {
-  let n = t ? Object.assign(t, { direction: "backward" }) : { direction: "backward" };
-  return Lr(r)(i, o, n);
-};
-var Ic = Mn(m);
-var Rn = (r) => async (i, o, t) => {
-  return Lr(r)(i, o, t);
-};
-var cc = Rn(m);
-var xn = (r) => (i, o, t) => {
-  let n = t ? Object.assign(t, { direction: "backward" }) : { direction: "backward" };
-  return Gr(r)(i, o, n);
-};
-var bc = xn(m);
-var Zn = (r) => (i, o, t) => {
-  return Gr(r)(i, o, t);
-};
-var _c = Zn(m);
-var dn = (r) => async (i, o, t) => {
-  let n = t ? Object.assign(t, { direction: "backward" }) : { direction: "backward" };
-  return Wr(r)(i, o, n);
-};
-var Uc = dn(m);
-var Cn = (r) => async (i, o, t) => {
-  return Wr(r)(i, o, t);
-};
-var kc = Cn(m);
-var x = {};
-s(x, { xid: () => Fv, uuid7: () => Oc, uuid6: () => Nc, uuid4: () => wc, uuid: () => _r, uppercase: () => uo, unicodeEmail: () => Ee, undefined: () => to, ulid: () => Yv, time: () => pv, string: () => ro, sha512_hex: () => Tc, sha512_base64url: () => Rc, sha512_base64: () => Mc, sha384_hex: () => Bc, sha384_base64url: () => Hc, sha384_base64: () => mc, sha256_hex: () => Qc, sha256_base64url: () => Fc, sha256_base64: () => Yc, sha1_hex: () => Ac, sha1_base64url: () => qc, sha1_base64: () => Kc, rfc5322Email: () => Sc, number: () => ln, null: () => oo, nanoid: () => mv, md5_hex: () => Vc, md5_base64url: () => Ec, md5_base64: () => Xc, mac: () => dv, lowercase: () => $o, ksuid: () => Bv, ipv6: () => Zv, ipv4: () => xv, integer: () => io, idnEmail: () => Pc, html5Email: () => zc, hostname: () => Lc, hex: () => Wc, guid: () => Tv, extendedDuration: () => Dc, emoji: () => Rv, email: () => Mv, e164: () => hv, duration: () => Hv, domain: () => Gc, datetime: () => sv, date: () => av, cuid2: () => Qv, cuid: () => qv, cidrv6: () => fv, cidrv4: () => Cv, browserEmail: () => jc, boolean: () => vo, bigint: () => no, base64url: () => fn, base64: () => yv });
-var qv = /^[cC][^\s-]{8,}$/;
-var Qv = /^[0-9a-z]+$/;
-var Yv = /^[0-9A-HJKMNP-TV-Za-hjkmnp-tv-z]{26}$/;
-var Fv = /^[0-9a-vA-V]{20}$/;
-var Bv = /^[A-Za-z0-9]{27}$/;
-var mv = /^[a-zA-Z0-9_-]{21}$/;
-var Hv = /^P(?:(\d+W)|(?!.*W)(?=\d|T\d)(\d+Y)?(\d+M)?(\d+D)?(T(?=\d)(\d+H)?(\d+M)?(\d+([.,]\d+)?S)?)?)$/;
-var Dc = /^[-+]?P(?!$)(?:(?:[-+]?\d+Y)|(?:[-+]?\d+[.,]\d+Y$))?(?:(?:[-+]?\d+M)|(?:[-+]?\d+[.,]\d+M$))?(?:(?:[-+]?\d+W)|(?:[-+]?\d+[.,]\d+W$))?(?:(?:[-+]?\d+D)|(?:[-+]?\d+[.,]\d+D$))?(?:T(?=[\d+-])(?:(?:[-+]?\d+H)|(?:[-+]?\d+[.,]\d+H$))?(?:(?:[-+]?\d+M)|(?:[-+]?\d+[.,]\d+M$))?(?:[-+]?\d+(?:[.,]\d+)?S)?)??$/;
-var Tv = /^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})$/;
-var _r = (r) => {
-  if (!r)
-    return /^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$/;
-  return new RegExp(`^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-${r}[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})$`);
-};
-var wc = _r(4);
-var Nc = _r(6);
-var Oc = _r(7);
-var Mv = /^(?!\.)(?!.*\.\.)([A-Za-z0-9_'+\-\.]*)[A-Za-z0-9_+-]@([A-Za-z0-9][A-Za-z0-9\-]*\.)+[A-Za-z]{2,}$/;
-var zc = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/;
-var Sc = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-var Ee = /^[^\s@"]{1,64}@[^\s@]{1,255}$/u;
-var Pc = Ee;
-var jc = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/;
-var Jc = "^(\\p{Extended_Pictographic}|\\p{Emoji_Component})+$";
-function Rv() {
-  return new RegExp(Jc, "u");
-}
-var xv = /^(?:(?:25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9][0-9]|[0-9])\.){3}(?:25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9][0-9]|[0-9])$/;
-var Zv = /^(([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:))$/;
-var dv = (r) => {
-  let i = R(r ?? ":");
-  return new RegExp(`^(?:[0-9A-F]{2}${i}){5}[0-9A-F]{2}$|^(?:[0-9a-f]{2}${i}){5}[0-9a-f]{2}$`);
-};
-var Cv = /^((25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9][0-9]|[0-9])\.){3}(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9][0-9]|[0-9])\/([0-9]|[1-2][0-9]|3[0-2])$/;
-var fv = /^(([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}|::|([0-9a-fA-F]{1,4})?::([0-9a-fA-F]{1,4}:?){0,6})\/(12[0-8]|1[01][0-9]|[1-9]?[0-9])$/;
-var yv = /^$|^(?:[0-9a-zA-Z+/]{4})*(?:(?:[0-9a-zA-Z+/]{2}==)|(?:[0-9a-zA-Z+/]{3}=))?$/;
-var fn = /^[A-Za-z0-9_-]*$/;
-var Lc = /^(?=.{1,253}\.?$)[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[-0-9a-zA-Z]{0,61}[0-9a-zA-Z])?)*\.?$/;
-var Gc = /^([a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}$/;
-var hv = /^\+[1-9]\d{6,14}$/;
-var Ae = "(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))";
-var av = new RegExp(`^${Ae}$`);
-function Ke(r) {
-  return typeof r.precision === "number" ? r.precision === -1 ? "(?:[01]\\d|2[0-3]):[0-5]\\d" : r.precision === 0 ? "(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d" : `(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d\\.\\d{${r.precision}}` : "(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?";
-}
-function pv(r) {
-  return new RegExp(`^${Ke(r)}$`);
-}
-function sv(r) {
-  let i = Ke({ precision: r.precision }), o = ["Z"];
-  if (r.local)
-    o.push("");
-  if (r.offset)
-    o.push("([+-](?:[01]\\d|2[0-3]):[0-5]\\d)");
-  let t = `${i}(?:${o.join("|")})`;
-  return new RegExp(`^${Ae}T(?:${t})$`);
-}
-var ro = (r) => {
-  let i = r ? `[\\s\\S]{${r?.minimum ?? 0},${r?.maximum ?? ""}}` : "[\\s\\S]*";
-  return new RegExp(`^${i}$`);
-};
-var no = /^-?\d+n?$/;
-var io = /^-?\d+$/;
-var ln = /^-?\d+(?:\.\d+)?$/;
-var vo = /^(?:true|false)$/i;
-var oo = /^null$/i;
-var to = /^undefined$/i;
-var $o = /^[^A-Z]*$/;
-var uo = /^[^a-z]*$/;
-var Wc = /^[0-9a-fA-F]*$/;
-function In(r, i) {
-  return new RegExp(`^[A-Za-z0-9+/]{${r}}${i}$`);
-}
-function cn(r) {
-  return new RegExp(`^[A-Za-z0-9_-]{${r}}$`);
-}
-var Vc = /^[0-9a-fA-F]{32}$/;
-var Xc = In(22, "==");
-var Ec = cn(22);
-var Ac = /^[0-9a-fA-F]{40}$/;
-var Kc = In(27, "=");
-var qc = cn(27);
-var Qc = /^[0-9a-fA-F]{64}$/;
-var Yc = In(43, "=");
-var Fc = cn(43);
-var Bc = /^[0-9a-fA-F]{96}$/;
-var mc = In(64, "");
-var Hc = cn(64);
-var Tc = /^[0-9a-fA-F]{128}$/;
-var Mc = In(86, "==");
-var Rc = cn(86);
-var V = I("$ZodCheck", (r, i) => {
-  var o;
-  r._zod ?? (r._zod = {}), r._zod.def = i, (o = r._zod).onattach ?? (o.onattach = []);
-});
-var Qe = { number: "number", bigint: "bigint", object: "date" };
-var yn = I("$ZodCheckLessThan", (r, i) => {
-  V.init(r, i);
-  let o = Qe[typeof i.value];
-  r._zod.onattach.push((t) => {
-    let n = t._zod.bag, v = (i.inclusive ? n.maximum : n.exclusiveMaximum) ?? Number.POSITIVE_INFINITY;
-    if (i.value < v)
-      if (i.inclusive)
-        n.maximum = i.value;
-      else
-        n.exclusiveMaximum = i.value;
-  }), r._zod.check = (t) => {
-    if (i.inclusive ? t.value <= i.value : t.value < i.value)
-      return;
-    t.issues.push({ origin: o, code: "too_big", maximum: typeof i.value === "object" ? i.value.getTime() : i.value, input: t.value, inclusive: i.inclusive, inst: r, continue: !i.abort });
-  };
-});
-var hn = I("$ZodCheckGreaterThan", (r, i) => {
-  V.init(r, i);
-  let o = Qe[typeof i.value];
-  r._zod.onattach.push((t) => {
-    let n = t._zod.bag, v = (i.inclusive ? n.minimum : n.exclusiveMinimum) ?? Number.NEGATIVE_INFINITY;
-    if (i.value > v)
-      if (i.inclusive)
-        n.minimum = i.value;
-      else
-        n.exclusiveMinimum = i.value;
-  }), r._zod.check = (t) => {
-    if (i.inclusive ? t.value >= i.value : t.value > i.value)
-      return;
-    t.issues.push({ origin: o, code: "too_small", minimum: typeof i.value === "object" ? i.value.getTime() : i.value, input: t.value, inclusive: i.inclusive, inst: r, continue: !i.abort });
-  };
-});
-var go = I("$ZodCheckMultipleOf", (r, i) => {
-  V.init(r, i), r._zod.onattach.push((o) => {
-    var t;
-    (t = o._zod.bag).multipleOf ?? (t.multipleOf = i.value);
-  }), r._zod.check = (o) => {
-    if (typeof o.value !== typeof i.value)
-      throw Error("Cannot mix number and bigint in multiple_of check.");
-    if (typeof o.value === "bigint" ? o.value % i.value === BigInt(0) : Sv(o.value, i.value) === 0)
-      return;
-    o.issues.push({ origin: typeof o.value, code: "not_multiple_of", divisor: i.value, input: o.value, inst: r, continue: !i.abort });
-  };
-});
-var eo = I("$ZodCheckNumberFormat", (r, i) => {
-  V.init(r, i), i.format = i.format || "float64";
-  let o = i.format?.includes("int"), t = o ? "int" : "number", [n, v] = Wv[i.format];
-  r._zod.onattach.push(($) => {
-    let u = $._zod.bag;
-    if (u.format = i.format, u.minimum = n, u.maximum = v, o)
-      u.pattern = io;
-  }), r._zod.check = ($) => {
-    let u = $.value;
-    if (o) {
-      if (!Number.isInteger(u)) {
-        $.issues.push({ expected: t, format: i.format, code: "invalid_type", continue: false, input: u, inst: r });
-        return;
-      }
-      if (!Number.isSafeInteger(u)) {
-        if (u > 0)
-          $.issues.push({ input: u, code: "too_big", maximum: Number.MAX_SAFE_INTEGER, note: "Integers must be within the safe integer range.", inst: r, origin: t, inclusive: true, continue: !i.abort });
-        else
-          $.issues.push({ input: u, code: "too_small", minimum: Number.MIN_SAFE_INTEGER, note: "Integers must be within the safe integer range.", inst: r, origin: t, inclusive: true, continue: !i.abort });
-        return;
-      }
-    }
-    if (u < n)
-      $.issues.push({ origin: "number", input: u, code: "too_small", minimum: n, inclusive: true, inst: r, continue: !i.abort });
-    if (u > v)
-      $.issues.push({ origin: "number", input: u, code: "too_big", maximum: v, inclusive: true, inst: r, continue: !i.abort });
-  };
-});
-var lo = I("$ZodCheckBigIntFormat", (r, i) => {
-  V.init(r, i);
-  let [o, t] = Vv[i.format];
-  r._zod.onattach.push((n) => {
-    let v = n._zod.bag;
-    v.format = i.format, v.minimum = o, v.maximum = t;
-  }), r._zod.check = (n) => {
-    let v = n.value;
-    if (v < o)
-      n.issues.push({ origin: "bigint", input: v, code: "too_small", minimum: o, inclusive: true, inst: r, continue: !i.abort });
-    if (v > t)
-      n.issues.push({ origin: "bigint", input: v, code: "too_big", maximum: t, inclusive: true, inst: r, continue: !i.abort });
-  };
-});
-var Io = I("$ZodCheckMaxSize", (r, i) => {
-  var o;
-  V.init(r, i), (o = r._zod.def).when ?? (o.when = (t) => {
-    let n = t.value;
-    return !vr(n) && n.size !== undefined;
-  }), r._zod.onattach.push((t) => {
-    let n = t._zod.bag.maximum ?? Number.POSITIVE_INFINITY;
-    if (i.maximum < n)
-      t._zod.bag.maximum = i.maximum;
-  }), r._zod.check = (t) => {
-    let n = t.value;
-    if (n.size <= i.maximum)
-      return;
-    t.issues.push({ origin: tn(n), code: "too_big", maximum: i.maximum, inclusive: true, input: n, inst: r, continue: !i.abort });
-  };
-});
-var co = I("$ZodCheckMinSize", (r, i) => {
-  var o;
-  V.init(r, i), (o = r._zod.def).when ?? (o.when = (t) => {
-    let n = t.value;
-    return !vr(n) && n.size !== undefined;
-  }), r._zod.onattach.push((t) => {
-    let n = t._zod.bag.minimum ?? Number.NEGATIVE_INFINITY;
-    if (i.minimum > n)
-      t._zod.bag.minimum = i.minimum;
-  }), r._zod.check = (t) => {
-    let n = t.value;
-    if (n.size >= i.minimum)
-      return;
-    t.issues.push({ origin: tn(n), code: "too_small", minimum: i.minimum, inclusive: true, input: n, inst: r, continue: !i.abort });
-  };
-});
-var bo = I("$ZodCheckSizeEquals", (r, i) => {
-  var o;
-  V.init(r, i), (o = r._zod.def).when ?? (o.when = (t) => {
-    let n = t.value;
-    return !vr(n) && n.size !== undefined;
-  }), r._zod.onattach.push((t) => {
-    let n = t._zod.bag;
-    n.minimum = i.size, n.maximum = i.size, n.size = i.size;
-  }), r._zod.check = (t) => {
-    let n = t.value, v = n.size;
-    if (v === i.size)
-      return;
-    let $ = v > i.size;
-    t.issues.push({ origin: tn(n), ...$ ? { code: "too_big", maximum: i.size } : { code: "too_small", minimum: i.size }, inclusive: true, exact: true, input: t.value, inst: r, continue: !i.abort });
-  };
-});
-var _o = I("$ZodCheckMaxLength", (r, i) => {
-  var o;
-  V.init(r, i), (o = r._zod.def).when ?? (o.when = (t) => {
-    let n = t.value;
-    return !vr(n) && n.length !== undefined;
-  }), r._zod.onattach.push((t) => {
-    let n = t._zod.bag.maximum ?? Number.POSITIVE_INFINITY;
-    if (i.maximum < n)
-      t._zod.bag.maximum = i.maximum;
-  }), r._zod.check = (t) => {
-    let n = t.value;
-    if (n.length <= i.maximum)
-      return;
-    let $ = $n(n);
-    t.issues.push({ origin: $, code: "too_big", maximum: i.maximum, inclusive: true, input: n, inst: r, continue: !i.abort });
-  };
-});
-var Uo = I("$ZodCheckMinLength", (r, i) => {
-  var o;
-  V.init(r, i), (o = r._zod.def).when ?? (o.when = (t) => {
-    let n = t.value;
-    return !vr(n) && n.length !== undefined;
-  }), r._zod.onattach.push((t) => {
-    let n = t._zod.bag.minimum ?? Number.NEGATIVE_INFINITY;
-    if (i.minimum > n)
-      t._zod.bag.minimum = i.minimum;
-  }), r._zod.check = (t) => {
-    let n = t.value;
-    if (n.length >= i.minimum)
-      return;
-    let $ = $n(n);
-    t.issues.push({ origin: $, code: "too_small", minimum: i.minimum, inclusive: true, input: n, inst: r, continue: !i.abort });
-  };
-});
-var ko = I("$ZodCheckLengthEquals", (r, i) => {
-  var o;
-  V.init(r, i), (o = r._zod.def).when ?? (o.when = (t) => {
-    let n = t.value;
-    return !vr(n) && n.length !== undefined;
-  }), r._zod.onattach.push((t) => {
-    let n = t._zod.bag;
-    n.minimum = i.length, n.maximum = i.length, n.length = i.length;
-  }), r._zod.check = (t) => {
-    let n = t.value, v = n.length;
-    if (v === i.length)
-      return;
-    let $ = $n(n), u = v > i.length;
-    t.issues.push({ origin: $, ...u ? { code: "too_big", maximum: i.length } : { code: "too_small", minimum: i.length }, inclusive: true, exact: true, input: t.value, inst: r, continue: !i.abort });
-  };
-});
-var Vr = I("$ZodCheckStringFormat", (r, i) => {
-  var o, t;
-  if (V.init(r, i), r._zod.onattach.push((n) => {
-    let v = n._zod.bag;
-    if (v.format = i.format, i.pattern)
-      v.patterns ?? (v.patterns = new Set), v.patterns.add(i.pattern);
-  }), i.pattern)
-    (o = r._zod).check ?? (o.check = (n) => {
-      if (i.pattern.lastIndex = 0, i.pattern.test(n.value))
-        return;
-      n.issues.push({ origin: "string", code: "invalid_format", format: i.format, input: n.value, ...i.pattern ? { pattern: i.pattern.toString() } : {}, inst: r, continue: !i.abort });
-    });
-  else
-    (t = r._zod).check ?? (t.check = () => {});
-});
-var Do = I("$ZodCheckRegex", (r, i) => {
-  Vr.init(r, i), r._zod.check = (o) => {
-    if (i.pattern.lastIndex = 0, i.pattern.test(o.value))
-      return;
-    o.issues.push({ origin: "string", code: "invalid_format", format: "regex", input: o.value, pattern: i.pattern.toString(), inst: r, continue: !i.abort });
-  };
-});
-var wo = I("$ZodCheckLowerCase", (r, i) => {
-  i.pattern ?? (i.pattern = $o), Vr.init(r, i);
-});
-var No = I("$ZodCheckUpperCase", (r, i) => {
-  i.pattern ?? (i.pattern = uo), Vr.init(r, i);
-});
-var Oo = I("$ZodCheckIncludes", (r, i) => {
-  V.init(r, i);
-  let o = R(i.includes), t = new RegExp(typeof i.position === "number" ? `^.{${i.position}}${o}` : o);
-  i.pattern = t, r._zod.onattach.push((n) => {
-    let v = n._zod.bag;
-    v.patterns ?? (v.patterns = new Set), v.patterns.add(t);
-  }), r._zod.check = (n) => {
-    if (n.value.includes(i.includes, i.position))
-      return;
-    n.issues.push({ origin: "string", code: "invalid_format", format: "includes", includes: i.includes, input: n.value, inst: r, continue: !i.abort });
-  };
-});
-var zo = I("$ZodCheckStartsWith", (r, i) => {
-  V.init(r, i);
-  let o = new RegExp(`^${R(i.prefix)}.*`);
-  i.pattern ?? (i.pattern = o), r._zod.onattach.push((t) => {
-    let n = t._zod.bag;
-    n.patterns ?? (n.patterns = new Set), n.patterns.add(o);
-  }), r._zod.check = (t) => {
-    if (t.value.startsWith(i.prefix))
-      return;
-    t.issues.push({ origin: "string", code: "invalid_format", format: "starts_with", prefix: i.prefix, input: t.value, inst: r, continue: !i.abort });
-  };
-});
-var So = I("$ZodCheckEndsWith", (r, i) => {
-  V.init(r, i);
-  let o = new RegExp(`.*${R(i.suffix)}$`);
-  i.pattern ?? (i.pattern = o), r._zod.onattach.push((t) => {
-    let n = t._zod.bag;
-    n.patterns ?? (n.patterns = new Set), n.patterns.add(o);
-  }), r._zod.check = (t) => {
-    if (t.value.endsWith(i.suffix))
-      return;
-    t.issues.push({ origin: "string", code: "invalid_format", format: "ends_with", suffix: i.suffix, input: t.value, inst: r, continue: !i.abort });
-  };
-});
-function qe(r, i, o) {
-  if (r.issues.length)
-    i.issues.push(...T(o, r.issues));
-}
-var Po = I("$ZodCheckProperty", (r, i) => {
-  V.init(r, i), r._zod.check = (o) => {
-    let t = i.schema._zod.run({ value: o.value[i.property], issues: [] }, {});
-    if (t instanceof Promise)
-      return t.then((n) => qe(n, o, i.property));
-    qe(t, o, i.property);
-    return;
-  };
-});
-var jo = I("$ZodCheckMimeType", (r, i) => {
-  V.init(r, i);
-  let o = new Set(i.mime);
-  r._zod.onattach.push((t) => {
-    t._zod.bag.mime = i.mime;
-  }), r._zod.check = (t) => {
-    if (o.has(t.value.type))
-      return;
-    t.issues.push({ code: "invalid_value", values: i.mime, input: t.value.type, inst: r, continue: !i.abort });
-  };
-});
-var Jo = I("$ZodCheckOverwrite", (r, i) => {
-  V.init(r, i), r._zod.check = (o) => {
-    o.value = i.tx(o.value);
-  };
-});
-
-class an {
-  constructor(r = []) {
-    if (this.content = [], this.indent = 0, this)
-      this.args = r;
-  }
-  indented(r) {
-    this.indent += 1, r(this), this.indent -= 1;
-  }
-  write(r) {
-    if (typeof r === "function") {
-      r(this, { execution: "sync" }), r(this, { execution: "async" });
-      return;
-    }
-    let o = r.split(`
-`).filter((v) => v), t = Math.min(...o.map((v) => v.length - v.trimStart().length)), n = o.map((v) => v.slice(t)).map((v) => " ".repeat(this.indent * 2) + v);
-    for (let v of n)
-      this.content.push(v);
-  }
-  compile() {
-    let r = Function, i = this?.args, t = [...(this?.content ?? [""]).map((n) => `  ${n}`)];
-    return new r(...i, t.join(`
-`));
-  }
-}
-var Lo = { major: 4, minor: 3, patch: 6 };
-var S = I("$ZodType", (r, i) => {
-  var o;
-  r ?? (r = {}), r._zod.def = i, r._zod.bag = r._zod.bag || {}, r._zod.version = Lo;
-  let t = [...r._zod.def.checks ?? []];
-  if (r._zod.traits.has("$ZodCheck"))
-    t.unshift(r);
-  for (let n of t)
-    for (let v of n._zod.onattach)
-      v(r);
-  if (t.length === 0)
-    (o = r._zod).deferred ?? (o.deferred = []), r._zod.deferred?.push(() => {
-      r._zod.run = r._zod.parse;
-    });
-  else {
-    let n = ($, u, l) => {
-      let e = $r($), c;
-      for (let _ of u) {
-        if (_._zod.def.when) {
-          if (!_._zod.def.when($))
-            continue;
-        } else if (e)
-          continue;
-        let N = $.issues.length, O = _._zod.check($);
-        if (O instanceof Promise && l?.async === false)
-          throw new f;
-        if (c || O instanceof Promise)
-          c = (c ?? Promise.resolve()).then(async () => {
-            if (await O, $.issues.length === N)
-              return;
-            if (!e)
-              e = $r($, N);
-          });
-        else {
-          if ($.issues.length === N)
-            continue;
-          if (!e)
-            e = $r($, N);
-        }
-      }
-      if (c)
-        return c.then(() => {
-          return $;
-        });
-      return $;
-    }, v = ($, u, l) => {
-      if ($r($))
-        return $.aborted = true, $;
-      let e = n(u, t, l);
-      if (e instanceof Promise) {
-        if (l.async === false)
-          throw new f;
-        return e.then((c) => r._zod.parse(c, l));
-      }
-      return r._zod.parse(e, l);
-    };
-    r._zod.run = ($, u) => {
-      if (u.skipChecks)
-        return r._zod.parse($, u);
-      if (u.direction === "backward") {
-        let e = r._zod.parse({ value: $.value, issues: [] }, { ...u, skipChecks: true });
-        if (e instanceof Promise)
-          return e.then((c) => {
-            return v(c, $, u);
-          });
-        return v(e, $, u);
-      }
-      let l = r._zod.parse($, u);
-      if (l instanceof Promise) {
-        if (u.async === false)
-          throw new f;
-        return l.then((e) => n(e, t, u));
-      }
-      return n(l, t, u);
-    };
-  }
-  j(r, "~standard", () => ({ validate: (n) => {
-    try {
-      let v = Av(r, n);
-      return v.success ? { value: v.data } : { issues: v.error?.issues };
-    } catch (v) {
-      return Kv(r, n).then(($) => $.success ? { value: $.data } : { issues: $.error?.issues });
-    }
-  }, vendor: "zod", version: 1 }));
-});
-var Ur = I("$ZodString", (r, i) => {
-  S.init(r, i), r._zod.pattern = [...r?._zod.bag?.patterns ?? []].pop() ?? ro(r._zod.bag), r._zod.parse = (o, t) => {
-    if (i.coerce)
-      try {
-        o.value = String(o.value);
-      } catch (n) {}
-    if (typeof o.value === "string")
-      return o;
-    return o.issues.push({ expected: "string", code: "invalid_type", input: o.value, inst: r }), o;
-  };
-});
-var G = I("$ZodStringFormat", (r, i) => {
-  Vr.init(r, i), Ur.init(r, i);
-});
-var Wo = I("$ZodGUID", (r, i) => {
-  i.pattern ?? (i.pattern = Tv), G.init(r, i);
-});
-var Vo = I("$ZodUUID", (r, i) => {
-  if (i.version) {
-    let t = { v1: 1, v2: 2, v3: 3, v4: 4, v5: 5, v6: 6, v7: 7, v8: 8 }[i.version];
-    if (t === undefined)
-      throw Error(`Invalid UUID version: "${i.version}"`);
-    i.pattern ?? (i.pattern = _r(t));
-  } else
-    i.pattern ?? (i.pattern = _r());
-  G.init(r, i);
-});
-var Xo = I("$ZodEmail", (r, i) => {
-  i.pattern ?? (i.pattern = Mv), G.init(r, i);
-});
-var Eo = I("$ZodURL", (r, i) => {
-  G.init(r, i), r._zod.check = (o) => {
-    try {
-      let t = o.value.trim(), n = new URL(t);
-      if (i.hostname) {
-        if (i.hostname.lastIndex = 0, !i.hostname.test(n.hostname))
-          o.issues.push({ code: "invalid_format", format: "url", note: "Invalid hostname", pattern: i.hostname.source, input: o.value, inst: r, continue: !i.abort });
-      }
-      if (i.protocol) {
-        if (i.protocol.lastIndex = 0, !i.protocol.test(n.protocol.endsWith(":") ? n.protocol.slice(0, -1) : n.protocol))
-          o.issues.push({ code: "invalid_format", format: "url", note: "Invalid protocol", pattern: i.protocol.source, input: o.value, inst: r, continue: !i.abort });
-      }
-      if (i.normalize)
-        o.value = n.href;
-      else
-        o.value = t;
-      return;
-    } catch (t) {
-      o.issues.push({ code: "invalid_format", format: "url", input: o.value, inst: r, continue: !i.abort });
-    }
-  };
-});
-var Ao = I("$ZodEmoji", (r, i) => {
-  i.pattern ?? (i.pattern = Rv()), G.init(r, i);
-});
-var Ko = I("$ZodNanoID", (r, i) => {
-  i.pattern ?? (i.pattern = mv), G.init(r, i);
-});
-var qo = I("$ZodCUID", (r, i) => {
-  i.pattern ?? (i.pattern = qv), G.init(r, i);
-});
-var Qo = I("$ZodCUID2", (r, i) => {
-  i.pattern ?? (i.pattern = Qv), G.init(r, i);
-});
-var Yo = I("$ZodULID", (r, i) => {
-  i.pattern ?? (i.pattern = Yv), G.init(r, i);
-});
-var Fo = I("$ZodXID", (r, i) => {
-  i.pattern ?? (i.pattern = Fv), G.init(r, i);
-});
-var Bo = I("$ZodKSUID", (r, i) => {
-  i.pattern ?? (i.pattern = Bv), G.init(r, i);
-});
-var mo = I("$ZodISODateTime", (r, i) => {
-  i.pattern ?? (i.pattern = sv(i)), G.init(r, i);
-});
-var Ho = I("$ZodISODate", (r, i) => {
-  i.pattern ?? (i.pattern = av), G.init(r, i);
-});
-var To = I("$ZodISOTime", (r, i) => {
-  i.pattern ?? (i.pattern = pv(i)), G.init(r, i);
-});
-var Mo = I("$ZodISODuration", (r, i) => {
-  i.pattern ?? (i.pattern = Hv), G.init(r, i);
-});
-var Ro = I("$ZodIPv4", (r, i) => {
-  i.pattern ?? (i.pattern = xv), G.init(r, i), r._zod.bag.format = "ipv4";
-});
-var xo = I("$ZodIPv6", (r, i) => {
-  i.pattern ?? (i.pattern = Zv), G.init(r, i), r._zod.bag.format = "ipv6", r._zod.check = (o) => {
-    try {
-      new URL(`http://[${o.value}]`);
-    } catch {
-      o.issues.push({ code: "invalid_format", format: "ipv6", input: o.value, inst: r, continue: !i.abort });
-    }
-  };
-});
-var Zo = I("$ZodMAC", (r, i) => {
-  i.pattern ?? (i.pattern = dv(i.delimiter)), G.init(r, i), r._zod.bag.format = "mac";
-});
-var Co = I("$ZodCIDRv4", (r, i) => {
-  i.pattern ?? (i.pattern = Cv), G.init(r, i);
-});
-var fo = I("$ZodCIDRv6", (r, i) => {
-  i.pattern ?? (i.pattern = fv), G.init(r, i), r._zod.check = (o) => {
-    let t = o.value.split("/");
-    try {
-      if (t.length !== 2)
-        throw Error();
-      let [n, v] = t;
-      if (!v)
-        throw Error();
-      let $ = Number(v);
-      if (`${$}` !== v)
-        throw Error();
-      if ($ < 0 || $ > 128)
-        throw Error();
-      new URL(`http://[${n}]`);
-    } catch {
-      o.issues.push({ code: "invalid_format", format: "cidrv6", input: o.value, inst: r, continue: !i.abort });
-    }
-  };
-});
-function yo(r) {
-  if (r === "")
-    return true;
-  if (r.length % 4 !== 0)
-    return false;
-  try {
-    return atob(r), true;
-  } catch {
-    return false;
-  }
-}
-var ho = I("$ZodBase64", (r, i) => {
-  i.pattern ?? (i.pattern = yv), G.init(r, i), r._zod.bag.contentEncoding = "base64", r._zod.check = (o) => {
-    if (yo(o.value))
-      return;
-    o.issues.push({ code: "invalid_format", format: "base64", input: o.value, inst: r, continue: !i.abort });
-  };
-});
-function fe(r) {
-  if (!fn.test(r))
-    return false;
-  let i = r.replace(/[-_]/g, (t) => t === "-" ? "+" : "/"), o = i.padEnd(Math.ceil(i.length / 4) * 4, "=");
-  return yo(o);
-}
-var ao = I("$ZodBase64URL", (r, i) => {
-  i.pattern ?? (i.pattern = fn), G.init(r, i), r._zod.bag.contentEncoding = "base64url", r._zod.check = (o) => {
-    if (fe(o.value))
-      return;
-    o.issues.push({ code: "invalid_format", format: "base64url", input: o.value, inst: r, continue: !i.abort });
-  };
-});
-var po = I("$ZodE164", (r, i) => {
-  i.pattern ?? (i.pattern = hv), G.init(r, i);
-});
-function ye(r, i = null) {
-  try {
-    let o = r.split(".");
-    if (o.length !== 3)
-      return false;
-    let [t] = o;
-    if (!t)
-      return false;
-    let n = JSON.parse(atob(t));
-    if ("typ" in n && n?.typ !== "JWT")
-      return false;
-    if (!n.alg)
-      return false;
-    if (i && (!("alg" in n) || n.alg !== i))
-      return false;
-    return true;
-  } catch {
-    return false;
-  }
-}
-var so = I("$ZodJWT", (r, i) => {
-  G.init(r, i), r._zod.check = (o) => {
-    if (ye(o.value, i.alg))
-      return;
-    o.issues.push({ code: "invalid_format", format: "jwt", input: o.value, inst: r, continue: !i.abort });
-  };
-});
-var rt = I("$ZodCustomStringFormat", (r, i) => {
-  G.init(r, i), r._zod.check = (o) => {
-    if (i.fn(o.value))
-      return;
-    o.issues.push({ code: "invalid_format", format: i.format, input: o.value, inst: r, continue: !i.abort });
-  };
-});
-var vi = I("$ZodNumber", (r, i) => {
-  S.init(r, i), r._zod.pattern = r._zod.bag.pattern ?? ln, r._zod.parse = (o, t) => {
-    if (i.coerce)
-      try {
-        o.value = Number(o.value);
-      } catch ($) {}
-    let n = o.value;
-    if (typeof n === "number" && !Number.isNaN(n) && Number.isFinite(n))
-      return o;
-    let v = typeof n === "number" ? Number.isNaN(n) ? "NaN" : !Number.isFinite(n) ? "Infinity" : undefined : undefined;
-    return o.issues.push({ expected: "number", code: "invalid_type", input: n, inst: r, ...v ? { received: v } : {} }), o;
-  };
-});
-var nt = I("$ZodNumberFormat", (r, i) => {
-  eo.init(r, i), vi.init(r, i);
-});
-var bn = I("$ZodBoolean", (r, i) => {
-  S.init(r, i), r._zod.pattern = vo, r._zod.parse = (o, t) => {
-    if (i.coerce)
-      try {
-        o.value = Boolean(o.value);
-      } catch (v) {}
-    let n = o.value;
-    if (typeof n === "boolean")
-      return o;
-    return o.issues.push({ expected: "boolean", code: "invalid_type", input: n, inst: r }), o;
-  };
-});
-var oi = I("$ZodBigInt", (r, i) => {
-  S.init(r, i), r._zod.pattern = no, r._zod.parse = (o, t) => {
-    if (i.coerce)
-      try {
-        o.value = BigInt(o.value);
-      } catch (n) {}
-    if (typeof o.value === "bigint")
-      return o;
-    return o.issues.push({ expected: "bigint", code: "invalid_type", input: o.value, inst: r }), o;
-  };
-});
-var it = I("$ZodBigIntFormat", (r, i) => {
-  lo.init(r, i), oi.init(r, i);
-});
-var vt = I("$ZodSymbol", (r, i) => {
-  S.init(r, i), r._zod.parse = (o, t) => {
-    let n = o.value;
-    if (typeof n === "symbol")
-      return o;
-    return o.issues.push({ expected: "symbol", code: "invalid_type", input: n, inst: r }), o;
-  };
-});
-var ot = I("$ZodUndefined", (r, i) => {
-  S.init(r, i), r._zod.pattern = to, r._zod.values = new Set([undefined]), r._zod.optin = "optional", r._zod.optout = "optional", r._zod.parse = (o, t) => {
-    let n = o.value;
-    if (typeof n > "u")
-      return o;
-    return o.issues.push({ expected: "undefined", code: "invalid_type", input: n, inst: r }), o;
-  };
-});
-var tt = I("$ZodNull", (r, i) => {
-  S.init(r, i), r._zod.pattern = oo, r._zod.values = new Set([null]), r._zod.parse = (o, t) => {
-    let n = o.value;
-    if (n === null)
-      return o;
-    return o.issues.push({ expected: "null", code: "invalid_type", input: n, inst: r }), o;
-  };
-});
-var $t = I("$ZodAny", (r, i) => {
-  S.init(r, i), r._zod.parse = (o) => o;
-});
-var ut = I("$ZodUnknown", (r, i) => {
-  S.init(r, i), r._zod.parse = (o) => o;
-});
-var gt = I("$ZodNever", (r, i) => {
-  S.init(r, i), r._zod.parse = (o, t) => {
-    return o.issues.push({ expected: "never", code: "invalid_type", input: o.value, inst: r }), o;
-  };
-});
-var et = I("$ZodVoid", (r, i) => {
-  S.init(r, i), r._zod.parse = (o, t) => {
-    let n = o.value;
-    if (typeof n > "u")
-      return o;
-    return o.issues.push({ expected: "void", code: "invalid_type", input: n, inst: r }), o;
-  };
-});
-var lt = I("$ZodDate", (r, i) => {
-  S.init(r, i), r._zod.parse = (o, t) => {
-    if (i.coerce)
-      try {
-        o.value = new Date(o.value);
-      } catch (u) {}
-    let n = o.value, v = n instanceof Date;
-    if (v && !Number.isNaN(n.getTime()))
-      return o;
-    return o.issues.push({ expected: "date", code: "invalid_type", input: n, ...v ? { received: "Invalid Date" } : {}, inst: r }), o;
-  };
-});
-function Fe(r, i, o) {
-  if (r.issues.length)
-    i.issues.push(...T(o, r.issues));
-  i.value[o] = r.value;
-}
-var It = I("$ZodArray", (r, i) => {
-  S.init(r, i), r._zod.parse = (o, t) => {
-    let n = o.value;
-    if (!Array.isArray(n))
-      return o.issues.push({ expected: "array", code: "invalid_type", input: n, inst: r }), o;
-    o.value = Array(n.length);
-    let v = [];
-    for (let $ = 0;$ < n.length; $++) {
-      let u = n[$], l = i.element._zod.run({ value: u, issues: [] }, t);
-      if (l instanceof Promise)
-        v.push(l.then((e) => Fe(e, o, $)));
-      else
-        Fe(l, o, $);
-    }
-    if (v.length)
-      return Promise.all(v).then(() => o);
-    return o;
-  };
-});
-function ii(r, i, o, t, n) {
-  if (r.issues.length) {
-    if (n && !(o in t))
-      return;
-    i.issues.push(...T(o, r.issues));
-  }
-  if (r.value === undefined) {
-    if (o in t)
-      i.value[o] = undefined;
-  } else
-    i.value[o] = r.value;
-}
-function he(r) {
-  let i = Object.keys(r.shape);
-  for (let t of i)
-    if (!r.shape?.[t]?._zod?.traits?.has("$ZodType"))
-      throw Error(`Invalid element at key "${t}": expected a Zod schema`);
-  let o = Gv(r.shape);
-  return { ...r, keys: i, keySet: new Set(i), numKeys: i.length, optionalKeys: new Set(o) };
-}
-function ae(r, i, o, t, n, v) {
-  let $ = [], u = n.keySet, l = n.catchall._zod, e = l.def.type, c = l.optout === "optional";
-  for (let _ in i) {
-    if (u.has(_))
-      continue;
-    if (e === "never") {
-      $.push(_);
-      continue;
-    }
-    let N = l.run({ value: i[_], issues: [] }, t);
-    if (N instanceof Promise)
-      r.push(N.then((O) => ii(O, o, _, i, c)));
-    else
-      ii(N, o, _, i, c);
-  }
-  if ($.length)
-    o.issues.push({ code: "unrecognized_keys", keys: $, input: i, inst: v });
-  if (!r.length)
-    return o;
-  return Promise.all(r).then(() => {
-    return o;
-  });
-}
-var pe = I("$ZodObject", (r, i) => {
-  if (S.init(r, i), !Object.getOwnPropertyDescriptor(i, "shape")?.get) {
-    let u = i.shape;
-    Object.defineProperty(i, "shape", { get: () => {
-      let l = { ...u };
-      return Object.defineProperty(i, "shape", { value: l }), l;
-    } });
-  }
-  let t = Pr(() => he(i));
-  j(r._zod, "propValues", () => {
-    let u = i.shape, l = {};
-    for (let e in u) {
-      let c = u[e]._zod;
-      if (c.values) {
-        l[e] ?? (l[e] = new Set);
-        for (let _ of c.values)
-          l[e].add(_);
-      }
-    }
-    return l;
-  });
-  let n = br, v = i.catchall, $;
-  r._zod.parse = (u, l) => {
-    $ ?? ($ = t.value);
-    let e = u.value;
-    if (!n(e))
-      return u.issues.push({ expected: "object", code: "invalid_type", input: e, inst: r }), u;
-    u.value = {};
-    let c = [], _ = $.shape;
-    for (let N of $.keys) {
-      let O = _[N], J = O._zod.optout === "optional", X = O._zod.run({ value: e[N], issues: [] }, l);
-      if (X instanceof Promise)
-        c.push(X.then((zr) => ii(zr, u, N, e, J)));
-      else
-        ii(X, u, N, e, J);
-    }
-    if (!v)
-      return c.length ? Promise.all(c).then(() => u) : u;
-    return ae(c, e, u, l, t.value, r);
-  };
-});
-var ct = I("$ZodObjectJIT", (r, i) => {
-  pe.init(r, i);
-  let o = r._zod.parse, t = Pr(() => he(i)), n = (N) => {
-    let O = new an(["shape", "payload", "ctx"]), J = t.value, X = (C) => {
-      let F = Yn(C);
-      return `shape[${F}]._zod.run({ value: input[${F}], issues: [] }, ctx)`;
-    };
-    O.write("const input = payload.value;");
-    let zr = Object.create(null), AI = 0;
-    for (let C of J.keys)
-      zr[C] = `key_${AI++}`;
-    O.write("const newResult = {};");
-    for (let C of J.keys) {
-      let F = zr[C], Z = Yn(C), qI = N[C]?._zod?.optout === "optional";
-      if (O.write(`const ${F} = ${X(C)};`), qI)
-        O.write(`
-        if (${F}.issues.length) {
-          if (${Z} in input) {
-            payload.issues = payload.issues.concat(${F}.issues.map(iss => ({
-              ...iss,
-              path: iss.path ? [${Z}, ...iss.path] : [${Z}]
-            })));
-          }
-        }
-        
-        if (${F}.value === undefined) {
-          if (${Z} in input) {
-            newResult[${Z}] = undefined;
-          }
-        } else {
-          newResult[${Z}] = ${F}.value;
-        }
-        
-      `);
-      else
-        O.write(`
-        if (${F}.issues.length) {
-          payload.issues = payload.issues.concat(${F}.issues.map(iss => ({
-            ...iss,
-            path: iss.path ? [${Z}, ...iss.path] : [${Z}]
-          })));
-        }
-        
-        if (${F}.value === undefined) {
-          if (${Z} in input) {
-            newResult[${Z}] = undefined;
-          }
-        } else {
-          newResult[${Z}] = ${F}.value;
-        }
-        
-      `);
-    }
-    O.write("payload.value = newResult;"), O.write("return payload;");
-    let KI = O.compile();
-    return (C, F) => KI(N, C, F);
-  }, v, $ = br, u = !sr.jitless, e = u && jv.value, c = i.catchall, _;
-  r._zod.parse = (N, O) => {
-    _ ?? (_ = t.value);
-    let J = N.value;
-    if (!$(J))
-      return N.issues.push({ expected: "object", code: "invalid_type", input: J, inst: r }), N;
-    if (u && e && O?.async === false && O.jitless !== true) {
-      if (!v)
-        v = n(i.shape);
-      if (N = v(N, O), !c)
-        return N;
-      return ae([], J, N, O, _, r);
-    }
-    return o(N, O);
-  };
-});
-function Be(r, i, o, t) {
-  for (let v of r)
-    if (v.issues.length === 0)
-      return i.value = v.value, i;
-  let n = r.filter((v) => !$r(v));
-  if (n.length === 1)
-    return i.value = n[0].value, n[0];
-  return i.issues.push({ code: "invalid_union", input: i.value, inst: o, errors: r.map((v) => v.issues.map(($) => B($, t, E()))) }), i;
-}
-var _n = I("$ZodUnion", (r, i) => {
-  S.init(r, i), j(r._zod, "optin", () => i.options.some((n) => n._zod.optin === "optional") ? "optional" : undefined), j(r._zod, "optout", () => i.options.some((n) => n._zod.optout === "optional") ? "optional" : undefined), j(r._zod, "values", () => {
-    if (i.options.every((n) => n._zod.values))
-      return new Set(i.options.flatMap((n) => Array.from(n._zod.values)));
-    return;
-  }), j(r._zod, "pattern", () => {
-    if (i.options.every((n) => n._zod.pattern)) {
-      let n = i.options.map((v) => v._zod.pattern);
-      return new RegExp(`^(${n.map((v) => vn(v.source)).join("|")})$`);
-    }
-    return;
-  });
-  let o = i.options.length === 1, t = i.options[0]._zod.run;
-  r._zod.parse = (n, v) => {
-    if (o)
-      return t(n, v);
-    let $ = false, u = [];
-    for (let l of i.options) {
-      let e = l._zod.run({ value: n.value, issues: [] }, v);
-      if (e instanceof Promise)
-        u.push(e), $ = true;
-      else {
-        if (e.issues.length === 0)
-          return e;
-        u.push(e);
-      }
-    }
-    if (!$)
-      return Be(u, n, r, v);
-    return Promise.all(u).then((l) => {
-      return Be(l, n, r, v);
-    });
-  };
-});
-function me(r, i, o, t) {
-  let n = r.filter((v) => v.issues.length === 0);
-  if (n.length === 1)
-    return i.value = n[0].value, i;
-  if (n.length === 0)
-    i.issues.push({ code: "invalid_union", input: i.value, inst: o, errors: r.map((v) => v.issues.map(($) => B($, t, E()))) });
-  else
-    i.issues.push({ code: "invalid_union", input: i.value, inst: o, errors: [], inclusive: false });
-  return i;
-}
-var bt = I("$ZodXor", (r, i) => {
-  _n.init(r, i), i.inclusive = false;
-  let o = i.options.length === 1, t = i.options[0]._zod.run;
-  r._zod.parse = (n, v) => {
-    if (o)
-      return t(n, v);
-    let $ = false, u = [];
-    for (let l of i.options) {
-      let e = l._zod.run({ value: n.value, issues: [] }, v);
-      if (e instanceof Promise)
-        u.push(e), $ = true;
-      else
-        u.push(e);
-    }
-    if (!$)
-      return me(u, n, r, v);
-    return Promise.all(u).then((l) => {
-      return me(l, n, r, v);
-    });
-  };
-});
-var _t = I("$ZodDiscriminatedUnion", (r, i) => {
-  i.inclusive = false, _n.init(r, i);
-  let o = r._zod.parse;
-  j(r._zod, "propValues", () => {
-    let n = {};
-    for (let v of i.options) {
-      let $ = v._zod.propValues;
-      if (!$ || Object.keys($).length === 0)
-        throw Error(`Invalid discriminated union option at index "${i.options.indexOf(v)}"`);
-      for (let [u, l] of Object.entries($)) {
-        if (!n[u])
-          n[u] = new Set;
-        for (let e of l)
-          n[u].add(e);
-      }
-    }
-    return n;
-  });
-  let t = Pr(() => {
-    let n = i.options, v = new Map;
-    for (let $ of n) {
-      let u = $._zod.propValues?.[i.discriminator];
-      if (!u || u.size === 0)
-        throw Error(`Invalid discriminated union option at index "${i.options.indexOf($)}"`);
-      for (let l of u) {
-        if (v.has(l))
-          throw Error(`Duplicate discriminator value "${String(l)}"`);
-        v.set(l, $);
-      }
-    }
-    return v;
-  });
-  r._zod.parse = (n, v) => {
-    let $ = n.value;
-    if (!br($))
-      return n.issues.push({ code: "invalid_type", expected: "object", input: $, inst: r }), n;
-    let u = t.value.get($?.[i.discriminator]);
-    if (u)
-      return u._zod.run(n, v);
-    if (i.unionFallback)
-      return o(n, v);
-    return n.issues.push({ code: "invalid_union", errors: [], note: "No matching discriminator", discriminator: i.discriminator, input: $, path: [i.discriminator], inst: r }), n;
-  };
-});
-var Ut = I("$ZodIntersection", (r, i) => {
-  S.init(r, i), r._zod.parse = (o, t) => {
-    let n = o.value, v = i.left._zod.run({ value: n, issues: [] }, t), $ = i.right._zod.run({ value: n, issues: [] }, t);
-    if (v instanceof Promise || $ instanceof Promise)
-      return Promise.all([v, $]).then(([l, e]) => {
-        return He(o, l, e);
-      });
-    return He(o, v, $);
-  };
-});
-function Go(r, i) {
-  if (r === i)
-    return { valid: true, data: r };
-  if (r instanceof Date && i instanceof Date && +r === +i)
-    return { valid: true, data: r };
-  if (tr(r) && tr(i)) {
-    let o = Object.keys(i), t = Object.keys(r).filter((v) => o.indexOf(v) !== -1), n = { ...r, ...i };
-    for (let v of t) {
-      let $ = Go(r[v], i[v]);
-      if (!$.valid)
-        return { valid: false, mergeErrorPath: [v, ...$.mergeErrorPath] };
-      n[v] = $.data;
-    }
-    return { valid: true, data: n };
-  }
-  if (Array.isArray(r) && Array.isArray(i)) {
-    if (r.length !== i.length)
-      return { valid: false, mergeErrorPath: [] };
-    let o = [];
-    for (let t = 0;t < r.length; t++) {
-      let n = r[t], v = i[t], $ = Go(n, v);
-      if (!$.valid)
-        return { valid: false, mergeErrorPath: [t, ...$.mergeErrorPath] };
-      o.push($.data);
-    }
-    return { valid: true, data: o };
-  }
-  return { valid: false, mergeErrorPath: [] };
-}
-function He(r, i, o) {
-  let t = new Map, n;
-  for (let u of i.issues)
-    if (u.code === "unrecognized_keys") {
-      n ?? (n = u);
-      for (let l of u.keys) {
-        if (!t.has(l))
-          t.set(l, {});
-        t.get(l).l = true;
-      }
-    } else
-      r.issues.push(u);
-  for (let u of o.issues)
-    if (u.code === "unrecognized_keys")
-      for (let l of u.keys) {
-        if (!t.has(l))
-          t.set(l, {});
-        t.get(l).r = true;
-      }
-    else
-      r.issues.push(u);
-  let v = [...t].filter(([, u]) => u.l && u.r).map(([u]) => u);
-  if (v.length && n)
-    r.issues.push({ ...n, keys: v });
-  if ($r(r))
-    return r;
-  let $ = Go(i.value, o.value);
-  if (!$.valid)
-    throw Error(`Unmergable intersection. Error path: ${JSON.stringify($.mergeErrorPath)}`);
-  return r.value = $.data, r;
-}
-var ti = I("$ZodTuple", (r, i) => {
-  S.init(r, i);
-  let o = i.items;
-  r._zod.parse = (t, n) => {
-    let v = t.value;
-    if (!Array.isArray(v))
-      return t.issues.push({ input: v, inst: r, expected: "tuple", code: "invalid_type" }), t;
-    t.value = [];
-    let $ = [], u = [...o].reverse().findIndex((c) => c._zod.optin !== "optional"), l = u === -1 ? 0 : o.length - u;
-    if (!i.rest) {
-      let c = v.length > o.length, _ = v.length < l - 1;
-      if (c || _)
-        return t.issues.push({ ...c ? { code: "too_big", maximum: o.length, inclusive: true } : { code: "too_small", minimum: o.length }, input: v, inst: r, origin: "array" }), t;
-    }
-    let e = -1;
-    for (let c of o) {
-      if (e++, e >= v.length) {
-        if (e >= l)
-          continue;
-      }
-      let _ = c._zod.run({ value: v[e], issues: [] }, n);
-      if (_ instanceof Promise)
-        $.push(_.then((N) => pn(N, t, e)));
-      else
-        pn(_, t, e);
-    }
-    if (i.rest) {
-      let c = v.slice(o.length);
-      for (let _ of c) {
-        e++;
-        let N = i.rest._zod.run({ value: _, issues: [] }, n);
-        if (N instanceof Promise)
-          $.push(N.then((O) => pn(O, t, e)));
-        else
-          pn(N, t, e);
-      }
-    }
-    if ($.length)
-      return Promise.all($).then(() => t);
-    return t;
-  };
-});
-function pn(r, i, o) {
-  if (r.issues.length)
-    i.issues.push(...T(o, r.issues));
-  i.value[o] = r.value;
-}
-var kt = I("$ZodRecord", (r, i) => {
-  S.init(r, i), r._zod.parse = (o, t) => {
-    let n = o.value;
-    if (!tr(n))
-      return o.issues.push({ expected: "record", code: "invalid_type", input: n, inst: r }), o;
-    let v = [], $ = i.keyType._zod.values;
-    if ($) {
-      o.value = {};
-      let u = new Set;
-      for (let e of $)
-        if (typeof e === "string" || typeof e === "number" || typeof e === "symbol") {
-          u.add(typeof e === "number" ? e.toString() : e);
-          let c = i.valueType._zod.run({ value: n[e], issues: [] }, t);
-          if (c instanceof Promise)
-            v.push(c.then((_) => {
-              if (_.issues.length)
-                o.issues.push(...T(e, _.issues));
-              o.value[e] = _.value;
-            }));
-          else {
-            if (c.issues.length)
-              o.issues.push(...T(e, c.issues));
-            o.value[e] = c.value;
-          }
-        }
-      let l;
-      for (let e in n)
-        if (!u.has(e))
-          l = l ?? [], l.push(e);
-      if (l && l.length > 0)
-        o.issues.push({ code: "unrecognized_keys", input: n, inst: r, keys: l });
-    } else {
-      o.value = {};
-      for (let u of Reflect.ownKeys(n)) {
-        if (u === "__proto__")
-          continue;
-        let l = i.keyType._zod.run({ value: u, issues: [] }, t);
-        if (l instanceof Promise)
-          throw Error("Async schemas not supported in object keys currently");
-        if (typeof u === "string" && ln.test(u) && l.issues.length) {
-          let _ = i.keyType._zod.run({ value: Number(u), issues: [] }, t);
-          if (_ instanceof Promise)
-            throw Error("Async schemas not supported in object keys currently");
-          if (_.issues.length === 0)
-            l = _;
-        }
-        if (l.issues.length) {
-          if (i.mode === "loose")
-            o.value[u] = n[u];
-          else
-            o.issues.push({ code: "invalid_key", origin: "record", issues: l.issues.map((_) => B(_, t, E())), input: u, path: [u], inst: r });
-          continue;
-        }
-        let c = i.valueType._zod.run({ value: n[u], issues: [] }, t);
-        if (c instanceof Promise)
-          v.push(c.then((_) => {
-            if (_.issues.length)
-              o.issues.push(...T(u, _.issues));
-            o.value[l.value] = _.value;
-          }));
-        else {
-          if (c.issues.length)
-            o.issues.push(...T(u, c.issues));
-          o.value[l.value] = c.value;
-        }
-      }
-    }
-    if (v.length)
-      return Promise.all(v).then(() => o);
-    return o;
-  };
-});
-var Dt = I("$ZodMap", (r, i) => {
-  S.init(r, i), r._zod.parse = (o, t) => {
-    let n = o.value;
-    if (!(n instanceof Map))
-      return o.issues.push({ expected: "map", code: "invalid_type", input: n, inst: r }), o;
-    let v = [];
-    o.value = new Map;
-    for (let [$, u] of n) {
-      let l = i.keyType._zod.run({ value: $, issues: [] }, t), e = i.valueType._zod.run({ value: u, issues: [] }, t);
-      if (l instanceof Promise || e instanceof Promise)
-        v.push(Promise.all([l, e]).then(([c, _]) => {
-          Te(c, _, o, $, n, r, t);
-        }));
-      else
-        Te(l, e, o, $, n, r, t);
-    }
-    if (v.length)
-      return Promise.all(v).then(() => o);
-    return o;
-  };
-});
-function Te(r, i, o, t, n, v, $) {
-  if (r.issues.length)
-    if (on.has(typeof t))
-      o.issues.push(...T(t, r.issues));
-    else
-      o.issues.push({ code: "invalid_key", origin: "map", input: n, inst: v, issues: r.issues.map((u) => B(u, $, E())) });
-  if (i.issues.length)
-    if (on.has(typeof t))
-      o.issues.push(...T(t, i.issues));
-    else
-      o.issues.push({ origin: "map", code: "invalid_element", input: n, inst: v, key: t, issues: i.issues.map((u) => B(u, $, E())) });
-  o.value.set(r.value, i.value);
-}
-var wt = I("$ZodSet", (r, i) => {
-  S.init(r, i), r._zod.parse = (o, t) => {
-    let n = o.value;
-    if (!(n instanceof Set))
-      return o.issues.push({ input: n, inst: r, expected: "set", code: "invalid_type" }), o;
-    let v = [];
-    o.value = new Set;
-    for (let $ of n) {
-      let u = i.valueType._zod.run({ value: $, issues: [] }, t);
-      if (u instanceof Promise)
-        v.push(u.then((l) => Me(l, o)));
-      else
-        Me(u, o);
-    }
-    if (v.length)
-      return Promise.all(v).then(() => o);
-    return o;
-  };
-});
-function Me(r, i) {
-  if (r.issues.length)
-    i.issues.push(...r.issues);
-  i.value.add(r.value);
-}
-var Nt = I("$ZodEnum", (r, i) => {
-  S.init(r, i);
-  let o = nn(i.entries), t = new Set(o);
-  r._zod.values = t, r._zod.pattern = new RegExp(`^(${o.filter((n) => on.has(typeof n)).map((n) => typeof n === "string" ? R(n) : n.toString()).join("|")})$`), r._zod.parse = (n, v) => {
-    let $ = n.value;
-    if (t.has($))
-      return n;
-    return n.issues.push({ code: "invalid_value", values: o, input: $, inst: r }), n;
-  };
-});
-var Ot = I("$ZodLiteral", (r, i) => {
-  if (S.init(r, i), i.values.length === 0)
-    throw Error("Cannot create literal schema with no valid values");
-  let o = new Set(i.values);
-  r._zod.values = o, r._zod.pattern = new RegExp(`^(${i.values.map((t) => typeof t === "string" ? R(t) : t ? R(t.toString()) : String(t)).join("|")})$`), r._zod.parse = (t, n) => {
-    let v = t.value;
-    if (o.has(v))
-      return t;
-    return t.issues.push({ code: "invalid_value", values: i.values, input: v, inst: r }), t;
-  };
-});
-var zt = I("$ZodFile", (r, i) => {
-  S.init(r, i), r._zod.parse = (o, t) => {
-    let n = o.value;
-    if (n instanceof File)
-      return o;
-    return o.issues.push({ expected: "file", code: "invalid_type", input: n, inst: r }), o;
-  };
-});
-var St = I("$ZodTransform", (r, i) => {
-  S.init(r, i), r._zod.parse = (o, t) => {
-    if (t.direction === "backward")
-      throw new cr(r.constructor.name);
-    let n = i.transform(o.value, o);
-    if (t.async)
-      return (n instanceof Promise ? n : Promise.resolve(n)).then(($) => {
-        return o.value = $, o;
-      });
-    if (n instanceof Promise)
-      throw new f;
-    return o.value = n, o;
-  };
-});
-function Re(r, i) {
-  if (r.issues.length && i === undefined)
-    return { issues: [], value: undefined };
-  return r;
-}
-var $i = I("$ZodOptional", (r, i) => {
-  S.init(r, i), r._zod.optin = "optional", r._zod.optout = "optional", j(r._zod, "values", () => {
-    return i.innerType._zod.values ? new Set([...i.innerType._zod.values, undefined]) : undefined;
-  }), j(r._zod, "pattern", () => {
-    let o = i.innerType._zod.pattern;
-    return o ? new RegExp(`^(${vn(o.source)})?$`) : undefined;
-  }), r._zod.parse = (o, t) => {
-    if (i.innerType._zod.optin === "optional") {
-      let n = i.innerType._zod.run(o, t);
-      if (n instanceof Promise)
-        return n.then((v) => Re(v, o.value));
-      return Re(n, o.value);
-    }
-    if (o.value === undefined)
-      return o;
-    return i.innerType._zod.run(o, t);
-  };
-});
-var Pt = I("$ZodExactOptional", (r, i) => {
-  $i.init(r, i), j(r._zod, "values", () => i.innerType._zod.values), j(r._zod, "pattern", () => i.innerType._zod.pattern), r._zod.parse = (o, t) => {
-    return i.innerType._zod.run(o, t);
-  };
-});
-var jt = I("$ZodNullable", (r, i) => {
-  S.init(r, i), j(r._zod, "optin", () => i.innerType._zod.optin), j(r._zod, "optout", () => i.innerType._zod.optout), j(r._zod, "pattern", () => {
-    let o = i.innerType._zod.pattern;
-    return o ? new RegExp(`^(${vn(o.source)}|null)$`) : undefined;
-  }), j(r._zod, "values", () => {
-    return i.innerType._zod.values ? new Set([...i.innerType._zod.values, null]) : undefined;
-  }), r._zod.parse = (o, t) => {
-    if (o.value === null)
-      return o;
-    return i.innerType._zod.run(o, t);
-  };
-});
-var Jt = I("$ZodDefault", (r, i) => {
-  S.init(r, i), r._zod.optin = "optional", j(r._zod, "values", () => i.innerType._zod.values), r._zod.parse = (o, t) => {
-    if (t.direction === "backward")
-      return i.innerType._zod.run(o, t);
-    if (o.value === undefined)
-      return o.value = i.defaultValue, o;
-    let n = i.innerType._zod.run(o, t);
-    if (n instanceof Promise)
-      return n.then((v) => xe(v, i));
-    return xe(n, i);
-  };
-});
-function xe(r, i) {
-  if (r.value === undefined)
-    r.value = i.defaultValue;
-  return r;
-}
-var Lt = I("$ZodPrefault", (r, i) => {
-  S.init(r, i), r._zod.optin = "optional", j(r._zod, "values", () => i.innerType._zod.values), r._zod.parse = (o, t) => {
-    if (t.direction === "backward")
-      return i.innerType._zod.run(o, t);
-    if (o.value === undefined)
-      o.value = i.defaultValue;
-    return i.innerType._zod.run(o, t);
-  };
-});
-var Gt = I("$ZodNonOptional", (r, i) => {
-  S.init(r, i), j(r._zod, "values", () => {
-    let o = i.innerType._zod.values;
-    return o ? new Set([...o].filter((t) => t !== undefined)) : undefined;
-  }), r._zod.parse = (o, t) => {
-    let n = i.innerType._zod.run(o, t);
-    if (n instanceof Promise)
-      return n.then((v) => Ze(v, r));
-    return Ze(n, r);
-  };
-});
-function Ze(r, i) {
-  if (!r.issues.length && r.value === undefined)
-    r.issues.push({ code: "invalid_type", expected: "nonoptional", input: r.value, inst: i });
-  return r;
-}
-var Wt = I("$ZodSuccess", (r, i) => {
-  S.init(r, i), r._zod.parse = (o, t) => {
-    if (t.direction === "backward")
-      throw new cr("ZodSuccess");
-    let n = i.innerType._zod.run(o, t);
-    if (n instanceof Promise)
-      return n.then((v) => {
-        return o.value = v.issues.length === 0, o;
-      });
-    return o.value = n.issues.length === 0, o;
-  };
-});
-var Vt = I("$ZodCatch", (r, i) => {
-  S.init(r, i), j(r._zod, "optin", () => i.innerType._zod.optin), j(r._zod, "optout", () => i.innerType._zod.optout), j(r._zod, "values", () => i.innerType._zod.values), r._zod.parse = (o, t) => {
-    if (t.direction === "backward")
-      return i.innerType._zod.run(o, t);
-    let n = i.innerType._zod.run(o, t);
-    if (n instanceof Promise)
-      return n.then((v) => {
-        if (o.value = v.value, v.issues.length)
-          o.value = i.catchValue({ ...o, error: { issues: v.issues.map(($) => B($, t, E())) }, input: o.value }), o.issues = [];
-        return o;
-      });
-    if (o.value = n.value, n.issues.length)
-      o.value = i.catchValue({ ...o, error: { issues: n.issues.map((v) => B(v, t, E())) }, input: o.value }), o.issues = [];
-    return o;
-  };
-});
-var Xt = I("$ZodNaN", (r, i) => {
-  S.init(r, i), r._zod.parse = (o, t) => {
-    if (typeof o.value !== "number" || !Number.isNaN(o.value))
-      return o.issues.push({ input: o.value, inst: r, expected: "nan", code: "invalid_type" }), o;
-    return o;
-  };
-});
-var Et = I("$ZodPipe", (r, i) => {
-  S.init(r, i), j(r._zod, "values", () => i.in._zod.values), j(r._zod, "optin", () => i.in._zod.optin), j(r._zod, "optout", () => i.out._zod.optout), j(r._zod, "propValues", () => i.in._zod.propValues), r._zod.parse = (o, t) => {
-    if (t.direction === "backward") {
-      let v = i.out._zod.run(o, t);
-      if (v instanceof Promise)
-        return v.then(($) => sn($, i.in, t));
-      return sn(v, i.in, t);
-    }
-    let n = i.in._zod.run(o, t);
-    if (n instanceof Promise)
-      return n.then((v) => sn(v, i.out, t));
-    return sn(n, i.out, t);
-  };
-});
-function sn(r, i, o) {
-  if (r.issues.length)
-    return r.aborted = true, r;
-  return i._zod.run({ value: r.value, issues: r.issues }, o);
-}
-var Un = I("$ZodCodec", (r, i) => {
-  S.init(r, i), j(r._zod, "values", () => i.in._zod.values), j(r._zod, "optin", () => i.in._zod.optin), j(r._zod, "optout", () => i.out._zod.optout), j(r._zod, "propValues", () => i.in._zod.propValues), r._zod.parse = (o, t) => {
-    if ((t.direction || "forward") === "forward") {
-      let v = i.in._zod.run(o, t);
-      if (v instanceof Promise)
-        return v.then(($) => ri($, i, t));
-      return ri(v, i, t);
-    } else {
-      let v = i.out._zod.run(o, t);
-      if (v instanceof Promise)
-        return v.then(($) => ri($, i, t));
-      return ri(v, i, t);
-    }
-  };
-});
-function ri(r, i, o) {
-  if (r.issues.length)
-    return r.aborted = true, r;
-  if ((o.direction || "forward") === "forward") {
-    let n = i.transform(r.value, r);
-    if (n instanceof Promise)
-      return n.then((v) => ni(r, v, i.out, o));
-    return ni(r, n, i.out, o);
-  } else {
-    let n = i.reverseTransform(r.value, r);
-    if (n instanceof Promise)
-      return n.then((v) => ni(r, v, i.in, o));
-    return ni(r, n, i.in, o);
-  }
-}
-function ni(r, i, o, t) {
-  if (r.issues.length)
-    return r.aborted = true, r;
-  return o._zod.run({ value: i, issues: r.issues }, t);
-}
-var At = I("$ZodReadonly", (r, i) => {
-  S.init(r, i), j(r._zod, "propValues", () => i.innerType._zod.propValues), j(r._zod, "values", () => i.innerType._zod.values), j(r._zod, "optin", () => i.innerType?._zod?.optin), j(r._zod, "optout", () => i.innerType?._zod?.optout), r._zod.parse = (o, t) => {
-    if (t.direction === "backward")
-      return i.innerType._zod.run(o, t);
-    let n = i.innerType._zod.run(o, t);
-    if (n instanceof Promise)
-      return n.then(de);
-    return de(n);
-  };
-});
-function de(r) {
-  return r.value = Object.freeze(r.value), r;
-}
-var Kt = I("$ZodTemplateLiteral", (r, i) => {
-  S.init(r, i);
-  let o = [];
-  for (let t of i.parts)
-    if (typeof t === "object" && t !== null) {
-      if (!t._zod.pattern)
-        throw Error(`Invalid template literal part, no pattern found: ${[...t._zod.traits].shift()}`);
-      let n = t._zod.pattern instanceof RegExp ? t._zod.pattern.source : t._zod.pattern;
-      if (!n)
-        throw Error(`Invalid template literal part: ${t._zod.traits}`);
-      let v = n.startsWith("^") ? 1 : 0, $ = n.endsWith("$") ? n.length - 1 : n.length;
-      o.push(n.slice(v, $));
-    } else if (t === null || Lv.has(typeof t))
-      o.push(R(`${t}`));
-    else
-      throw Error(`Invalid template literal part: ${t}`);
-  r._zod.pattern = new RegExp(`^${o.join("")}$`), r._zod.parse = (t, n) => {
-    if (typeof t.value !== "string")
-      return t.issues.push({ input: t.value, inst: r, expected: "string", code: "invalid_type" }), t;
-    if (r._zod.pattern.lastIndex = 0, !r._zod.pattern.test(t.value))
-      return t.issues.push({ input: t.value, inst: r, code: "invalid_format", format: i.format ?? "template_literal", pattern: r._zod.pattern.source }), t;
-    return t;
-  };
-});
-var qt = I("$ZodFunction", (r, i) => {
-  return S.init(r, i), r._def = i, r._zod.def = i, r.implement = (o) => {
-    if (typeof o !== "function")
-      throw Error("implement() must be called with a function");
-    return function(...t) {
-      let n = r._def.input ? Bn(r._def.input, t) : t, v = Reflect.apply(o, this, n);
-      if (r._def.output)
-        return Bn(r._def.output, v);
-      return v;
-    };
-  }, r.implementAsync = (o) => {
-    if (typeof o !== "function")
-      throw Error("implementAsync() must be called with a function");
-    return async function(...t) {
-      let n = r._def.input ? await mn(r._def.input, t) : t, v = await Reflect.apply(o, this, n);
-      if (r._def.output)
-        return await mn(r._def.output, v);
-      return v;
-    };
-  }, r._zod.parse = (o, t) => {
-    if (typeof o.value !== "function")
-      return o.issues.push({ code: "invalid_type", expected: "function", input: o.value, inst: r }), o;
-    if (r._def.output && r._def.output._zod.def.type === "promise")
-      o.value = r.implementAsync(o.value);
-    else
-      o.value = r.implement(o.value);
-    return o;
-  }, r.input = (...o) => {
-    let t = r.constructor;
-    if (Array.isArray(o[0]))
-      return new t({ type: "function", input: new ti({ type: "tuple", items: o[0], rest: o[1] }), output: r._def.output });
-    return new t({ type: "function", input: o[0], output: r._def.output });
-  }, r.output = (o) => {
-    return new r.constructor({ type: "function", input: r._def.input, output: o });
-  }, r;
-});
-var Qt = I("$ZodPromise", (r, i) => {
-  S.init(r, i), r._zod.parse = (o, t) => {
-    return Promise.resolve(o.value).then((n) => i.innerType._zod.run({ value: n, issues: [] }, t));
-  };
-});
-var Yt = I("$ZodLazy", (r, i) => {
-  S.init(r, i), j(r._zod, "innerType", () => i.getter()), j(r._zod, "pattern", () => r._zod.innerType?._zod?.pattern), j(r._zod, "propValues", () => r._zod.innerType?._zod?.propValues), j(r._zod, "optin", () => r._zod.innerType?._zod?.optin ?? undefined), j(r._zod, "optout", () => r._zod.innerType?._zod?.optout ?? undefined), r._zod.parse = (o, t) => {
-    return r._zod.innerType._zod.run(o, t);
-  };
-});
-var Ft = I("$ZodCustom", (r, i) => {
-  V.init(r, i), S.init(r, i), r._zod.parse = (o, t) => {
-    return o;
-  }, r._zod.check = (o) => {
-    let t = o.value, n = i.fn(t);
-    if (n instanceof Promise)
-      return n.then((v) => Ce(v, o, t, r));
-    Ce(n, o, t, r);
-    return;
-  };
-});
-function Ce(r, i, o, t) {
-  if (!r) {
-    let n = { code: "custom", input: o, inst: t, path: [...t._zod.def.path ?? []], continue: !t._zod.def.abort };
-    if (t._zod.def.params)
-      n.params = t._zod.def.params;
-    i.issues.push(jr(n));
-  }
-}
-var On = {};
-s(On, { zhTW: () => W$, zhCN: () => G$, yo: () => V$, vi: () => L$, uz: () => J$, ur: () => j$, uk: () => Nn, ua: () => P$, tr: () => S$, th: () => z$, ta: () => O$, sv: () => N$, sl: () => w$, ru: () => D$, pt: () => k$, ps: () => _$, pl: () => U$, ota: () => b$, no: () => c$, nl: () => I$, ms: () => l$, mk: () => e$, lt: () => g$, ko: () => u$, km: () => Dn, kh: () => $$, ka: () => t$, ja: () => o$, it: () => v$, is: () => i$, id: () => n$, hy: () => r$, hu: () => st, he: () => pt, frCA: () => at, fr: () => ht, fi: () => yt, fa: () => ft, es: () => Ct, eo: () => dt, en: () => kn, de: () => Zt, da: () => xt, cs: () => Rt, ca: () => Mt, bg: () => Tt, be: () => Ht, az: () => mt, ar: () => Bt });
-var Zc = () => {
-  let r = { string: { unit: "حرف", verb: "أن يحوي" }, file: { unit: "بايت", verb: "أن يحوي" }, array: { unit: "عنصر", verb: "أن يحوي" }, set: { unit: "عنصر", verb: "أن يحوي" } };
-  function i(n) {
-    return r[n] ?? null;
-  }
-  let o = { regex: "مدخل", email: "بريد إلكتروني", url: "رابط", emoji: "إيموجي", uuid: "UUID", uuidv4: "UUIDv4", uuidv6: "UUIDv6", nanoid: "nanoid", guid: "GUID", cuid: "cuid", cuid2: "cuid2", ulid: "ULID", xid: "XID", ksuid: "KSUID", datetime: "تاريخ ووقت بمعيار ISO", date: "تاريخ بمعيار ISO", time: "وقت بمعيار ISO", duration: "مدة بمعيار ISO", ipv4: "عنوان IPv4", ipv6: "عنوان IPv6", cidrv4: "مدى عناوين بصيغة IPv4", cidrv6: "مدى عناوين بصيغة IPv6", base64: "نَص بترميز base64-encoded", base64url: "نَص بترميز base64url-encoded", json_string: "نَص على هيئة JSON", e164: "رقم هاتف بمعيار E.164", jwt: "JWT", template_literal: "مدخل" }, t = { nan: "NaN" };
-  return (n) => {
-    switch (n.code) {
-      case "invalid_type": {
-        let v = t[n.expected] ?? n.expected, $ = k(n.input), u = t[$] ?? $;
-        if (/^[A-Z]/.test(n.expected))
-          return `مدخلات غير مقبولة: يفترض إدخال instanceof ${n.expected}، ولكن تم إدخال ${u}`;
-        return `مدخلات غير مقبولة: يفترض إدخال ${v}، ولكن تم إدخال ${u}`;
-      }
-      case "invalid_value":
-        if (n.values.length === 1)
-          return `مدخلات غير مقبولة: يفترض إدخال ${U(n.values[0])}`;
-        return `اختيار غير مقبول: يتوقع انتقاء أحد هذه الخيارات: ${b(n.values, "|")}`;
-      case "too_big": {
-        let v = n.inclusive ? "<=" : "<", $ = i(n.origin);
-        if ($)
-          return ` أكبر من اللازم: يفترض أن تكون ${n.origin ?? "القيمة"} ${v} ${n.maximum.toString()} ${$.unit ?? "عنصر"}`;
-        return `أكبر من اللازم: يفترض أن تكون ${n.origin ?? "القيمة"} ${v} ${n.maximum.toString()}`;
-      }
-      case "too_small": {
-        let v = n.inclusive ? ">=" : ">", $ = i(n.origin);
-        if ($)
-          return `أصغر من اللازم: يفترض لـ ${n.origin} أن يكون ${v} ${n.minimum.toString()} ${$.unit}`;
-        return `أصغر من اللازم: يفترض لـ ${n.origin} أن يكون ${v} ${n.minimum.toString()}`;
-      }
-      case "invalid_format": {
-        let v = n;
-        if (v.format === "starts_with")
-          return `نَص غير مقبول: يجب أن يبدأ بـ "${n.prefix}"`;
-        if (v.format === "ends_with")
-          return `نَص غير مقبول: يجب أن ينتهي بـ "${v.suffix}"`;
-        if (v.format === "includes")
-          return `نَص غير مقبول: يجب أن يتضمَّن "${v.includes}"`;
-        if (v.format === "regex")
-          return `نَص غير مقبول: يجب أن يطابق النمط ${v.pattern}`;
-        return `${o[v.format] ?? n.format} غير مقبول`;
-      }
-      case "not_multiple_of":
-        return `رقم غير مقبول: يجب أن يكون من مضاعفات ${n.divisor}`;
-      case "unrecognized_keys":
-        return `معرف${n.keys.length > 1 ? "ات" : ""} غريب${n.keys.length > 1 ? "ة" : ""}: ${b(n.keys, "، ")}`;
-      case "invalid_key":
-        return `معرف غير مقبول في ${n.origin}`;
-      case "invalid_union":
-        return "مدخل غير مقبول";
-      case "invalid_element":
-        return `مدخل غير مقبول في ${n.origin}`;
-      default:
-        return "مدخل غير مقبول";
-    }
-  };
-};
-function Bt() {
-  return { localeError: Zc() };
-}
-var dc = () => {
-  let r = { string: { unit: "simvol", verb: "olmalıdır" }, file: { unit: "bayt", verb: "olmalıdır" }, array: { unit: "element", verb: "olmalıdır" }, set: { unit: "element", verb: "olmalıdır" } };
-  function i(n) {
-    return r[n] ?? null;
-  }
-  let o = { regex: "input", email: "email address", url: "URL", emoji: "emoji", uuid: "UUID", uuidv4: "UUIDv4", uuidv6: "UUIDv6", nanoid: "nanoid", guid: "GUID", cuid: "cuid", cuid2: "cuid2", ulid: "ULID", xid: "XID", ksuid: "KSUID", datetime: "ISO datetime", date: "ISO date", time: "ISO time", duration: "ISO duration", ipv4: "IPv4 address", ipv6: "IPv6 address", cidrv4: "IPv4 range", cidrv6: "IPv6 range", base64: "base64-encoded string", base64url: "base64url-encoded string", json_string: "JSON string", e164: "E.164 number", jwt: "JWT", template_literal: "input" }, t = { nan: "NaN" };
-  return (n) => {
-    switch (n.code) {
-      case "invalid_type": {
-        let v = t[n.expected] ?? n.expected, $ = k(n.input), u = t[$] ?? $;
-        if (/^[A-Z]/.test(n.expected))
-          return `Yanlış dəyər: gözlənilən instanceof ${n.expected}, daxil olan ${u}`;
-        return `Yanlış dəyər: gözlənilən ${v}, daxil olan ${u}`;
-      }
-      case "invalid_value":
-        if (n.values.length === 1)
-          return `Yanlış dəyər: gözlənilən ${U(n.values[0])}`;
-        return `Yanlış seçim: aşağıdakılardan biri olmalıdır: ${b(n.values, "|")}`;
-      case "too_big": {
-        let v = n.inclusive ? "<=" : "<", $ = i(n.origin);
-        if ($)
-          return `Çox böyük: gözlənilən ${n.origin ?? "dəyər"} ${v}${n.maximum.toString()} ${$.unit ?? "element"}`;
-        return `Çox böyük: gözlənilən ${n.origin ?? "dəyər"} ${v}${n.maximum.toString()}`;
-      }
-      case "too_small": {
-        let v = n.inclusive ? ">=" : ">", $ = i(n.origin);
-        if ($)
-          return `Çox kiçik: gözlənilən ${n.origin} ${v}${n.minimum.toString()} ${$.unit}`;
-        return `Çox kiçik: gözlənilən ${n.origin} ${v}${n.minimum.toString()}`;
-      }
-      case "invalid_format": {
-        let v = n;
-        if (v.format === "starts_with")
-          return `Yanlış mətn: "${v.prefix}" ilə başlamalıdır`;
-        if (v.format === "ends_with")
-          return `Yanlış mətn: "${v.suffix}" ilə bitməlidir`;
-        if (v.format === "includes")
-          return `Yanlış mətn: "${v.includes}" daxil olmalıdır`;
-        if (v.format === "regex")
-          return `Yanlış mətn: ${v.pattern} şablonuna uyğun olmalıdır`;
-        return `Yanlış ${o[v.format] ?? n.format}`;
-      }
-      case "not_multiple_of":
-        return `Yanlış ədəd: ${n.divisor} ilə bölünə bilən olmalıdır`;
-      case "unrecognized_keys":
-        return `Tanınmayan açar${n.keys.length > 1 ? "lar" : ""}: ${b(n.keys, ", ")}`;
-      case "invalid_key":
-        return `${n.origin} daxilində yanlış açar`;
-      case "invalid_union":
-        return "Yanlış dəyər";
-      case "invalid_element":
-        return `${n.origin} daxilində yanlış dəyər`;
-      default:
-        return "Yanlış dəyər";
-    }
-  };
-};
-function mt() {
-  return { localeError: dc() };
-}
-function se(r, i, o, t) {
-  let n = Math.abs(r), v = n % 10, $ = n % 100;
-  if ($ >= 11 && $ <= 19)
-    return t;
-  if (v === 1)
-    return i;
-  if (v >= 2 && v <= 4)
-    return o;
-  return t;
-}
-var Cc = () => {
-  let r = { string: { unit: { one: "сімвал", few: "сімвалы", many: "сімвалаў" }, verb: "мець" }, array: { unit: { one: "элемент", few: "элементы", many: "элементаў" }, verb: "мець" }, set: { unit: { one: "элемент", few: "элементы", many: "элементаў" }, verb: "мець" }, file: { unit: { one: "байт", few: "байты", many: "байтаў" }, verb: "мець" } };
-  function i(n) {
-    return r[n] ?? null;
-  }
-  let o = { regex: "увод", email: "email адрас", url: "URL", emoji: "эмодзі", uuid: "UUID", uuidv4: "UUIDv4", uuidv6: "UUIDv6", nanoid: "nanoid", guid: "GUID", cuid: "cuid", cuid2: "cuid2", ulid: "ULID", xid: "XID", ksuid: "KSUID", datetime: "ISO дата і час", date: "ISO дата", time: "ISO час", duration: "ISO працягласць", ipv4: "IPv4 адрас", ipv6: "IPv6 адрас", cidrv4: "IPv4 дыяпазон", cidrv6: "IPv6 дыяпазон", base64: "радок у фармаце base64", base64url: "радок у фармаце base64url", json_string: "JSON радок", e164: "нумар E.164", jwt: "JWT", template_literal: "увод" }, t = { nan: "NaN", number: "лік", array: "масіў" };
-  return (n) => {
-    switch (n.code) {
-      case "invalid_type": {
-        let v = t[n.expected] ?? n.expected, $ = k(n.input), u = t[$] ?? $;
-        if (/^[A-Z]/.test(n.expected))
-          return `Няправільны ўвод: чакаўся instanceof ${n.expected}, атрымана ${u}`;
-        return `Няправільны ўвод: чакаўся ${v}, атрымана ${u}`;
-      }
-      case "invalid_value":
-        if (n.values.length === 1)
-          return `Няправільны ўвод: чакалася ${U(n.values[0])}`;
-        return `Няправільны варыянт: чакаўся адзін з ${b(n.values, "|")}`;
-      case "too_big": {
-        let v = n.inclusive ? "<=" : "<", $ = i(n.origin);
-        if ($) {
-          let u = Number(n.maximum), l = se(u, $.unit.one, $.unit.few, $.unit.many);
-          return `Занадта вялікі: чакалася, што ${n.origin ?? "значэнне"} павінна ${$.verb} ${v}${n.maximum.toString()} ${l}`;
-        }
-        return `Занадта вялікі: чакалася, што ${n.origin ?? "значэнне"} павінна быць ${v}${n.maximum.toString()}`;
-      }
-      case "too_small": {
-        let v = n.inclusive ? ">=" : ">", $ = i(n.origin);
-        if ($) {
-          let u = Number(n.minimum), l = se(u, $.unit.one, $.unit.few, $.unit.many);
-          return `Занадта малы: чакалася, што ${n.origin} павінна ${$.verb} ${v}${n.minimum.toString()} ${l}`;
-        }
-        return `Занадта малы: чакалася, што ${n.origin} павінна быць ${v}${n.minimum.toString()}`;
-      }
-      case "invalid_format": {
-        let v = n;
-        if (v.format === "starts_with")
-          return `Няправільны радок: павінен пачынацца з "${v.prefix}"`;
-        if (v.format === "ends_with")
-          return `Няправільны радок: павінен заканчвацца на "${v.suffix}"`;
-        if (v.format === "includes")
-          return `Няправільны радок: павінен змяшчаць "${v.includes}"`;
-        if (v.format === "regex")
-          return `Няправільны радок: павінен адпавядаць шаблону ${v.pattern}`;
-        return `Няправільны ${o[v.format] ?? n.format}`;
-      }
-      case "not_multiple_of":
-        return `Няправільны лік: павінен быць кратным ${n.divisor}`;
-      case "unrecognized_keys":
-        return `Нераспазнаны ${n.keys.length > 1 ? "ключы" : "ключ"}: ${b(n.keys, ", ")}`;
-      case "invalid_key":
-        return `Няправільны ключ у ${n.origin}`;
-      case "invalid_union":
-        return "Няправільны ўвод";
-      case "invalid_element":
-        return `Няправільнае значэнне ў ${n.origin}`;
-      default:
-        return "Няправільны ўвод";
-    }
-  };
-};
-function Ht() {
-  return { localeError: Cc() };
-}
-var fc = () => {
-  let r = { string: { unit: "символа", verb: "да съдържа" }, file: { unit: "байта", verb: "да съдържа" }, array: { unit: "елемента", verb: "да съдържа" }, set: { unit: "елемента", verb: "да съдържа" } };
-  function i(n) {
-    return r[n] ?? null;
-  }
-  let o = { regex: "вход", email: "имейл адрес", url: "URL", emoji: "емоджи", uuid: "UUID", uuidv4: "UUIDv4", uuidv6: "UUIDv6", nanoid: "nanoid", guid: "GUID", cuid: "cuid", cuid2: "cuid2", ulid: "ULID", xid: "XID", ksuid: "KSUID", datetime: "ISO време", date: "ISO дата", time: "ISO време", duration: "ISO продължителност", ipv4: "IPv4 адрес", ipv6: "IPv6 адрес", cidrv4: "IPv4 диапазон", cidrv6: "IPv6 диапазон", base64: "base64-кодиран низ", base64url: "base64url-кодиран низ", json_string: "JSON низ", e164: "E.164 номер", jwt: "JWT", template_literal: "вход" }, t = { nan: "NaN", number: "число", array: "масив" };
-  return (n) => {
-    switch (n.code) {
-      case "invalid_type": {
-        let v = t[n.expected] ?? n.expected, $ = k(n.input), u = t[$] ?? $;
-        if (/^[A-Z]/.test(n.expected))
-          return `Невалиден вход: очакван instanceof ${n.expected}, получен ${u}`;
-        return `Невалиден вход: очакван ${v}, получен ${u}`;
-      }
-      case "invalid_value":
-        if (n.values.length === 1)
-          return `Невалиден вход: очакван ${U(n.values[0])}`;
-        return `Невалидна опция: очаквано едно от ${b(n.values, "|")}`;
-      case "too_big": {
-        let v = n.inclusive ? "<=" : "<", $ = i(n.origin);
-        if ($)
-          return `Твърде голямо: очаква се ${n.origin ?? "стойност"} да съдържа ${v}${n.maximum.toString()} ${$.unit ?? "елемента"}`;
-        return `Твърде голямо: очаква се ${n.origin ?? "стойност"} да бъде ${v}${n.maximum.toString()}`;
-      }
-      case "too_small": {
-        let v = n.inclusive ? ">=" : ">", $ = i(n.origin);
-        if ($)
-          return `Твърде малко: очаква се ${n.origin} да съдържа ${v}${n.minimum.toString()} ${$.unit}`;
-        return `Твърде малко: очаква се ${n.origin} да бъде ${v}${n.minimum.toString()}`;
-      }
-      case "invalid_format": {
-        let v = n;
-        if (v.format === "starts_with")
-          return `Невалиден низ: трябва да започва с "${v.prefix}"`;
-        if (v.format === "ends_with")
-          return `Невалиден низ: трябва да завършва с "${v.suffix}"`;
-        if (v.format === "includes")
-          return `Невалиден низ: трябва да включва "${v.includes}"`;
-        if (v.format === "regex")
-          return `Невалиден низ: трябва да съвпада с ${v.pattern}`;
-        let $ = "Невалиден";
-        if (v.format === "emoji")
-          $ = "Невалидно";
-        if (v.format === "datetime")
-          $ = "Невалидно";
-        if (v.format === "date")
-          $ = "Невалидна";
-        if (v.format === "time")
-          $ = "Невалидно";
-        if (v.format === "duration")
-          $ = "Невалидна";
-        return `${$} ${o[v.format] ?? n.format}`;
-      }
-      case "not_multiple_of":
-        return `Невалидно число: трябва да бъде кратно на ${n.divisor}`;
-      case "unrecognized_keys":
-        return `Неразпознат${n.keys.length > 1 ? "и" : ""} ключ${n.keys.length > 1 ? "ове" : ""}: ${b(n.keys, ", ")}`;
-      case "invalid_key":
-        return `Невалиден ключ в ${n.origin}`;
-      case "invalid_union":
-        return "Невалиден вход";
-      case "invalid_element":
-        return `Невалидна стойност в ${n.origin}`;
-      default:
-        return "Невалиден вход";
-    }
-  };
-};
-function Tt() {
-  return { localeError: fc() };
-}
-var yc = () => {
-  let r = { string: { unit: "caràcters", verb: "contenir" }, file: { unit: "bytes", verb: "contenir" }, array: { unit: "elements", verb: "contenir" }, set: { unit: "elements", verb: "contenir" } };
-  function i(n) {
-    return r[n] ?? null;
-  }
-  let o = { regex: "entrada", email: "adreça electrònica", url: "URL", emoji: "emoji", uuid: "UUID", uuidv4: "UUIDv4", uuidv6: "UUIDv6", nanoid: "nanoid", guid: "GUID", cuid: "cuid", cuid2: "cuid2", ulid: "ULID", xid: "XID", ksuid: "KSUID", datetime: "data i hora ISO", date: "data ISO", time: "hora ISO", duration: "durada ISO", ipv4: "adreça IPv4", ipv6: "adreça IPv6", cidrv4: "rang IPv4", cidrv6: "rang IPv6", base64: "cadena codificada en base64", base64url: "cadena codificada en base64url", json_string: "cadena JSON", e164: "número E.164", jwt: "JWT", template_literal: "entrada" }, t = { nan: "NaN" };
-  return (n) => {
-    switch (n.code) {
-      case "invalid_type": {
-        let v = t[n.expected] ?? n.expected, $ = k(n.input), u = t[$] ?? $;
-        if (/^[A-Z]/.test(n.expected))
-          return `Tipus invàlid: s'esperava instanceof ${n.expected}, s'ha rebut ${u}`;
-        return `Tipus invàlid: s'esperava ${v}, s'ha rebut ${u}`;
-      }
-      case "invalid_value":
-        if (n.values.length === 1)
-          return `Valor invàlid: s'esperava ${U(n.values[0])}`;
-        return `Opció invàlida: s'esperava una de ${b(n.values, " o ")}`;
-      case "too_big": {
-        let v = n.inclusive ? "com a màxim" : "menys de", $ = i(n.origin);
-        if ($)
-          return `Massa gran: s'esperava que ${n.origin ?? "el valor"} contingués ${v} ${n.maximum.toString()} ${$.unit ?? "elements"}`;
-        return `Massa gran: s'esperava que ${n.origin ?? "el valor"} fos ${v} ${n.maximum.toString()}`;
-      }
-      case "too_small": {
-        let v = n.inclusive ? "com a mínim" : "més de", $ = i(n.origin);
-        if ($)
-          return `Massa petit: s'esperava que ${n.origin} contingués ${v} ${n.minimum.toString()} ${$.unit}`;
-        return `Massa petit: s'esperava que ${n.origin} fos ${v} ${n.minimum.toString()}`;
-      }
-      case "invalid_format": {
-        let v = n;
-        if (v.format === "starts_with")
-          return `Format invàlid: ha de començar amb "${v.prefix}"`;
-        if (v.format === "ends_with")
-          return `Format invàlid: ha d'acabar amb "${v.suffix}"`;
-        if (v.format === "includes")
-          return `Format invàlid: ha d'incloure "${v.includes}"`;
-        if (v.format === "regex")
-          return `Format invàlid: ha de coincidir amb el patró ${v.pattern}`;
-        return `Format invàlid per a ${o[v.format] ?? n.format}`;
-      }
-      case "not_multiple_of":
-        return `Número invàlid: ha de ser múltiple de ${n.divisor}`;
-      case "unrecognized_keys":
-        return `Clau${n.keys.length > 1 ? "s" : ""} no reconeguda${n.keys.length > 1 ? "s" : ""}: ${b(n.keys, ", ")}`;
-      case "invalid_key":
-        return `Clau invàlida a ${n.origin}`;
-      case "invalid_union":
-        return "Entrada invàlida";
-      case "invalid_element":
-        return `Element invàlid a ${n.origin}`;
-      default:
-        return "Entrada invàlida";
-    }
-  };
-};
-function Mt() {
-  return { localeError: yc() };
-}
-var hc = () => {
-  let r = { string: { unit: "znaků", verb: "mít" }, file: { unit: "bajtů", verb: "mít" }, array: { unit: "prvků", verb: "mít" }, set: { unit: "prvků", verb: "mít" } };
-  function i(n) {
-    return r[n] ?? null;
-  }
-  let o = { regex: "regulární výraz", email: "e-mailová adresa", url: "URL", emoji: "emoji", uuid: "UUID", uuidv4: "UUIDv4", uuidv6: "UUIDv6", nanoid: "nanoid", guid: "GUID", cuid: "cuid", cuid2: "cuid2", ulid: "ULID", xid: "XID", ksuid: "KSUID", datetime: "datum a čas ve formátu ISO", date: "datum ve formátu ISO", time: "čas ve formátu ISO", duration: "doba trvání ISO", ipv4: "IPv4 adresa", ipv6: "IPv6 adresa", cidrv4: "rozsah IPv4", cidrv6: "rozsah IPv6", base64: "řetězec zakódovaný ve formátu base64", base64url: "řetězec zakódovaný ve formátu base64url", json_string: "řetězec ve formátu JSON", e164: "číslo E.164", jwt: "JWT", template_literal: "vstup" }, t = { nan: "NaN", number: "číslo", string: "řetězec", function: "funkce", array: "pole" };
-  return (n) => {
-    switch (n.code) {
-      case "invalid_type": {
-        let v = t[n.expected] ?? n.expected, $ = k(n.input), u = t[$] ?? $;
-        if (/^[A-Z]/.test(n.expected))
-          return `Neplatný vstup: očekáváno instanceof ${n.expected}, obdrženo ${u}`;
-        return `Neplatný vstup: očekáváno ${v}, obdrženo ${u}`;
-      }
-      case "invalid_value":
-        if (n.values.length === 1)
-          return `Neplatný vstup: očekáváno ${U(n.values[0])}`;
-        return `Neplatná možnost: očekávána jedna z hodnot ${b(n.values, "|")}`;
-      case "too_big": {
-        let v = n.inclusive ? "<=" : "<", $ = i(n.origin);
-        if ($)
-          return `Hodnota je příliš velká: ${n.origin ?? "hodnota"} musí mít ${v}${n.maximum.toString()} ${$.unit ?? "prvků"}`;
-        return `Hodnota je příliš velká: ${n.origin ?? "hodnota"} musí být ${v}${n.maximum.toString()}`;
-      }
-      case "too_small": {
-        let v = n.inclusive ? ">=" : ">", $ = i(n.origin);
-        if ($)
-          return `Hodnota je příliš malá: ${n.origin ?? "hodnota"} musí mít ${v}${n.minimum.toString()} ${$.unit ?? "prvků"}`;
-        return `Hodnota je příliš malá: ${n.origin ?? "hodnota"} musí být ${v}${n.minimum.toString()}`;
-      }
-      case "invalid_format": {
-        let v = n;
-        if (v.format === "starts_with")
-          return `Neplatný řetězec: musí začínat na "${v.prefix}"`;
-        if (v.format === "ends_with")
-          return `Neplatný řetězec: musí končit na "${v.suffix}"`;
-        if (v.format === "includes")
-          return `Neplatný řetězec: musí obsahovat "${v.includes}"`;
-        if (v.format === "regex")
-          return `Neplatný řetězec: musí odpovídat vzoru ${v.pattern}`;
-        return `Neplatný formát ${o[v.format] ?? n.format}`;
-      }
-      case "not_multiple_of":
-        return `Neplatné číslo: musí být násobkem ${n.divisor}`;
-      case "unrecognized_keys":
-        return `Neznámé klíče: ${b(n.keys, ", ")}`;
-      case "invalid_key":
-        return `Neplatný klíč v ${n.origin}`;
-      case "invalid_union":
-        return "Neplatný vstup";
-      case "invalid_element":
-        return `Neplatná hodnota v ${n.origin}`;
-      default:
-        return "Neplatný vstup";
-    }
-  };
-};
-function Rt() {
-  return { localeError: hc() };
-}
-var ac = () => {
-  let r = { string: { unit: "tegn", verb: "havde" }, file: { unit: "bytes", verb: "havde" }, array: { unit: "elementer", verb: "indeholdt" }, set: { unit: "elementer", verb: "indeholdt" } };
-  function i(n) {
-    return r[n] ?? null;
-  }
-  let o = { regex: "input", email: "e-mailadresse", url: "URL", emoji: "emoji", uuid: "UUID", uuidv4: "UUIDv4", uuidv6: "UUIDv6", nanoid: "nanoid", guid: "GUID", cuid: "cuid", cuid2: "cuid2", ulid: "ULID", xid: "XID", ksuid: "KSUID", datetime: "ISO dato- og klokkeslæt", date: "ISO-dato", time: "ISO-klokkeslæt", duration: "ISO-varighed", ipv4: "IPv4-område", ipv6: "IPv6-område", cidrv4: "IPv4-spektrum", cidrv6: "IPv6-spektrum", base64: "base64-kodet streng", base64url: "base64url-kodet streng", json_string: "JSON-streng", e164: "E.164-nummer", jwt: "JWT", template_literal: "input" }, t = { nan: "NaN", string: "streng", number: "tal", boolean: "boolean", array: "liste", object: "objekt", set: "sæt", file: "fil" };
-  return (n) => {
-    switch (n.code) {
-      case "invalid_type": {
-        let v = t[n.expected] ?? n.expected, $ = k(n.input), u = t[$] ?? $;
-        if (/^[A-Z]/.test(n.expected))
-          return `Ugyldigt input: forventede instanceof ${n.expected}, fik ${u}`;
-        return `Ugyldigt input: forventede ${v}, fik ${u}`;
-      }
-      case "invalid_value":
-        if (n.values.length === 1)
-          return `Ugyldig værdi: forventede ${U(n.values[0])}`;
-        return `Ugyldigt valg: forventede en af følgende ${b(n.values, "|")}`;
-      case "too_big": {
-        let v = n.inclusive ? "<=" : "<", $ = i(n.origin), u = t[n.origin] ?? n.origin;
-        if ($)
-          return `For stor: forventede ${u ?? "value"} ${$.verb} ${v} ${n.maximum.toString()} ${$.unit ?? "elementer"}`;
-        return `For stor: forventede ${u ?? "value"} havde ${v} ${n.maximum.toString()}`;
-      }
-      case "too_small": {
-        let v = n.inclusive ? ">=" : ">", $ = i(n.origin), u = t[n.origin] ?? n.origin;
-        if ($)
-          return `For lille: forventede ${u} ${$.verb} ${v} ${n.minimum.toString()} ${$.unit}`;
-        return `For lille: forventede ${u} havde ${v} ${n.minimum.toString()}`;
-      }
-      case "invalid_format": {
-        let v = n;
-        if (v.format === "starts_with")
-          return `Ugyldig streng: skal starte med "${v.prefix}"`;
-        if (v.format === "ends_with")
-          return `Ugyldig streng: skal ende med "${v.suffix}"`;
-        if (v.format === "includes")
-          return `Ugyldig streng: skal indeholde "${v.includes}"`;
-        if (v.format === "regex")
-          return `Ugyldig streng: skal matche mønsteret ${v.pattern}`;
-        return `Ugyldig ${o[v.format] ?? n.format}`;
-      }
-      case "not_multiple_of":
-        return `Ugyldigt tal: skal være deleligt med ${n.divisor}`;
-      case "unrecognized_keys":
-        return `${n.keys.length > 1 ? "Ukendte nøgler" : "Ukendt nøgle"}: ${b(n.keys, ", ")}`;
-      case "invalid_key":
-        return `Ugyldig nøgle i ${n.origin}`;
-      case "invalid_union":
-        return "Ugyldigt input: matcher ingen af de tilladte typer";
-      case "invalid_element":
-        return `Ugyldig værdi i ${n.origin}`;
-      default:
-        return "Ugyldigt input";
-    }
-  };
-};
-function xt() {
-  return { localeError: ac() };
-}
-var pc = () => {
-  let r = { string: { unit: "Zeichen", verb: "zu haben" }, file: { unit: "Bytes", verb: "zu haben" }, array: { unit: "Elemente", verb: "zu haben" }, set: { unit: "Elemente", verb: "zu haben" } };
-  function i(n) {
-    return r[n] ?? null;
-  }
-  let o = { regex: "Eingabe", email: "E-Mail-Adresse", url: "URL", emoji: "Emoji", uuid: "UUID", uuidv4: "UUIDv4", uuidv6: "UUIDv6", nanoid: "nanoid", guid: "GUID", cuid: "cuid", cuid2: "cuid2", ulid: "ULID", xid: "XID", ksuid: "KSUID", datetime: "ISO-Datum und -Uhrzeit", date: "ISO-Datum", time: "ISO-Uhrzeit", duration: "ISO-Dauer", ipv4: "IPv4-Adresse", ipv6: "IPv6-Adresse", cidrv4: "IPv4-Bereich", cidrv6: "IPv6-Bereich", base64: "Base64-codierter String", base64url: "Base64-URL-codierter String", json_string: "JSON-String", e164: "E.164-Nummer", jwt: "JWT", template_literal: "Eingabe" }, t = { nan: "NaN", number: "Zahl", array: "Array" };
-  return (n) => {
-    switch (n.code) {
-      case "invalid_type": {
-        let v = t[n.expected] ?? n.expected, $ = k(n.input), u = t[$] ?? $;
-        if (/^[A-Z]/.test(n.expected))
-          return `Ungültige Eingabe: erwartet instanceof ${n.expected}, erhalten ${u}`;
-        return `Ungültige Eingabe: erwartet ${v}, erhalten ${u}`;
-      }
-      case "invalid_value":
-        if (n.values.length === 1)
-          return `Ungültige Eingabe: erwartet ${U(n.values[0])}`;
-        return `Ungültige Option: erwartet eine von ${b(n.values, "|")}`;
-      case "too_big": {
-        let v = n.inclusive ? "<=" : "<", $ = i(n.origin);
-        if ($)
-          return `Zu groß: erwartet, dass ${n.origin ?? "Wert"} ${v}${n.maximum.toString()} ${$.unit ?? "Elemente"} hat`;
-        return `Zu groß: erwartet, dass ${n.origin ?? "Wert"} ${v}${n.maximum.toString()} ist`;
-      }
-      case "too_small": {
-        let v = n.inclusive ? ">=" : ">", $ = i(n.origin);
-        if ($)
-          return `Zu klein: erwartet, dass ${n.origin} ${v}${n.minimum.toString()} ${$.unit} hat`;
-        return `Zu klein: erwartet, dass ${n.origin} ${v}${n.minimum.toString()} ist`;
-      }
-      case "invalid_format": {
-        let v = n;
-        if (v.format === "starts_with")
-          return `Ungültiger String: muss mit "${v.prefix}" beginnen`;
-        if (v.format === "ends_with")
-          return `Ungültiger String: muss mit "${v.suffix}" enden`;
-        if (v.format === "includes")
-          return `Ungültiger String: muss "${v.includes}" enthalten`;
-        if (v.format === "regex")
-          return `Ungültiger String: muss dem Muster ${v.pattern} entsprechen`;
-        return `Ungültig: ${o[v.format] ?? n.format}`;
-      }
-      case "not_multiple_of":
-        return `Ungültige Zahl: muss ein Vielfaches von ${n.divisor} sein`;
-      case "unrecognized_keys":
-        return `${n.keys.length > 1 ? "Unbekannte Schlüssel" : "Unbekannter Schlüssel"}: ${b(n.keys, ", ")}`;
-      case "invalid_key":
-        return `Ungültiger Schlüssel in ${n.origin}`;
-      case "invalid_union":
-        return "Ungültige Eingabe";
-      case "invalid_element":
-        return `Ungültiger Wert in ${n.origin}`;
-      default:
-        return "Ungültige Eingabe";
-    }
-  };
-};
-function Zt() {
-  return { localeError: pc() };
-}
-var sc = () => {
-  let r = { string: { unit: "characters", verb: "to have" }, file: { unit: "bytes", verb: "to have" }, array: { unit: "items", verb: "to have" }, set: { unit: "items", verb: "to have" }, map: { unit: "entries", verb: "to have" } };
-  function i(n) {
-    return r[n] ?? null;
-  }
-  let o = { regex: "input", email: "email address", url: "URL", emoji: "emoji", uuid: "UUID", uuidv4: "UUIDv4", uuidv6: "UUIDv6", nanoid: "nanoid", guid: "GUID", cuid: "cuid", cuid2: "cuid2", ulid: "ULID", xid: "XID", ksuid: "KSUID", datetime: "ISO datetime", date: "ISO date", time: "ISO time", duration: "ISO duration", ipv4: "IPv4 address", ipv6: "IPv6 address", mac: "MAC address", cidrv4: "IPv4 range", cidrv6: "IPv6 range", base64: "base64-encoded string", base64url: "base64url-encoded string", json_string: "JSON string", e164: "E.164 number", jwt: "JWT", template_literal: "input" }, t = { nan: "NaN" };
-  return (n) => {
-    switch (n.code) {
-      case "invalid_type": {
-        let v = t[n.expected] ?? n.expected, $ = k(n.input), u = t[$] ?? $;
-        return `Invalid input: expected ${v}, received ${u}`;
-      }
-      case "invalid_value":
-        if (n.values.length === 1)
-          return `Invalid input: expected ${U(n.values[0])}`;
-        return `Invalid option: expected one of ${b(n.values, "|")}`;
-      case "too_big": {
-        let v = n.inclusive ? "<=" : "<", $ = i(n.origin);
-        if ($)
-          return `Too big: expected ${n.origin ?? "value"} to have ${v}${n.maximum.toString()} ${$.unit ?? "elements"}`;
-        return `Too big: expected ${n.origin ?? "value"} to be ${v}${n.maximum.toString()}`;
-      }
-      case "too_small": {
-        let v = n.inclusive ? ">=" : ">", $ = i(n.origin);
-        if ($)
-          return `Too small: expected ${n.origin} to have ${v}${n.minimum.toString()} ${$.unit}`;
-        return `Too small: expected ${n.origin} to be ${v}${n.minimum.toString()}`;
-      }
-      case "invalid_format": {
-        let v = n;
-        if (v.format === "starts_with")
-          return `Invalid string: must start with "${v.prefix}"`;
-        if (v.format === "ends_with")
-          return `Invalid string: must end with "${v.suffix}"`;
-        if (v.format === "includes")
-          return `Invalid string: must include "${v.includes}"`;
-        if (v.format === "regex")
-          return `Invalid string: must match pattern ${v.pattern}`;
-        return `Invalid ${o[v.format] ?? n.format}`;
-      }
-      case "not_multiple_of":
-        return `Invalid number: must be a multiple of ${n.divisor}`;
-      case "unrecognized_keys":
-        return `Unrecognized key${n.keys.length > 1 ? "s" : ""}: ${b(n.keys, ", ")}`;
-      case "invalid_key":
-        return `Invalid key in ${n.origin}`;
-      case "invalid_union":
-        return "Invalid input";
-      case "invalid_element":
-        return `Invalid value in ${n.origin}`;
-      default:
-        return "Invalid input";
-    }
-  };
-};
-function kn() {
-  return { localeError: sc() };
-}
-var r4 = () => {
-  let r = { string: { unit: "karaktrojn", verb: "havi" }, file: { unit: "bajtojn", verb: "havi" }, array: { unit: "elementojn", verb: "havi" }, set: { unit: "elementojn", verb: "havi" } };
-  function i(n) {
-    return r[n] ?? null;
-  }
-  let o = { regex: "enigo", email: "retadreso", url: "URL", emoji: "emoĝio", uuid: "UUID", uuidv4: "UUIDv4", uuidv6: "UUIDv6", nanoid: "nanoid", guid: "GUID", cuid: "cuid", cuid2: "cuid2", ulid: "ULID", xid: "XID", ksuid: "KSUID", datetime: "ISO-datotempo", date: "ISO-dato", time: "ISO-tempo", duration: "ISO-daŭro", ipv4: "IPv4-adreso", ipv6: "IPv6-adreso", cidrv4: "IPv4-rango", cidrv6: "IPv6-rango", base64: "64-ume kodita karaktraro", base64url: "URL-64-ume kodita karaktraro", json_string: "JSON-karaktraro", e164: "E.164-nombro", jwt: "JWT", template_literal: "enigo" }, t = { nan: "NaN", number: "nombro", array: "tabelo", null: "senvalora" };
-  return (n) => {
-    switch (n.code) {
-      case "invalid_type": {
-        let v = t[n.expected] ?? n.expected, $ = k(n.input), u = t[$] ?? $;
-        if (/^[A-Z]/.test(n.expected))
-          return `Nevalida enigo: atendiĝis instanceof ${n.expected}, riceviĝis ${u}`;
-        return `Nevalida enigo: atendiĝis ${v}, riceviĝis ${u}`;
-      }
-      case "invalid_value":
-        if (n.values.length === 1)
-          return `Nevalida enigo: atendiĝis ${U(n.values[0])}`;
-        return `Nevalida opcio: atendiĝis unu el ${b(n.values, "|")}`;
-      case "too_big": {
-        let v = n.inclusive ? "<=" : "<", $ = i(n.origin);
-        if ($)
-          return `Tro granda: atendiĝis ke ${n.origin ?? "valoro"} havu ${v}${n.maximum.toString()} ${$.unit ?? "elementojn"}`;
-        return `Tro granda: atendiĝis ke ${n.origin ?? "valoro"} havu ${v}${n.maximum.toString()}`;
-      }
-      case "too_small": {
-        let v = n.inclusive ? ">=" : ">", $ = i(n.origin);
-        if ($)
-          return `Tro malgranda: atendiĝis ke ${n.origin} havu ${v}${n.minimum.toString()} ${$.unit}`;
-        return `Tro malgranda: atendiĝis ke ${n.origin} estu ${v}${n.minimum.toString()}`;
-      }
-      case "invalid_format": {
-        let v = n;
-        if (v.format === "starts_with")
-          return `Nevalida karaktraro: devas komenciĝi per "${v.prefix}"`;
-        if (v.format === "ends_with")
-          return `Nevalida karaktraro: devas finiĝi per "${v.suffix}"`;
-        if (v.format === "includes")
-          return `Nevalida karaktraro: devas inkluzivi "${v.includes}"`;
-        if (v.format === "regex")
-          return `Nevalida karaktraro: devas kongrui kun la modelo ${v.pattern}`;
-        return `Nevalida ${o[v.format] ?? n.format}`;
-      }
-      case "not_multiple_of":
-        return `Nevalida nombro: devas esti oblo de ${n.divisor}`;
-      case "unrecognized_keys":
-        return `Nekonata${n.keys.length > 1 ? "j" : ""} ŝlosilo${n.keys.length > 1 ? "j" : ""}: ${b(n.keys, ", ")}`;
-      case "invalid_key":
-        return `Nevalida ŝlosilo en ${n.origin}`;
-      case "invalid_union":
-        return "Nevalida enigo";
-      case "invalid_element":
-        return `Nevalida valoro en ${n.origin}`;
-      default:
-        return "Nevalida enigo";
-    }
-  };
-};
-function dt() {
-  return { localeError: r4() };
-}
-var n4 = () => {
-  let r = { string: { unit: "caracteres", verb: "tener" }, file: { unit: "bytes", verb: "tener" }, array: { unit: "elementos", verb: "tener" }, set: { unit: "elementos", verb: "tener" } };
-  function i(n) {
-    return r[n] ?? null;
-  }
-  let o = { regex: "entrada", email: "dirección de correo electrónico", url: "URL", emoji: "emoji", uuid: "UUID", uuidv4: "UUIDv4", uuidv6: "UUIDv6", nanoid: "nanoid", guid: "GUID", cuid: "cuid", cuid2: "cuid2", ulid: "ULID", xid: "XID", ksuid: "KSUID", datetime: "fecha y hora ISO", date: "fecha ISO", time: "hora ISO", duration: "duración ISO", ipv4: "dirección IPv4", ipv6: "dirección IPv6", cidrv4: "rango IPv4", cidrv6: "rango IPv6", base64: "cadena codificada en base64", base64url: "URL codificada en base64", json_string: "cadena JSON", e164: "número E.164", jwt: "JWT", template_literal: "entrada" }, t = { nan: "NaN", string: "texto", number: "número", boolean: "booleano", array: "arreglo", object: "objeto", set: "conjunto", file: "archivo", date: "fecha", bigint: "número grande", symbol: "símbolo", undefined: "indefinido", null: "nulo", function: "función", map: "mapa", record: "registro", tuple: "tupla", enum: "enumeración", union: "unión", literal: "literal", promise: "promesa", void: "vacío", never: "nunca", unknown: "desconocido", any: "cualquiera" };
-  return (n) => {
-    switch (n.code) {
-      case "invalid_type": {
-        let v = t[n.expected] ?? n.expected, $ = k(n.input), u = t[$] ?? $;
-        if (/^[A-Z]/.test(n.expected))
-          return `Entrada inválida: se esperaba instanceof ${n.expected}, recibido ${u}`;
-        return `Entrada inválida: se esperaba ${v}, recibido ${u}`;
-      }
-      case "invalid_value":
-        if (n.values.length === 1)
-          return `Entrada inválida: se esperaba ${U(n.values[0])}`;
-        return `Opción inválida: se esperaba una de ${b(n.values, "|")}`;
-      case "too_big": {
-        let v = n.inclusive ? "<=" : "<", $ = i(n.origin), u = t[n.origin] ?? n.origin;
-        if ($)
-          return `Demasiado grande: se esperaba que ${u ?? "valor"} tuviera ${v}${n.maximum.toString()} ${$.unit ?? "elementos"}`;
-        return `Demasiado grande: se esperaba que ${u ?? "valor"} fuera ${v}${n.maximum.toString()}`;
-      }
-      case "too_small": {
-        let v = n.inclusive ? ">=" : ">", $ = i(n.origin), u = t[n.origin] ?? n.origin;
-        if ($)
-          return `Demasiado pequeño: se esperaba que ${u} tuviera ${v}${n.minimum.toString()} ${$.unit}`;
-        return `Demasiado pequeño: se esperaba que ${u} fuera ${v}${n.minimum.toString()}`;
-      }
-      case "invalid_format": {
-        let v = n;
-        if (v.format === "starts_with")
-          return `Cadena inválida: debe comenzar con "${v.prefix}"`;
-        if (v.format === "ends_with")
-          return `Cadena inválida: debe terminar en "${v.suffix}"`;
-        if (v.format === "includes")
-          return `Cadena inválida: debe incluir "${v.includes}"`;
-        if (v.format === "regex")
-          return `Cadena inválida: debe coincidir con el patrón ${v.pattern}`;
-        return `Inválido ${o[v.format] ?? n.format}`;
-      }
-      case "not_multiple_of":
-        return `Número inválido: debe ser múltiplo de ${n.divisor}`;
-      case "unrecognized_keys":
-        return `Llave${n.keys.length > 1 ? "s" : ""} desconocida${n.keys.length > 1 ? "s" : ""}: ${b(n.keys, ", ")}`;
-      case "invalid_key":
-        return `Llave inválida en ${t[n.origin] ?? n.origin}`;
-      case "invalid_union":
-        return "Entrada inválida";
-      case "invalid_element":
-        return `Valor inválido en ${t[n.origin] ?? n.origin}`;
-      default:
-        return "Entrada inválida";
-    }
-  };
-};
-function Ct() {
-  return { localeError: n4() };
-}
-var i4 = () => {
-  let r = { string: { unit: "کاراکتر", verb: "داشته باشد" }, file: { unit: "بایت", verb: "داشته باشد" }, array: { unit: "آیتم", verb: "داشته باشد" }, set: { unit: "آیتم", verb: "داشته باشد" } };
-  function i(n) {
-    return r[n] ?? null;
-  }
-  let o = { regex: "ورودی", email: "آدرس ایمیل", url: "URL", emoji: "ایموجی", uuid: "UUID", uuidv4: "UUIDv4", uuidv6: "UUIDv6", nanoid: "nanoid", guid: "GUID", cuid: "cuid", cuid2: "cuid2", ulid: "ULID", xid: "XID", ksuid: "KSUID", datetime: "تاریخ و زمان ایزو", date: "تاریخ ایزو", time: "زمان ایزو", duration: "مدت زمان ایزو", ipv4: "IPv4 آدرس", ipv6: "IPv6 آدرس", cidrv4: "IPv4 دامنه", cidrv6: "IPv6 دامنه", base64: "base64-encoded رشته", base64url: "base64url-encoded رشته", json_string: "JSON رشته", e164: "E.164 عدد", jwt: "JWT", template_literal: "ورودی" }, t = { nan: "NaN", number: "عدد", array: "آرایه" };
-  return (n) => {
-    switch (n.code) {
-      case "invalid_type": {
-        let v = t[n.expected] ?? n.expected, $ = k(n.input), u = t[$] ?? $;
-        if (/^[A-Z]/.test(n.expected))
-          return `ورودی نامعتبر: می‌بایست instanceof ${n.expected} می‌بود، ${u} دریافت شد`;
-        return `ورودی نامعتبر: می‌بایست ${v} می‌بود، ${u} دریافت شد`;
-      }
-      case "invalid_value":
-        if (n.values.length === 1)
-          return `ورودی نامعتبر: می‌بایست ${U(n.values[0])} می‌بود`;
-        return `گزینه نامعتبر: می‌بایست یکی از ${b(n.values, "|")} می‌بود`;
-      case "too_big": {
-        let v = n.inclusive ? "<=" : "<", $ = i(n.origin);
-        if ($)
-          return `خیلی بزرگ: ${n.origin ?? "مقدار"} باید ${v}${n.maximum.toString()} ${$.unit ?? "عنصر"} باشد`;
-        return `خیلی بزرگ: ${n.origin ?? "مقدار"} باید ${v}${n.maximum.toString()} باشد`;
-      }
-      case "too_small": {
-        let v = n.inclusive ? ">=" : ">", $ = i(n.origin);
-        if ($)
-          return `خیلی کوچک: ${n.origin} باید ${v}${n.minimum.toString()} ${$.unit} باشد`;
-        return `خیلی کوچک: ${n.origin} باید ${v}${n.minimum.toString()} باشد`;
-      }
-      case "invalid_format": {
-        let v = n;
-        if (v.format === "starts_with")
-          return `رشته نامعتبر: باید با "${v.prefix}" شروع شود`;
-        if (v.format === "ends_with")
-          return `رشته نامعتبر: باید با "${v.suffix}" تمام شود`;
-        if (v.format === "includes")
-          return `رشته نامعتبر: باید شامل "${v.includes}" باشد`;
-        if (v.format === "regex")
-          return `رشته نامعتبر: باید با الگوی ${v.pattern} مطابقت داشته باشد`;
-        return `${o[v.format] ?? n.format} نامعتبر`;
-      }
-      case "not_multiple_of":
-        return `عدد نامعتبر: باید مضرب ${n.divisor} باشد`;
-      case "unrecognized_keys":
-        return `کلید${n.keys.length > 1 ? "های" : ""} ناشناس: ${b(n.keys, ", ")}`;
-      case "invalid_key":
-        return `کلید ناشناس در ${n.origin}`;
-      case "invalid_union":
-        return "ورودی نامعتبر";
-      case "invalid_element":
-        return `مقدار نامعتبر در ${n.origin}`;
-      default:
-        return "ورودی نامعتبر";
-    }
-  };
-};
-function ft() {
-  return { localeError: i4() };
-}
-var v4 = () => {
-  let r = { string: { unit: "merkkiä", subject: "merkkijonon" }, file: { unit: "tavua", subject: "tiedoston" }, array: { unit: "alkiota", subject: "listan" }, set: { unit: "alkiota", subject: "joukon" }, number: { unit: "", subject: "luvun" }, bigint: { unit: "", subject: "suuren kokonaisluvun" }, int: { unit: "", subject: "kokonaisluvun" }, date: { unit: "", subject: "päivämäärän" } };
-  function i(n) {
-    return r[n] ?? null;
-  }
-  let o = { regex: "säännöllinen lauseke", email: "sähköpostiosoite", url: "URL-osoite", emoji: "emoji", uuid: "UUID", uuidv4: "UUIDv4", uuidv6: "UUIDv6", nanoid: "nanoid", guid: "GUID", cuid: "cuid", cuid2: "cuid2", ulid: "ULID", xid: "XID", ksuid: "KSUID", datetime: "ISO-aikaleima", date: "ISO-päivämäärä", time: "ISO-aika", duration: "ISO-kesto", ipv4: "IPv4-osoite", ipv6: "IPv6-osoite", cidrv4: "IPv4-alue", cidrv6: "IPv6-alue", base64: "base64-koodattu merkkijono", base64url: "base64url-koodattu merkkijono", json_string: "JSON-merkkijono", e164: "E.164-luku", jwt: "JWT", template_literal: "templaattimerkkijono" }, t = { nan: "NaN" };
-  return (n) => {
-    switch (n.code) {
-      case "invalid_type": {
-        let v = t[n.expected] ?? n.expected, $ = k(n.input), u = t[$] ?? $;
-        if (/^[A-Z]/.test(n.expected))
-          return `Virheellinen tyyppi: odotettiin instanceof ${n.expected}, oli ${u}`;
-        return `Virheellinen tyyppi: odotettiin ${v}, oli ${u}`;
-      }
-      case "invalid_value":
-        if (n.values.length === 1)
-          return `Virheellinen syöte: täytyy olla ${U(n.values[0])}`;
-        return `Virheellinen valinta: täytyy olla yksi seuraavista: ${b(n.values, "|")}`;
-      case "too_big": {
-        let v = n.inclusive ? "<=" : "<", $ = i(n.origin);
-        if ($)
-          return `Liian suuri: ${$.subject} täytyy olla ${v}${n.maximum.toString()} ${$.unit}`.trim();
-        return `Liian suuri: arvon täytyy olla ${v}${n.maximum.toString()}`;
-      }
-      case "too_small": {
-        let v = n.inclusive ? ">=" : ">", $ = i(n.origin);
-        if ($)
-          return `Liian pieni: ${$.subject} täytyy olla ${v}${n.minimum.toString()} ${$.unit}`.trim();
-        return `Liian pieni: arvon täytyy olla ${v}${n.minimum.toString()}`;
-      }
-      case "invalid_format": {
-        let v = n;
-        if (v.format === "starts_with")
-          return `Virheellinen syöte: täytyy alkaa "${v.prefix}"`;
-        if (v.format === "ends_with")
-          return `Virheellinen syöte: täytyy loppua "${v.suffix}"`;
-        if (v.format === "includes")
-          return `Virheellinen syöte: täytyy sisältää "${v.includes}"`;
-        if (v.format === "regex")
-          return `Virheellinen syöte: täytyy vastata säännöllistä lauseketta ${v.pattern}`;
-        return `Virheellinen ${o[v.format] ?? n.format}`;
-      }
-      case "not_multiple_of":
-        return `Virheellinen luku: täytyy olla luvun ${n.divisor} monikerta`;
-      case "unrecognized_keys":
-        return `${n.keys.length > 1 ? "Tuntemattomat avaimet" : "Tuntematon avain"}: ${b(n.keys, ", ")}`;
-      case "invalid_key":
-        return "Virheellinen avain tietueessa";
-      case "invalid_union":
-        return "Virheellinen unioni";
-      case "invalid_element":
-        return "Virheellinen arvo joukossa";
-      default:
-        return "Virheellinen syöte";
-    }
-  };
-};
-function yt() {
-  return { localeError: v4() };
-}
-var o4 = () => {
-  let r = { string: { unit: "caractères", verb: "avoir" }, file: { unit: "octets", verb: "avoir" }, array: { unit: "éléments", verb: "avoir" }, set: { unit: "éléments", verb: "avoir" } };
-  function i(n) {
-    return r[n] ?? null;
-  }
-  let o = { regex: "entrée", email: "adresse e-mail", url: "URL", emoji: "emoji", uuid: "UUID", uuidv4: "UUIDv4", uuidv6: "UUIDv6", nanoid: "nanoid", guid: "GUID", cuid: "cuid", cuid2: "cuid2", ulid: "ULID", xid: "XID", ksuid: "KSUID", datetime: "date et heure ISO", date: "date ISO", time: "heure ISO", duration: "durée ISO", ipv4: "adresse IPv4", ipv6: "adresse IPv6", cidrv4: "plage IPv4", cidrv6: "plage IPv6", base64: "chaîne encodée en base64", base64url: "chaîne encodée en base64url", json_string: "chaîne JSON", e164: "numéro E.164", jwt: "JWT", template_literal: "entrée" }, t = { nan: "NaN", number: "nombre", array: "tableau" };
-  return (n) => {
-    switch (n.code) {
-      case "invalid_type": {
-        let v = t[n.expected] ?? n.expected, $ = k(n.input), u = t[$] ?? $;
-        if (/^[A-Z]/.test(n.expected))
-          return `Entrée invalide : instanceof ${n.expected} attendu, ${u} reçu`;
-        return `Entrée invalide : ${v} attendu, ${u} reçu`;
-      }
-      case "invalid_value":
-        if (n.values.length === 1)
-          return `Entrée invalide : ${U(n.values[0])} attendu`;
-        return `Option invalide : une valeur parmi ${b(n.values, "|")} attendue`;
-      case "too_big": {
-        let v = n.inclusive ? "<=" : "<", $ = i(n.origin);
-        if ($)
-          return `Trop grand : ${n.origin ?? "valeur"} doit ${$.verb} ${v}${n.maximum.toString()} ${$.unit ?? "élément(s)"}`;
-        return `Trop grand : ${n.origin ?? "valeur"} doit être ${v}${n.maximum.toString()}`;
-      }
-      case "too_small": {
-        let v = n.inclusive ? ">=" : ">", $ = i(n.origin);
-        if ($)
-          return `Trop petit : ${n.origin} doit ${$.verb} ${v}${n.minimum.toString()} ${$.unit}`;
-        return `Trop petit : ${n.origin} doit être ${v}${n.minimum.toString()}`;
-      }
-      case "invalid_format": {
-        let v = n;
-        if (v.format === "starts_with")
-          return `Chaîne invalide : doit commencer par "${v.prefix}"`;
-        if (v.format === "ends_with")
-          return `Chaîne invalide : doit se terminer par "${v.suffix}"`;
-        if (v.format === "includes")
-          return `Chaîne invalide : doit inclure "${v.includes}"`;
-        if (v.format === "regex")
-          return `Chaîne invalide : doit correspondre au modèle ${v.pattern}`;
-        return `${o[v.format] ?? n.format} invalide`;
-      }
-      case "not_multiple_of":
-        return `Nombre invalide : doit être un multiple de ${n.divisor}`;
-      case "unrecognized_keys":
-        return `Clé${n.keys.length > 1 ? "s" : ""} non reconnue${n.keys.length > 1 ? "s" : ""} : ${b(n.keys, ", ")}`;
-      case "invalid_key":
-        return `Clé invalide dans ${n.origin}`;
-      case "invalid_union":
-        return "Entrée invalide";
-      case "invalid_element":
-        return `Valeur invalide dans ${n.origin}`;
-      default:
-        return "Entrée invalide";
-    }
-  };
-};
-function ht() {
-  return { localeError: o4() };
-}
-var t4 = () => {
-  let r = { string: { unit: "caractères", verb: "avoir" }, file: { unit: "octets", verb: "avoir" }, array: { unit: "éléments", verb: "avoir" }, set: { unit: "éléments", verb: "avoir" } };
-  function i(n) {
-    return r[n] ?? null;
-  }
-  let o = { regex: "entrée", email: "adresse courriel", url: "URL", emoji: "emoji", uuid: "UUID", uuidv4: "UUIDv4", uuidv6: "UUIDv6", nanoid: "nanoid", guid: "GUID", cuid: "cuid", cuid2: "cuid2", ulid: "ULID", xid: "XID", ksuid: "KSUID", datetime: "date-heure ISO", date: "date ISO", time: "heure ISO", duration: "durée ISO", ipv4: "adresse IPv4", ipv6: "adresse IPv6", cidrv4: "plage IPv4", cidrv6: "plage IPv6", base64: "chaîne encodée en base64", base64url: "chaîne encodée en base64url", json_string: "chaîne JSON", e164: "numéro E.164", jwt: "JWT", template_literal: "entrée" }, t = { nan: "NaN" };
-  return (n) => {
-    switch (n.code) {
-      case "invalid_type": {
-        let v = t[n.expected] ?? n.expected, $ = k(n.input), u = t[$] ?? $;
-        if (/^[A-Z]/.test(n.expected))
-          return `Entrée invalide : attendu instanceof ${n.expected}, reçu ${u}`;
-        return `Entrée invalide : attendu ${v}, reçu ${u}`;
-      }
-      case "invalid_value":
-        if (n.values.length === 1)
-          return `Entrée invalide : attendu ${U(n.values[0])}`;
-        return `Option invalide : attendu l'une des valeurs suivantes ${b(n.values, "|")}`;
-      case "too_big": {
-        let v = n.inclusive ? "≤" : "<", $ = i(n.origin);
-        if ($)
-          return `Trop grand : attendu que ${n.origin ?? "la valeur"} ait ${v}${n.maximum.toString()} ${$.unit}`;
-        return `Trop grand : attendu que ${n.origin ?? "la valeur"} soit ${v}${n.maximum.toString()}`;
-      }
-      case "too_small": {
-        let v = n.inclusive ? "≥" : ">", $ = i(n.origin);
-        if ($)
-          return `Trop petit : attendu que ${n.origin} ait ${v}${n.minimum.toString()} ${$.unit}`;
-        return `Trop petit : attendu que ${n.origin} soit ${v}${n.minimum.toString()}`;
-      }
-      case "invalid_format": {
-        let v = n;
-        if (v.format === "starts_with")
-          return `Chaîne invalide : doit commencer par "${v.prefix}"`;
-        if (v.format === "ends_with")
-          return `Chaîne invalide : doit se terminer par "${v.suffix}"`;
-        if (v.format === "includes")
-          return `Chaîne invalide : doit inclure "${v.includes}"`;
-        if (v.format === "regex")
-          return `Chaîne invalide : doit correspondre au motif ${v.pattern}`;
-        return `${o[v.format] ?? n.format} invalide`;
-      }
-      case "not_multiple_of":
-        return `Nombre invalide : doit être un multiple de ${n.divisor}`;
-      case "unrecognized_keys":
-        return `Clé${n.keys.length > 1 ? "s" : ""} non reconnue${n.keys.length > 1 ? "s" : ""} : ${b(n.keys, ", ")}`;
-      case "invalid_key":
-        return `Clé invalide dans ${n.origin}`;
-      case "invalid_union":
-        return "Entrée invalide";
-      case "invalid_element":
-        return `Valeur invalide dans ${n.origin}`;
-      default:
-        return "Entrée invalide";
-    }
-  };
-};
-function at() {
-  return { localeError: t4() };
-}
-var $4 = () => {
-  let r = { string: { label: "מחרוזת", gender: "f" }, number: { label: "מספר", gender: "m" }, boolean: { label: "ערך בוליאני", gender: "m" }, bigint: { label: "BigInt", gender: "m" }, date: { label: "תאריך", gender: "m" }, array: { label: "מערך", gender: "m" }, object: { label: "אובייקט", gender: "m" }, null: { label: "ערך ריק (null)", gender: "m" }, undefined: { label: "ערך לא מוגדר (undefined)", gender: "m" }, symbol: { label: "סימבול (Symbol)", gender: "m" }, function: { label: "פונקציה", gender: "f" }, map: { label: "מפה (Map)", gender: "f" }, set: { label: "קבוצה (Set)", gender: "f" }, file: { label: "קובץ", gender: "m" }, promise: { label: "Promise", gender: "m" }, NaN: { label: "NaN", gender: "m" }, unknown: { label: "ערך לא ידוע", gender: "m" }, value: { label: "ערך", gender: "m" } }, i = { string: { unit: "תווים", shortLabel: "קצר", longLabel: "ארוך" }, file: { unit: "בייטים", shortLabel: "קטן", longLabel: "גדול" }, array: { unit: "פריטים", shortLabel: "קטן", longLabel: "גדול" }, set: { unit: "פריטים", shortLabel: "קטן", longLabel: "גדול" }, number: { unit: "", shortLabel: "קטן", longLabel: "גדול" } }, o = (e) => e ? r[e] : undefined, t = (e) => {
-    let c = o(e);
-    if (c)
-      return c.label;
-    return e ?? r.unknown.label;
-  }, n = (e) => `ה${t(e)}`, v = (e) => {
-    return (o(e)?.gender ?? "m") === "f" ? "צריכה להיות" : "צריך להיות";
-  }, $ = (e) => {
-    if (!e)
-      return null;
-    return i[e] ?? null;
-  }, u = { regex: { label: "קלט", gender: "m" }, email: { label: "כתובת אימייל", gender: "f" }, url: { label: "כתובת רשת", gender: "f" }, emoji: { label: "אימוג'י", gender: "m" }, uuid: { label: "UUID", gender: "m" }, nanoid: { label: "nanoid", gender: "m" }, guid: { label: "GUID", gender: "m" }, cuid: { label: "cuid", gender: "m" }, cuid2: { label: "cuid2", gender: "m" }, ulid: { label: "ULID", gender: "m" }, xid: { label: "XID", gender: "m" }, ksuid: { label: "KSUID", gender: "m" }, datetime: { label: "תאריך וזמן ISO", gender: "m" }, date: { label: "תאריך ISO", gender: "m" }, time: { label: "זמן ISO", gender: "m" }, duration: { label: "משך זמן ISO", gender: "m" }, ipv4: { label: "כתובת IPv4", gender: "f" }, ipv6: { label: "כתובת IPv6", gender: "f" }, cidrv4: { label: "טווח IPv4", gender: "m" }, cidrv6: { label: "טווח IPv6", gender: "m" }, base64: { label: "מחרוזת בבסיס 64", gender: "f" }, base64url: { label: "מחרוזת בבסיס 64 לכתובות רשת", gender: "f" }, json_string: { label: "מחרוזת JSON", gender: "f" }, e164: { label: "מספר E.164", gender: "m" }, jwt: { label: "JWT", gender: "m" }, ends_with: { label: "קלט", gender: "m" }, includes: { label: "קלט", gender: "m" }, lowercase: { label: "קלט", gender: "m" }, starts_with: { label: "קלט", gender: "m" }, uppercase: { label: "קלט", gender: "m" } }, l = { nan: "NaN" };
-  return (e) => {
-    switch (e.code) {
-      case "invalid_type": {
-        let c = e.expected, _ = l[c ?? ""] ?? t(c), N = k(e.input), O = l[N] ?? r[N]?.label ?? N;
-        if (/^[A-Z]/.test(e.expected))
-          return `קלט לא תקין: צריך להיות instanceof ${e.expected}, התקבל ${O}`;
-        return `קלט לא תקין: צריך להיות ${_}, התקבל ${O}`;
-      }
-      case "invalid_value": {
-        if (e.values.length === 1)
-          return `ערך לא תקין: הערך חייב להיות ${U(e.values[0])}`;
-        let c = e.values.map((O) => U(O));
-        if (e.values.length === 2)
-          return `ערך לא תקין: האפשרויות המתאימות הן ${c[0]} או ${c[1]}`;
-        let _ = c[c.length - 1];
-        return `ערך לא תקין: האפשרויות המתאימות הן ${c.slice(0, -1).join(", ")} או ${_}`;
-      }
-      case "too_big": {
-        let c = $(e.origin), _ = n(e.origin ?? "value");
-        if (e.origin === "string")
-          return `${c?.longLabel ?? "ארוך"} מדי: ${_} צריכה להכיל ${e.maximum.toString()} ${c?.unit ?? ""} ${e.inclusive ? "או פחות" : "לכל היותר"}`.trim();
-        if (e.origin === "number") {
-          let J = e.inclusive ? `קטן או שווה ל-${e.maximum}` : `קטן מ-${e.maximum}`;
-          return `גדול מדי: ${_} צריך להיות ${J}`;
-        }
-        if (e.origin === "array" || e.origin === "set") {
-          let J = e.origin === "set" ? "צריכה" : "צריך", X = e.inclusive ? `${e.maximum} ${c?.unit ?? ""} או פחות` : `פחות מ-${e.maximum} ${c?.unit ?? ""}`;
-          return `גדול מדי: ${_} ${J} להכיל ${X}`.trim();
-        }
-        let N = e.inclusive ? "<=" : "<", O = v(e.origin ?? "value");
-        if (c?.unit)
-          return `${c.longLabel} מדי: ${_} ${O} ${N}${e.maximum.toString()} ${c.unit}`;
-        return `${c?.longLabel ?? "גדול"} מדי: ${_} ${O} ${N}${e.maximum.toString()}`;
-      }
-      case "too_small": {
-        let c = $(e.origin), _ = n(e.origin ?? "value");
-        if (e.origin === "string")
-          return `${c?.shortLabel ?? "קצר"} מדי: ${_} צריכה להכיל ${e.minimum.toString()} ${c?.unit ?? ""} ${e.inclusive ? "או יותר" : "לפחות"}`.trim();
-        if (e.origin === "number") {
-          let J = e.inclusive ? `גדול או שווה ל-${e.minimum}` : `גדול מ-${e.minimum}`;
-          return `קטן מדי: ${_} צריך להיות ${J}`;
-        }
-        if (e.origin === "array" || e.origin === "set") {
-          let J = e.origin === "set" ? "צריכה" : "צריך";
-          if (e.minimum === 1 && e.inclusive) {
-            let zr = e.origin === "set" ? "לפחות פריט אחד" : "לפחות פריט אחד";
-            return `קטן מדי: ${_} ${J} להכיל ${zr}`;
-          }
-          let X = e.inclusive ? `${e.minimum} ${c?.unit ?? ""} או יותר` : `יותר מ-${e.minimum} ${c?.unit ?? ""}`;
-          return `קטן מדי: ${_} ${J} להכיל ${X}`.trim();
-        }
-        let N = e.inclusive ? ">=" : ">", O = v(e.origin ?? "value");
-        if (c?.unit)
-          return `${c.shortLabel} מדי: ${_} ${O} ${N}${e.minimum.toString()} ${c.unit}`;
-        return `${c?.shortLabel ?? "קטן"} מדי: ${_} ${O} ${N}${e.minimum.toString()}`;
-      }
-      case "invalid_format": {
-        let c = e;
-        if (c.format === "starts_with")
-          return `המחרוזת חייבת להתחיל ב "${c.prefix}"`;
-        if (c.format === "ends_with")
-          return `המחרוזת חייבת להסתיים ב "${c.suffix}"`;
-        if (c.format === "includes")
-          return `המחרוזת חייבת לכלול "${c.includes}"`;
-        if (c.format === "regex")
-          return `המחרוזת חייבת להתאים לתבנית ${c.pattern}`;
-        let _ = u[c.format], N = _?.label ?? c.format, J = (_?.gender ?? "m") === "f" ? "תקינה" : "תקין";
-        return `${N} לא ${J}`;
-      }
-      case "not_multiple_of":
-        return `מספר לא תקין: חייב להיות מכפלה של ${e.divisor}`;
-      case "unrecognized_keys":
-        return `מפתח${e.keys.length > 1 ? "ות" : ""} לא מזוה${e.keys.length > 1 ? "ים" : "ה"}: ${b(e.keys, ", ")}`;
-      case "invalid_key":
-        return "שדה לא תקין באובייקט";
-      case "invalid_union":
-        return "קלט לא תקין";
-      case "invalid_element":
-        return `ערך לא תקין ב${n(e.origin ?? "array")}`;
-      default:
-        return "קלט לא תקין";
-    }
-  };
-};
-function pt() {
-  return { localeError: $4() };
-}
-var u4 = () => {
-  let r = { string: { unit: "karakter", verb: "legyen" }, file: { unit: "byte", verb: "legyen" }, array: { unit: "elem", verb: "legyen" }, set: { unit: "elem", verb: "legyen" } };
-  function i(n) {
-    return r[n] ?? null;
-  }
-  let o = { regex: "bemenet", email: "email cím", url: "URL", emoji: "emoji", uuid: "UUID", uuidv4: "UUIDv4", uuidv6: "UUIDv6", nanoid: "nanoid", guid: "GUID", cuid: "cuid", cuid2: "cuid2", ulid: "ULID", xid: "XID", ksuid: "KSUID", datetime: "ISO időbélyeg", date: "ISO dátum", time: "ISO idő", duration: "ISO időintervallum", ipv4: "IPv4 cím", ipv6: "IPv6 cím", cidrv4: "IPv4 tartomány", cidrv6: "IPv6 tartomány", base64: "base64-kódolt string", base64url: "base64url-kódolt string", json_string: "JSON string", e164: "E.164 szám", jwt: "JWT", template_literal: "bemenet" }, t = { nan: "NaN", number: "szám", array: "tömb" };
-  return (n) => {
-    switch (n.code) {
-      case "invalid_type": {
-        let v = t[n.expected] ?? n.expected, $ = k(n.input), u = t[$] ?? $;
-        if (/^[A-Z]/.test(n.expected))
-          return `Érvénytelen bemenet: a várt érték instanceof ${n.expected}, a kapott érték ${u}`;
-        return `Érvénytelen bemenet: a várt érték ${v}, a kapott érték ${u}`;
-      }
-      case "invalid_value":
-        if (n.values.length === 1)
-          return `Érvénytelen bemenet: a várt érték ${U(n.values[0])}`;
-        return `Érvénytelen opció: valamelyik érték várt ${b(n.values, "|")}`;
-      case "too_big": {
-        let v = n.inclusive ? "<=" : "<", $ = i(n.origin);
-        if ($)
-          return `Túl nagy: ${n.origin ?? "érték"} mérete túl nagy ${v}${n.maximum.toString()} ${$.unit ?? "elem"}`;
-        return `Túl nagy: a bemeneti érték ${n.origin ?? "érték"} túl nagy: ${v}${n.maximum.toString()}`;
-      }
-      case "too_small": {
-        let v = n.inclusive ? ">=" : ">", $ = i(n.origin);
-        if ($)
-          return `Túl kicsi: a bemeneti érték ${n.origin} mérete túl kicsi ${v}${n.minimum.toString()} ${$.unit}`;
-        return `Túl kicsi: a bemeneti érték ${n.origin} túl kicsi ${v}${n.minimum.toString()}`;
-      }
-      case "invalid_format": {
-        let v = n;
-        if (v.format === "starts_with")
-          return `Érvénytelen string: "${v.prefix}" értékkel kell kezdődnie`;
-        if (v.format === "ends_with")
-          return `Érvénytelen string: "${v.suffix}" értékkel kell végződnie`;
-        if (v.format === "includes")
-          return `Érvénytelen string: "${v.includes}" értéket kell tartalmaznia`;
-        if (v.format === "regex")
-          return `Érvénytelen string: ${v.pattern} mintának kell megfelelnie`;
-        return `Érvénytelen ${o[v.format] ?? n.format}`;
-      }
-      case "not_multiple_of":
-        return `Érvénytelen szám: ${n.divisor} többszörösének kell lennie`;
-      case "unrecognized_keys":
-        return `Ismeretlen kulcs${n.keys.length > 1 ? "s" : ""}: ${b(n.keys, ", ")}`;
-      case "invalid_key":
-        return `Érvénytelen kulcs ${n.origin}`;
-      case "invalid_union":
-        return "Érvénytelen bemenet";
-      case "invalid_element":
-        return `Érvénytelen érték: ${n.origin}`;
-      default:
-        return "Érvénytelen bemenet";
-    }
-  };
-};
-function st() {
-  return { localeError: u4() };
-}
-function rl(r, i, o) {
-  return Math.abs(r) === 1 ? i : o;
-}
-function Xr(r) {
-  if (!r)
-    return "";
-  let i = ["ա", "ե", "ը", "ի", "ո", "ու", "օ"], o = r[r.length - 1];
-  return r + (i.includes(o) ? "ն" : "ը");
-}
-var g4 = () => {
-  let r = { string: { unit: { one: "նշան", many: "նշաններ" }, verb: "ունենալ" }, file: { unit: { one: "բայթ", many: "բայթեր" }, verb: "ունենալ" }, array: { unit: { one: "տարր", many: "տարրեր" }, verb: "ունենալ" }, set: { unit: { one: "տարր", many: "տարրեր" }, verb: "ունենալ" } };
-  function i(n) {
-    return r[n] ?? null;
-  }
-  let o = { regex: "մուտք", email: "էլ. հասցե", url: "URL", emoji: "էմոջի", uuid: "UUID", uuidv4: "UUIDv4", uuidv6: "UUIDv6", nanoid: "nanoid", guid: "GUID", cuid: "cuid", cuid2: "cuid2", ulid: "ULID", xid: "XID", ksuid: "KSUID", datetime: "ISO ամսաթիվ և ժամ", date: "ISO ամսաթիվ", time: "ISO ժամ", duration: "ISO տևողություն", ipv4: "IPv4 հասցե", ipv6: "IPv6 հասցե", cidrv4: "IPv4 միջակայք", cidrv6: "IPv6 միջակայք", base64: "base64 ձևաչափով տող", base64url: "base64url ձևաչափով տող", json_string: "JSON տող", e164: "E.164 համար", jwt: "JWT", template_literal: "մուտք" }, t = { nan: "NaN", number: "թիվ", array: "զանգված" };
-  return (n) => {
-    switch (n.code) {
-      case "invalid_type": {
-        let v = t[n.expected] ?? n.expected, $ = k(n.input), u = t[$] ?? $;
-        if (/^[A-Z]/.test(n.expected))
-          return `Սխալ մուտքագրում․ սպասվում էր instanceof ${n.expected}, ստացվել է ${u}`;
-        return `Սխալ մուտքագրում․ սպասվում էր ${v}, ստացվել է ${u}`;
-      }
-      case "invalid_value":
-        if (n.values.length === 1)
-          return `Սխալ մուտքագրում․ սպասվում էր ${U(n.values[1])}`;
-        return `Սխալ տարբերակ․ սպասվում էր հետևյալներից մեկը՝ ${b(n.values, "|")}`;
-      case "too_big": {
-        let v = n.inclusive ? "<=" : "<", $ = i(n.origin);
-        if ($) {
-          let u = Number(n.maximum), l = rl(u, $.unit.one, $.unit.many);
-          return `Չափազանց մեծ արժեք․ սպասվում է, որ ${Xr(n.origin ?? "արժեք")} կունենա ${v}${n.maximum.toString()} ${l}`;
-        }
-        return `Չափազանց մեծ արժեք․ սպասվում է, որ ${Xr(n.origin ?? "արժեք")} լինի ${v}${n.maximum.toString()}`;
-      }
-      case "too_small": {
-        let v = n.inclusive ? ">=" : ">", $ = i(n.origin);
-        if ($) {
-          let u = Number(n.minimum), l = rl(u, $.unit.one, $.unit.many);
-          return `Չափազանց փոքր արժեք․ սպասվում է, որ ${Xr(n.origin)} կունենա ${v}${n.minimum.toString()} ${l}`;
-        }
-        return `Չափազանց փոքր արժեք․ սպասվում է, որ ${Xr(n.origin)} լինի ${v}${n.minimum.toString()}`;
-      }
-      case "invalid_format": {
-        let v = n;
-        if (v.format === "starts_with")
-          return `Սխալ տող․ պետք է սկսվի "${v.prefix}"-ով`;
-        if (v.format === "ends_with")
-          return `Սխալ տող․ պետք է ավարտվի "${v.suffix}"-ով`;
-        if (v.format === "includes")
-          return `Սխալ տող․ պետք է պարունակի "${v.includes}"`;
-        if (v.format === "regex")
-          return `Սխալ տող․ պետք է համապատասխանի ${v.pattern} ձևաչափին`;
-        return `Սխալ ${o[v.format] ?? n.format}`;
-      }
-      case "not_multiple_of":
-        return `Սխալ թիվ․ պետք է բազմապատիկ լինի ${n.divisor}-ի`;
-      case "unrecognized_keys":
-        return `Չճանաչված բանալի${n.keys.length > 1 ? "ներ" : ""}. ${b(n.keys, ", ")}`;
-      case "invalid_key":
-        return `Սխալ բանալի ${Xr(n.origin)}-ում`;
-      case "invalid_union":
-        return "Սխալ մուտքագրում";
-      case "invalid_element":
-        return `Սխալ արժեք ${Xr(n.origin)}-ում`;
-      default:
-        return "Սխալ մուտքագրում";
-    }
-  };
-};
-function r$() {
-  return { localeError: g4() };
-}
-var e4 = () => {
-  let r = { string: { unit: "karakter", verb: "memiliki" }, file: { unit: "byte", verb: "memiliki" }, array: { unit: "item", verb: "memiliki" }, set: { unit: "item", verb: "memiliki" } };
-  function i(n) {
-    return r[n] ?? null;
-  }
-  let o = { regex: "input", email: "alamat email", url: "URL", emoji: "emoji", uuid: "UUID", uuidv4: "UUIDv4", uuidv6: "UUIDv6", nanoid: "nanoid", guid: "GUID", cuid: "cuid", cuid2: "cuid2", ulid: "ULID", xid: "XID", ksuid: "KSUID", datetime: "tanggal dan waktu format ISO", date: "tanggal format ISO", time: "jam format ISO", duration: "durasi format ISO", ipv4: "alamat IPv4", ipv6: "alamat IPv6", cidrv4: "rentang alamat IPv4", cidrv6: "rentang alamat IPv6", base64: "string dengan enkode base64", base64url: "string dengan enkode base64url", json_string: "string JSON", e164: "angka E.164", jwt: "JWT", template_literal: "input" }, t = { nan: "NaN" };
-  return (n) => {
-    switch (n.code) {
-      case "invalid_type": {
-        let v = t[n.expected] ?? n.expected, $ = k(n.input), u = t[$] ?? $;
-        if (/^[A-Z]/.test(n.expected))
-          return `Input tidak valid: diharapkan instanceof ${n.expected}, diterima ${u}`;
-        return `Input tidak valid: diharapkan ${v}, diterima ${u}`;
-      }
-      case "invalid_value":
-        if (n.values.length === 1)
-          return `Input tidak valid: diharapkan ${U(n.values[0])}`;
-        return `Pilihan tidak valid: diharapkan salah satu dari ${b(n.values, "|")}`;
-      case "too_big": {
-        let v = n.inclusive ? "<=" : "<", $ = i(n.origin);
-        if ($)
-          return `Terlalu besar: diharapkan ${n.origin ?? "value"} memiliki ${v}${n.maximum.toString()} ${$.unit ?? "elemen"}`;
-        return `Terlalu besar: diharapkan ${n.origin ?? "value"} menjadi ${v}${n.maximum.toString()}`;
-      }
-      case "too_small": {
-        let v = n.inclusive ? ">=" : ">", $ = i(n.origin);
-        if ($)
-          return `Terlalu kecil: diharapkan ${n.origin} memiliki ${v}${n.minimum.toString()} ${$.unit}`;
-        return `Terlalu kecil: diharapkan ${n.origin} menjadi ${v}${n.minimum.toString()}`;
-      }
-      case "invalid_format": {
-        let v = n;
-        if (v.format === "starts_with")
-          return `String tidak valid: harus dimulai dengan "${v.prefix}"`;
-        if (v.format === "ends_with")
-          return `String tidak valid: harus berakhir dengan "${v.suffix}"`;
-        if (v.format === "includes")
-          return `String tidak valid: harus menyertakan "${v.includes}"`;
-        if (v.format === "regex")
-          return `String tidak valid: harus sesuai pola ${v.pattern}`;
-        return `${o[v.format] ?? n.format} tidak valid`;
-      }
-      case "not_multiple_of":
-        return `Angka tidak valid: harus kelipatan dari ${n.divisor}`;
-      case "unrecognized_keys":
-        return `Kunci tidak dikenali ${n.keys.length > 1 ? "s" : ""}: ${b(n.keys, ", ")}`;
-      case "invalid_key":
-        return `Kunci tidak valid di ${n.origin}`;
-      case "invalid_union":
-        return "Input tidak valid";
-      case "invalid_element":
-        return `Nilai tidak valid di ${n.origin}`;
-      default:
-        return "Input tidak valid";
-    }
-  };
-};
-function n$() {
-  return { localeError: e4() };
-}
-var l4 = () => {
-  let r = { string: { unit: "stafi", verb: "að hafa" }, file: { unit: "bæti", verb: "að hafa" }, array: { unit: "hluti", verb: "að hafa" }, set: { unit: "hluti", verb: "að hafa" } };
-  function i(n) {
-    return r[n] ?? null;
-  }
-  let o = { regex: "gildi", email: "netfang", url: "vefslóð", emoji: "emoji", uuid: "UUID", uuidv4: "UUIDv4", uuidv6: "UUIDv6", nanoid: "nanoid", guid: "GUID", cuid: "cuid", cuid2: "cuid2", ulid: "ULID", xid: "XID", ksuid: "KSUID", datetime: "ISO dagsetning og tími", date: "ISO dagsetning", time: "ISO tími", duration: "ISO tímalengd", ipv4: "IPv4 address", ipv6: "IPv6 address", cidrv4: "IPv4 range", cidrv6: "IPv6 range", base64: "base64-encoded strengur", base64url: "base64url-encoded strengur", json_string: "JSON strengur", e164: "E.164 tölugildi", jwt: "JWT", template_literal: "gildi" }, t = { nan: "NaN", number: "númer", array: "fylki" };
-  return (n) => {
-    switch (n.code) {
-      case "invalid_type": {
-        let v = t[n.expected] ?? n.expected, $ = k(n.input), u = t[$] ?? $;
-        if (/^[A-Z]/.test(n.expected))
-          return `Rangt gildi: Þú slóst inn ${u} þar sem á að vera instanceof ${n.expected}`;
-        return `Rangt gildi: Þú slóst inn ${u} þar sem á að vera ${v}`;
-      }
-      case "invalid_value":
-        if (n.values.length === 1)
-          return `Rangt gildi: gert ráð fyrir ${U(n.values[0])}`;
-        return `Ógilt val: má vera eitt af eftirfarandi ${b(n.values, "|")}`;
-      case "too_big": {
-        let v = n.inclusive ? "<=" : "<", $ = i(n.origin);
-        if ($)
-          return `Of stórt: gert er ráð fyrir að ${n.origin ?? "gildi"} hafi ${v}${n.maximum.toString()} ${$.unit ?? "hluti"}`;
-        return `Of stórt: gert er ráð fyrir að ${n.origin ?? "gildi"} sé ${v}${n.maximum.toString()}`;
-      }
-      case "too_small": {
-        let v = n.inclusive ? ">=" : ">", $ = i(n.origin);
-        if ($)
-          return `Of lítið: gert er ráð fyrir að ${n.origin} hafi ${v}${n.minimum.toString()} ${$.unit}`;
-        return `Of lítið: gert er ráð fyrir að ${n.origin} sé ${v}${n.minimum.toString()}`;
-      }
-      case "invalid_format": {
-        let v = n;
-        if (v.format === "starts_with")
-          return `Ógildur strengur: verður að byrja á "${v.prefix}"`;
-        if (v.format === "ends_with")
-          return `Ógildur strengur: verður að enda á "${v.suffix}"`;
-        if (v.format === "includes")
-          return `Ógildur strengur: verður að innihalda "${v.includes}"`;
-        if (v.format === "regex")
-          return `Ógildur strengur: verður að fylgja mynstri ${v.pattern}`;
-        return `Rangt ${o[v.format] ?? n.format}`;
-      }
-      case "not_multiple_of":
-        return `Röng tala: verður að vera margfeldi af ${n.divisor}`;
-      case "unrecognized_keys":
-        return `Óþekkt ${n.keys.length > 1 ? "ir lyklar" : "ur lykill"}: ${b(n.keys, ", ")}`;
-      case "invalid_key":
-        return `Rangur lykill í ${n.origin}`;
-      case "invalid_union":
-        return "Rangt gildi";
-      case "invalid_element":
-        return `Rangt gildi í ${n.origin}`;
-      default:
-        return "Rangt gildi";
-    }
-  };
-};
-function i$() {
-  return { localeError: l4() };
-}
-var I4 = () => {
-  let r = { string: { unit: "caratteri", verb: "avere" }, file: { unit: "byte", verb: "avere" }, array: { unit: "elementi", verb: "avere" }, set: { unit: "elementi", verb: "avere" } };
-  function i(n) {
-    return r[n] ?? null;
-  }
-  let o = { regex: "input", email: "indirizzo email", url: "URL", emoji: "emoji", uuid: "UUID", uuidv4: "UUIDv4", uuidv6: "UUIDv6", nanoid: "nanoid", guid: "GUID", cuid: "cuid", cuid2: "cuid2", ulid: "ULID", xid: "XID", ksuid: "KSUID", datetime: "data e ora ISO", date: "data ISO", time: "ora ISO", duration: "durata ISO", ipv4: "indirizzo IPv4", ipv6: "indirizzo IPv6", cidrv4: "intervallo IPv4", cidrv6: "intervallo IPv6", base64: "stringa codificata in base64", base64url: "URL codificata in base64", json_string: "stringa JSON", e164: "numero E.164", jwt: "JWT", template_literal: "input" }, t = { nan: "NaN", number: "numero", array: "vettore" };
-  return (n) => {
-    switch (n.code) {
-      case "invalid_type": {
-        let v = t[n.expected] ?? n.expected, $ = k(n.input), u = t[$] ?? $;
-        if (/^[A-Z]/.test(n.expected))
-          return `Input non valido: atteso instanceof ${n.expected}, ricevuto ${u}`;
-        return `Input non valido: atteso ${v}, ricevuto ${u}`;
-      }
-      case "invalid_value":
-        if (n.values.length === 1)
-          return `Input non valido: atteso ${U(n.values[0])}`;
-        return `Opzione non valida: atteso uno tra ${b(n.values, "|")}`;
-      case "too_big": {
-        let v = n.inclusive ? "<=" : "<", $ = i(n.origin);
-        if ($)
-          return `Troppo grande: ${n.origin ?? "valore"} deve avere ${v}${n.maximum.toString()} ${$.unit ?? "elementi"}`;
-        return `Troppo grande: ${n.origin ?? "valore"} deve essere ${v}${n.maximum.toString()}`;
-      }
-      case "too_small": {
-        let v = n.inclusive ? ">=" : ">", $ = i(n.origin);
-        if ($)
-          return `Troppo piccolo: ${n.origin} deve avere ${v}${n.minimum.toString()} ${$.unit}`;
-        return `Troppo piccolo: ${n.origin} deve essere ${v}${n.minimum.toString()}`;
-      }
-      case "invalid_format": {
-        let v = n;
-        if (v.format === "starts_with")
-          return `Stringa non valida: deve iniziare con "${v.prefix}"`;
-        if (v.format === "ends_with")
-          return `Stringa non valida: deve terminare con "${v.suffix}"`;
-        if (v.format === "includes")
-          return `Stringa non valida: deve includere "${v.includes}"`;
-        if (v.format === "regex")
-          return `Stringa non valida: deve corrispondere al pattern ${v.pattern}`;
-        return `Invalid ${o[v.format] ?? n.format}`;
-      }
-      case "not_multiple_of":
-        return `Numero non valido: deve essere un multiplo di ${n.divisor}`;
-      case "unrecognized_keys":
-        return `Chiav${n.keys.length > 1 ? "i" : "e"} non riconosciut${n.keys.length > 1 ? "e" : "a"}: ${b(n.keys, ", ")}`;
-      case "invalid_key":
-        return `Chiave non valida in ${n.origin}`;
-      case "invalid_union":
-        return "Input non valido";
-      case "invalid_element":
-        return `Valore non valido in ${n.origin}`;
-      default:
-        return "Input non valido";
-    }
-  };
-};
-function v$() {
-  return { localeError: I4() };
-}
-var c4 = () => {
-  let r = { string: { unit: "文字", verb: "である" }, file: { unit: "バイト", verb: "である" }, array: { unit: "要素", verb: "である" }, set: { unit: "要素", verb: "である" } };
-  function i(n) {
-    return r[n] ?? null;
-  }
-  let o = { regex: "入力値", email: "メールアドレス", url: "URL", emoji: "絵文字", uuid: "UUID", uuidv4: "UUIDv4", uuidv6: "UUIDv6", nanoid: "nanoid", guid: "GUID", cuid: "cuid", cuid2: "cuid2", ulid: "ULID", xid: "XID", ksuid: "KSUID", datetime: "ISO日時", date: "ISO日付", time: "ISO時刻", duration: "ISO期間", ipv4: "IPv4アドレス", ipv6: "IPv6アドレス", cidrv4: "IPv4範囲", cidrv6: "IPv6範囲", base64: "base64エンコード文字列", base64url: "base64urlエンコード文字列", json_string: "JSON文字列", e164: "E.164番号", jwt: "JWT", template_literal: "入力値" }, t = { nan: "NaN", number: "数値", array: "配列" };
-  return (n) => {
-    switch (n.code) {
-      case "invalid_type": {
-        let v = t[n.expected] ?? n.expected, $ = k(n.input), u = t[$] ?? $;
-        if (/^[A-Z]/.test(n.expected))
-          return `無効な入力: instanceof ${n.expected}が期待されましたが、${u}が入力されました`;
-        return `無効な入力: ${v}が期待されましたが、${u}が入力されました`;
-      }
-      case "invalid_value":
-        if (n.values.length === 1)
-          return `無効な入力: ${U(n.values[0])}が期待されました`;
-        return `無効な選択: ${b(n.values, "、")}のいずれかである必要があります`;
-      case "too_big": {
-        let v = n.inclusive ? "以下である" : "より小さい", $ = i(n.origin);
-        if ($)
-          return `大きすぎる値: ${n.origin ?? "値"}は${n.maximum.toString()}${$.unit ?? "要素"}${v}必要があります`;
-        return `大きすぎる値: ${n.origin ?? "値"}は${n.maximum.toString()}${v}必要があります`;
-      }
-      case "too_small": {
-        let v = n.inclusive ? "以上である" : "より大きい", $ = i(n.origin);
-        if ($)
-          return `小さすぎる値: ${n.origin}は${n.minimum.toString()}${$.unit}${v}必要があります`;
-        return `小さすぎる値: ${n.origin}は${n.minimum.toString()}${v}必要があります`;
-      }
-      case "invalid_format": {
-        let v = n;
-        if (v.format === "starts_with")
-          return `無効な文字列: "${v.prefix}"で始まる必要があります`;
-        if (v.format === "ends_with")
-          return `無効な文字列: "${v.suffix}"で終わる必要があります`;
-        if (v.format === "includes")
-          return `無効な文字列: "${v.includes}"を含む必要があります`;
-        if (v.format === "regex")
-          return `無効な文字列: パターン${v.pattern}に一致する必要があります`;
-        return `無効な${o[v.format] ?? n.format}`;
-      }
-      case "not_multiple_of":
-        return `無効な数値: ${n.divisor}の倍数である必要があります`;
-      case "unrecognized_keys":
-        return `認識されていないキー${n.keys.length > 1 ? "群" : ""}: ${b(n.keys, "、")}`;
-      case "invalid_key":
-        return `${n.origin}内の無効なキー`;
-      case "invalid_union":
-        return "無効な入力";
-      case "invalid_element":
-        return `${n.origin}内の無効な値`;
-      default:
-        return "無効な入力";
-    }
-  };
-};
-function o$() {
-  return { localeError: c4() };
-}
-var b4 = () => {
-  let r = { string: { unit: "სიმბოლო", verb: "უნდა შეიცავდეს" }, file: { unit: "ბაიტი", verb: "უნდა შეიცავდეს" }, array: { unit: "ელემენტი", verb: "უნდა შეიცავდეს" }, set: { unit: "ელემენტი", verb: "უნდა შეიცავდეს" } };
-  function i(n) {
-    return r[n] ?? null;
-  }
-  let o = { regex: "შეყვანა", email: "ელ-ფოსტის მისამართი", url: "URL", emoji: "ემოჯი", uuid: "UUID", uuidv4: "UUIDv4", uuidv6: "UUIDv6", nanoid: "nanoid", guid: "GUID", cuid: "cuid", cuid2: "cuid2", ulid: "ULID", xid: "XID", ksuid: "KSUID", datetime: "თარიღი-დრო", date: "თარიღი", time: "დრო", duration: "ხანგრძლივობა", ipv4: "IPv4 მისამართი", ipv6: "IPv6 მისამართი", cidrv4: "IPv4 დიაპაზონი", cidrv6: "IPv6 დიაპაზონი", base64: "base64-კოდირებული სტრინგი", base64url: "base64url-კოდირებული სტრინგი", json_string: "JSON სტრინგი", e164: "E.164 ნომერი", jwt: "JWT", template_literal: "შეყვანა" }, t = { nan: "NaN", number: "რიცხვი", string: "სტრინგი", boolean: "ბულეანი", function: "ფუნქცია", array: "მასივი" };
-  return (n) => {
-    switch (n.code) {
-      case "invalid_type": {
-        let v = t[n.expected] ?? n.expected, $ = k(n.input), u = t[$] ?? $;
-        if (/^[A-Z]/.test(n.expected))
-          return `არასწორი შეყვანა: მოსალოდნელი instanceof ${n.expected}, მიღებული ${u}`;
-        return `არასწორი შეყვანა: მოსალოდნელი ${v}, მიღებული ${u}`;
-      }
-      case "invalid_value":
-        if (n.values.length === 1)
-          return `არასწორი შეყვანა: მოსალოდნელი ${U(n.values[0])}`;
-        return `არასწორი ვარიანტი: მოსალოდნელია ერთ-ერთი ${b(n.values, "|")}-დან`;
-      case "too_big": {
-        let v = n.inclusive ? "<=" : "<", $ = i(n.origin);
-        if ($)
-          return `ზედმეტად დიდი: მოსალოდნელი ${n.origin ?? "მნიშვნელობა"} ${$.verb} ${v}${n.maximum.toString()} ${$.unit}`;
-        return `ზედმეტად დიდი: მოსალოდნელი ${n.origin ?? "მნიშვნელობა"} იყოს ${v}${n.maximum.toString()}`;
-      }
-      case "too_small": {
-        let v = n.inclusive ? ">=" : ">", $ = i(n.origin);
-        if ($)
-          return `ზედმეტად პატარა: მოსალოდნელი ${n.origin} ${$.verb} ${v}${n.minimum.toString()} ${$.unit}`;
-        return `ზედმეტად პატარა: მოსალოდნელი ${n.origin} იყოს ${v}${n.minimum.toString()}`;
-      }
-      case "invalid_format": {
-        let v = n;
-        if (v.format === "starts_with")
-          return `არასწორი სტრინგი: უნდა იწყებოდეს "${v.prefix}"-ით`;
-        if (v.format === "ends_with")
-          return `არასწორი სტრინგი: უნდა მთავრდებოდეს "${v.suffix}"-ით`;
-        if (v.format === "includes")
-          return `არასწორი სტრინგი: უნდა შეიცავდეს "${v.includes}"-ს`;
-        if (v.format === "regex")
-          return `არასწორი სტრინგი: უნდა შეესაბამებოდეს შაბლონს ${v.pattern}`;
-        return `არასწორი ${o[v.format] ?? n.format}`;
-      }
-      case "not_multiple_of":
-        return `არასწორი რიცხვი: უნდა იყოს ${n.divisor}-ის ჯერადი`;
-      case "unrecognized_keys":
-        return `უცნობი გასაღებ${n.keys.length > 1 ? "ები" : "ი"}: ${b(n.keys, ", ")}`;
-      case "invalid_key":
-        return `არასწორი გასაღები ${n.origin}-ში`;
-      case "invalid_union":
-        return "არასწორი შეყვანა";
-      case "invalid_element":
-        return `არასწორი მნიშვნელობა ${n.origin}-ში`;
-      default:
-        return "არასწორი შეყვანა";
-    }
-  };
-};
-function t$() {
-  return { localeError: b4() };
-}
-var _4 = () => {
-  let r = { string: { unit: "តួអក្សរ", verb: "គួរមាន" }, file: { unit: "បៃ", verb: "គួរមាន" }, array: { unit: "ធាតុ", verb: "គួរមាន" }, set: { unit: "ធាតុ", verb: "គួរមាន" } };
-  function i(n) {
-    return r[n] ?? null;
-  }
-  let o = { regex: "ទិន្នន័យបញ្ចូល", email: "អាសយដ្ឋានអ៊ីមែល", url: "URL", emoji: "សញ្ញាអារម្មណ៍", uuid: "UUID", uuidv4: "UUIDv4", uuidv6: "UUIDv6", nanoid: "nanoid", guid: "GUID", cuid: "cuid", cuid2: "cuid2", ulid: "ULID", xid: "XID", ksuid: "KSUID", datetime: "កាលបរិច្ឆេទ និងម៉ោង ISO", date: "កាលបរិច្ឆេទ ISO", time: "ម៉ោង ISO", duration: "រយៈពេល ISO", ipv4: "អាសយដ្ឋាន IPv4", ipv6: "អាសយដ្ឋាន IPv6", cidrv4: "ដែនអាសយដ្ឋាន IPv4", cidrv6: "ដែនអាសយដ្ឋាន IPv6", base64: "ខ្សែអក្សរអ៊ិកូដ base64", base64url: "ខ្សែអក្សរអ៊ិកូដ base64url", json_string: "ខ្សែអក្សរ JSON", e164: "លេខ E.164", jwt: "JWT", template_literal: "ទិន្នន័យបញ្ចូល" }, t = { nan: "NaN", number: "លេខ", array: "អារេ (Array)", null: "គ្មានតម្លៃ (null)" };
-  return (n) => {
-    switch (n.code) {
-      case "invalid_type": {
-        let v = t[n.expected] ?? n.expected, $ = k(n.input), u = t[$] ?? $;
-        if (/^[A-Z]/.test(n.expected))
-          return `ទិន្នន័យបញ្ចូលមិនត្រឹមត្រូវ៖ ត្រូវការ instanceof ${n.expected} ប៉ុន្តែទទួលបាន ${u}`;
-        return `ទិន្នន័យបញ្ចូលមិនត្រឹមត្រូវ៖ ត្រូវការ ${v} ប៉ុន្តែទទួលបាន ${u}`;
-      }
-      case "invalid_value":
-        if (n.values.length === 1)
-          return `ទិន្នន័យបញ្ចូលមិនត្រឹមត្រូវ៖ ត្រូវការ ${U(n.values[0])}`;
-        return `ជម្រើសមិនត្រឹមត្រូវ៖ ត្រូវជាមួយក្នុងចំណោម ${b(n.values, "|")}`;
-      case "too_big": {
-        let v = n.inclusive ? "<=" : "<", $ = i(n.origin);
-        if ($)
-          return `ធំពេក៖ ត្រូវការ ${n.origin ?? "តម្លៃ"} ${v} ${n.maximum.toString()} ${$.unit ?? "ធាតុ"}`;
-        return `ធំពេក៖ ត្រូវការ ${n.origin ?? "តម្លៃ"} ${v} ${n.maximum.toString()}`;
-      }
-      case "too_small": {
-        let v = n.inclusive ? ">=" : ">", $ = i(n.origin);
-        if ($)
-          return `តូចពេក៖ ត្រូវការ ${n.origin} ${v} ${n.minimum.toString()} ${$.unit}`;
-        return `តូចពេក៖ ត្រូវការ ${n.origin} ${v} ${n.minimum.toString()}`;
-      }
-      case "invalid_format": {
-        let v = n;
-        if (v.format === "starts_with")
-          return `ខ្សែអក្សរមិនត្រឹមត្រូវ៖ ត្រូវចាប់ផ្តើមដោយ "${v.prefix}"`;
-        if (v.format === "ends_with")
-          return `ខ្សែអក្សរមិនត្រឹមត្រូវ៖ ត្រូវបញ្ចប់ដោយ "${v.suffix}"`;
-        if (v.format === "includes")
-          return `ខ្សែអក្សរមិនត្រឹមត្រូវ៖ ត្រូវមាន "${v.includes}"`;
-        if (v.format === "regex")
-          return `ខ្សែអក្សរមិនត្រឹមត្រូវ៖ ត្រូវតែផ្គូផ្គងនឹងទម្រង់ដែលបានកំណត់ ${v.pattern}`;
-        return `មិនត្រឹមត្រូវ៖ ${o[v.format] ?? n.format}`;
-      }
-      case "not_multiple_of":
-        return `លេខមិនត្រឹមត្រូវ៖ ត្រូវតែជាពហុគុណនៃ ${n.divisor}`;
-      case "unrecognized_keys":
-        return `រកឃើញសោមិនស្គាល់៖ ${b(n.keys, ", ")}`;
-      case "invalid_key":
-        return `សោមិនត្រឹមត្រូវនៅក្នុង ${n.origin}`;
-      case "invalid_union":
-        return "ទិន្នន័យមិនត្រឹមត្រូវ";
-      case "invalid_element":
-        return `ទិន្នន័យមិនត្រឹមត្រូវនៅក្នុង ${n.origin}`;
-      default:
-        return "ទិន្នន័យមិនត្រឹមត្រូវ";
-    }
-  };
-};
-function Dn() {
-  return { localeError: _4() };
-}
-function $$() {
-  return Dn();
-}
-var U4 = () => {
-  let r = { string: { unit: "문자", verb: "to have" }, file: { unit: "바이트", verb: "to have" }, array: { unit: "개", verb: "to have" }, set: { unit: "개", verb: "to have" } };
-  function i(n) {
-    return r[n] ?? null;
-  }
-  let o = { regex: "입력", email: "이메일 주소", url: "URL", emoji: "이모지", uuid: "UUID", uuidv4: "UUIDv4", uuidv6: "UUIDv6", nanoid: "nanoid", guid: "GUID", cuid: "cuid", cuid2: "cuid2", ulid: "ULID", xid: "XID", ksuid: "KSUID", datetime: "ISO 날짜시간", date: "ISO 날짜", time: "ISO 시간", duration: "ISO 기간", ipv4: "IPv4 주소", ipv6: "IPv6 주소", cidrv4: "IPv4 범위", cidrv6: "IPv6 범위", base64: "base64 인코딩 문자열", base64url: "base64url 인코딩 문자열", json_string: "JSON 문자열", e164: "E.164 번호", jwt: "JWT", template_literal: "입력" }, t = { nan: "NaN" };
-  return (n) => {
-    switch (n.code) {
-      case "invalid_type": {
-        let v = t[n.expected] ?? n.expected, $ = k(n.input), u = t[$] ?? $;
-        if (/^[A-Z]/.test(n.expected))
-          return `잘못된 입력: 예상 타입은 instanceof ${n.expected}, 받은 타입은 ${u}입니다`;
-        return `잘못된 입력: 예상 타입은 ${v}, 받은 타입은 ${u}입니다`;
-      }
-      case "invalid_value":
-        if (n.values.length === 1)
-          return `잘못된 입력: 값은 ${U(n.values[0])} 이어야 합니다`;
-        return `잘못된 옵션: ${b(n.values, "또는 ")} 중 하나여야 합니다`;
-      case "too_big": {
-        let v = n.inclusive ? "이하" : "미만", $ = v === "미만" ? "이어야 합니다" : "여야 합니다", u = i(n.origin), l = u?.unit ?? "요소";
-        if (u)
-          return `${n.origin ?? "값"}이 너무 큽니다: ${n.maximum.toString()}${l} ${v}${$}`;
-        return `${n.origin ?? "값"}이 너무 큽니다: ${n.maximum.toString()} ${v}${$}`;
-      }
-      case "too_small": {
-        let v = n.inclusive ? "이상" : "초과", $ = v === "이상" ? "이어야 합니다" : "여야 합니다", u = i(n.origin), l = u?.unit ?? "요소";
-        if (u)
-          return `${n.origin ?? "값"}이 너무 작습니다: ${n.minimum.toString()}${l} ${v}${$}`;
-        return `${n.origin ?? "값"}이 너무 작습니다: ${n.minimum.toString()} ${v}${$}`;
-      }
-      case "invalid_format": {
-        let v = n;
-        if (v.format === "starts_with")
-          return `잘못된 문자열: "${v.prefix}"(으)로 시작해야 합니다`;
-        if (v.format === "ends_with")
-          return `잘못된 문자열: "${v.suffix}"(으)로 끝나야 합니다`;
-        if (v.format === "includes")
-          return `잘못된 문자열: "${v.includes}"을(를) 포함해야 합니다`;
-        if (v.format === "regex")
-          return `잘못된 문자열: 정규식 ${v.pattern} 패턴과 일치해야 합니다`;
-        return `잘못된 ${o[v.format] ?? n.format}`;
-      }
-      case "not_multiple_of":
-        return `잘못된 숫자: ${n.divisor}의 배수여야 합니다`;
-      case "unrecognized_keys":
-        return `인식할 수 없는 키: ${b(n.keys, ", ")}`;
-      case "invalid_key":
-        return `잘못된 키: ${n.origin}`;
-      case "invalid_union":
-        return "잘못된 입력";
-      case "invalid_element":
-        return `잘못된 값: ${n.origin}`;
-      default:
-        return "잘못된 입력";
-    }
-  };
-};
-function u$() {
-  return { localeError: U4() };
-}
-var wn = (r) => {
-  return r.charAt(0).toUpperCase() + r.slice(1);
-};
-function nl(r) {
-  let i = Math.abs(r), o = i % 10, t = i % 100;
-  if (t >= 11 && t <= 19 || o === 0)
-    return "many";
-  if (o === 1)
-    return "one";
-  return "few";
-}
-var k4 = () => {
-  let r = { string: { unit: { one: "simbolis", few: "simboliai", many: "simbolių" }, verb: { smaller: { inclusive: "turi būti ne ilgesnė kaip", notInclusive: "turi būti trumpesnė kaip" }, bigger: { inclusive: "turi būti ne trumpesnė kaip", notInclusive: "turi būti ilgesnė kaip" } } }, file: { unit: { one: "baitas", few: "baitai", many: "baitų" }, verb: { smaller: { inclusive: "turi būti ne didesnis kaip", notInclusive: "turi būti mažesnis kaip" }, bigger: { inclusive: "turi būti ne mažesnis kaip", notInclusive: "turi būti didesnis kaip" } } }, array: { unit: { one: "elementą", few: "elementus", many: "elementų" }, verb: { smaller: { inclusive: "turi turėti ne daugiau kaip", notInclusive: "turi turėti mažiau kaip" }, bigger: { inclusive: "turi turėti ne mažiau kaip", notInclusive: "turi turėti daugiau kaip" } } }, set: { unit: { one: "elementą", few: "elementus", many: "elementų" }, verb: { smaller: { inclusive: "turi turėti ne daugiau kaip", notInclusive: "turi turėti mažiau kaip" }, bigger: { inclusive: "turi turėti ne mažiau kaip", notInclusive: "turi turėti daugiau kaip" } } } };
-  function i(n, v, $, u) {
-    let l = r[n] ?? null;
-    if (l === null)
-      return l;
-    return { unit: l.unit[v], verb: l.verb[u][$ ? "inclusive" : "notInclusive"] };
-  }
-  let o = { regex: "įvestis", email: "el. pašto adresas", url: "URL", emoji: "jaustukas", uuid: "UUID", uuidv4: "UUIDv4", uuidv6: "UUIDv6", nanoid: "nanoid", guid: "GUID", cuid: "cuid", cuid2: "cuid2", ulid: "ULID", xid: "XID", ksuid: "KSUID", datetime: "ISO data ir laikas", date: "ISO data", time: "ISO laikas", duration: "ISO trukmė", ipv4: "IPv4 adresas", ipv6: "IPv6 adresas", cidrv4: "IPv4 tinklo prefiksas (CIDR)", cidrv6: "IPv6 tinklo prefiksas (CIDR)", base64: "base64 užkoduota eilutė", base64url: "base64url užkoduota eilutė", json_string: "JSON eilutė", e164: "E.164 numeris", jwt: "JWT", template_literal: "įvestis" }, t = { nan: "NaN", number: "skaičius", bigint: "sveikasis skaičius", string: "eilutė", boolean: "loginė reikšmė", undefined: "neapibrėžta reikšmė", function: "funkcija", symbol: "simbolis", array: "masyvas", object: "objektas", null: "nulinė reikšmė" };
-  return (n) => {
-    switch (n.code) {
-      case "invalid_type": {
-        let v = t[n.expected] ?? n.expected, $ = k(n.input), u = t[$] ?? $;
-        if (/^[A-Z]/.test(n.expected))
-          return `Gautas tipas ${u}, o tikėtasi - instanceof ${n.expected}`;
-        return `Gautas tipas ${u}, o tikėtasi - ${v}`;
-      }
-      case "invalid_value":
-        if (n.values.length === 1)
-          return `Privalo būti ${U(n.values[0])}`;
-        return `Privalo būti vienas iš ${b(n.values, "|")} pasirinkimų`;
-      case "too_big": {
-        let v = t[n.origin] ?? n.origin, $ = i(n.origin, nl(Number(n.maximum)), n.inclusive ?? false, "smaller");
-        if ($?.verb)
-          return `${wn(v ?? n.origin ?? "reikšmė")} ${$.verb} ${n.maximum.toString()} ${$.unit ?? "elementų"}`;
-        let u = n.inclusive ? "ne didesnis kaip" : "mažesnis kaip";
-        return `${wn(v ?? n.origin ?? "reikšmė")} turi būti ${u} ${n.maximum.toString()} ${$?.unit}`;
-      }
-      case "too_small": {
-        let v = t[n.origin] ?? n.origin, $ = i(n.origin, nl(Number(n.minimum)), n.inclusive ?? false, "bigger");
-        if ($?.verb)
-          return `${wn(v ?? n.origin ?? "reikšmė")} ${$.verb} ${n.minimum.toString()} ${$.unit ?? "elementų"}`;
-        let u = n.inclusive ? "ne mažesnis kaip" : "didesnis kaip";
-        return `${wn(v ?? n.origin ?? "reikšmė")} turi būti ${u} ${n.minimum.toString()} ${$?.unit}`;
-      }
-      case "invalid_format": {
-        let v = n;
-        if (v.format === "starts_with")
-          return `Eilutė privalo prasidėti "${v.prefix}"`;
-        if (v.format === "ends_with")
-          return `Eilutė privalo pasibaigti "${v.suffix}"`;
-        if (v.format === "includes")
-          return `Eilutė privalo įtraukti "${v.includes}"`;
-        if (v.format === "regex")
-          return `Eilutė privalo atitikti ${v.pattern}`;
-        return `Neteisingas ${o[v.format] ?? n.format}`;
-      }
-      case "not_multiple_of":
-        return `Skaičius privalo būti ${n.divisor} kartotinis.`;
-      case "unrecognized_keys":
-        return `Neatpažint${n.keys.length > 1 ? "i" : "as"} rakt${n.keys.length > 1 ? "ai" : "as"}: ${b(n.keys, ", ")}`;
-      case "invalid_key":
-        return "Rastas klaidingas raktas";
-      case "invalid_union":
-        return "Klaidinga įvestis";
-      case "invalid_element": {
-        let v = t[n.origin] ?? n.origin;
-        return `${wn(v ?? n.origin ?? "reikšmė")} turi klaidingą įvestį`;
-      }
-      default:
-        return "Klaidinga įvestis";
-    }
-  };
-};
-function g$() {
-  return { localeError: k4() };
-}
-var D4 = () => {
-  let r = { string: { unit: "знаци", verb: "да имаат" }, file: { unit: "бајти", verb: "да имаат" }, array: { unit: "ставки", verb: "да имаат" }, set: { unit: "ставки", verb: "да имаат" } };
-  function i(n) {
-    return r[n] ?? null;
-  }
-  let o = { regex: "внес", email: "адреса на е-пошта", url: "URL", emoji: "емоџи", uuid: "UUID", uuidv4: "UUIDv4", uuidv6: "UUIDv6", nanoid: "nanoid", guid: "GUID", cuid: "cuid", cuid2: "cuid2", ulid: "ULID", xid: "XID", ksuid: "KSUID", datetime: "ISO датум и време", date: "ISO датум", time: "ISO време", duration: "ISO времетраење", ipv4: "IPv4 адреса", ipv6: "IPv6 адреса", cidrv4: "IPv4 опсег", cidrv6: "IPv6 опсег", base64: "base64-енкодирана низа", base64url: "base64url-енкодирана низа", json_string: "JSON низа", e164: "E.164 број", jwt: "JWT", template_literal: "внес" }, t = { nan: "NaN", number: "број", array: "низа" };
-  return (n) => {
-    switch (n.code) {
-      case "invalid_type": {
-        let v = t[n.expected] ?? n.expected, $ = k(n.input), u = t[$] ?? $;
-        if (/^[A-Z]/.test(n.expected))
-          return `Грешен внес: се очекува instanceof ${n.expected}, примено ${u}`;
-        return `Грешен внес: се очекува ${v}, примено ${u}`;
-      }
-      case "invalid_value":
-        if (n.values.length === 1)
-          return `Invalid input: expected ${U(n.values[0])}`;
-        return `Грешана опција: се очекува една ${b(n.values, "|")}`;
-      case "too_big": {
-        let v = n.inclusive ? "<=" : "<", $ = i(n.origin);
-        if ($)
-          return `Премногу голем: се очекува ${n.origin ?? "вредноста"} да има ${v}${n.maximum.toString()} ${$.unit ?? "елементи"}`;
-        return `Премногу голем: се очекува ${n.origin ?? "вредноста"} да биде ${v}${n.maximum.toString()}`;
-      }
-      case "too_small": {
-        let v = n.inclusive ? ">=" : ">", $ = i(n.origin);
-        if ($)
-          return `Премногу мал: се очекува ${n.origin} да има ${v}${n.minimum.toString()} ${$.unit}`;
-        return `Премногу мал: се очекува ${n.origin} да биде ${v}${n.minimum.toString()}`;
-      }
-      case "invalid_format": {
-        let v = n;
-        if (v.format === "starts_with")
-          return `Неважечка низа: мора да започнува со "${v.prefix}"`;
-        if (v.format === "ends_with")
-          return `Неважечка низа: мора да завршува со "${v.suffix}"`;
-        if (v.format === "includes")
-          return `Неважечка низа: мора да вклучува "${v.includes}"`;
-        if (v.format === "regex")
-          return `Неважечка низа: мора да одгоара на патернот ${v.pattern}`;
-        return `Invalid ${o[v.format] ?? n.format}`;
-      }
-      case "not_multiple_of":
-        return `Грешен број: мора да биде делив со ${n.divisor}`;
-      case "unrecognized_keys":
-        return `${n.keys.length > 1 ? "Непрепознаени клучеви" : "Непрепознаен клуч"}: ${b(n.keys, ", ")}`;
-      case "invalid_key":
-        return `Грешен клуч во ${n.origin}`;
-      case "invalid_union":
-        return "Грешен внес";
-      case "invalid_element":
-        return `Грешна вредност во ${n.origin}`;
-      default:
-        return "Грешен внес";
-    }
-  };
-};
-function e$() {
-  return { localeError: D4() };
-}
-var w4 = () => {
-  let r = { string: { unit: "aksara", verb: "mempunyai" }, file: { unit: "bait", verb: "mempunyai" }, array: { unit: "elemen", verb: "mempunyai" }, set: { unit: "elemen", verb: "mempunyai" } };
-  function i(n) {
-    return r[n] ?? null;
-  }
-  let o = { regex: "input", email: "alamat e-mel", url: "URL", emoji: "emoji", uuid: "UUID", uuidv4: "UUIDv4", uuidv6: "UUIDv6", nanoid: "nanoid", guid: "GUID", cuid: "cuid", cuid2: "cuid2", ulid: "ULID", xid: "XID", ksuid: "KSUID", datetime: "tarikh masa ISO", date: "tarikh ISO", time: "masa ISO", duration: "tempoh ISO", ipv4: "alamat IPv4", ipv6: "alamat IPv6", cidrv4: "julat IPv4", cidrv6: "julat IPv6", base64: "string dikodkan base64", base64url: "string dikodkan base64url", json_string: "string JSON", e164: "nombor E.164", jwt: "JWT", template_literal: "input" }, t = { nan: "NaN", number: "nombor" };
-  return (n) => {
-    switch (n.code) {
-      case "invalid_type": {
-        let v = t[n.expected] ?? n.expected, $ = k(n.input), u = t[$] ?? $;
-        if (/^[A-Z]/.test(n.expected))
-          return `Input tidak sah: dijangka instanceof ${n.expected}, diterima ${u}`;
-        return `Input tidak sah: dijangka ${v}, diterima ${u}`;
-      }
-      case "invalid_value":
-        if (n.values.length === 1)
-          return `Input tidak sah: dijangka ${U(n.values[0])}`;
-        return `Pilihan tidak sah: dijangka salah satu daripada ${b(n.values, "|")}`;
-      case "too_big": {
-        let v = n.inclusive ? "<=" : "<", $ = i(n.origin);
-        if ($)
-          return `Terlalu besar: dijangka ${n.origin ?? "nilai"} ${$.verb} ${v}${n.maximum.toString()} ${$.unit ?? "elemen"}`;
-        return `Terlalu besar: dijangka ${n.origin ?? "nilai"} adalah ${v}${n.maximum.toString()}`;
-      }
-      case "too_small": {
-        let v = n.inclusive ? ">=" : ">", $ = i(n.origin);
-        if ($)
-          return `Terlalu kecil: dijangka ${n.origin} ${$.verb} ${v}${n.minimum.toString()} ${$.unit}`;
-        return `Terlalu kecil: dijangka ${n.origin} adalah ${v}${n.minimum.toString()}`;
-      }
-      case "invalid_format": {
-        let v = n;
-        if (v.format === "starts_with")
-          return `String tidak sah: mesti bermula dengan "${v.prefix}"`;
-        if (v.format === "ends_with")
-          return `String tidak sah: mesti berakhir dengan "${v.suffix}"`;
-        if (v.format === "includes")
-          return `String tidak sah: mesti mengandungi "${v.includes}"`;
-        if (v.format === "regex")
-          return `String tidak sah: mesti sepadan dengan corak ${v.pattern}`;
-        return `${o[v.format] ?? n.format} tidak sah`;
-      }
-      case "not_multiple_of":
-        return `Nombor tidak sah: perlu gandaan ${n.divisor}`;
-      case "unrecognized_keys":
-        return `Kunci tidak dikenali: ${b(n.keys, ", ")}`;
-      case "invalid_key":
-        return `Kunci tidak sah dalam ${n.origin}`;
-      case "invalid_union":
-        return "Input tidak sah";
-      case "invalid_element":
-        return `Nilai tidak sah dalam ${n.origin}`;
-      default:
-        return "Input tidak sah";
-    }
-  };
-};
-function l$() {
-  return { localeError: w4() };
-}
-var N4 = () => {
-  let r = { string: { unit: "tekens", verb: "heeft" }, file: { unit: "bytes", verb: "heeft" }, array: { unit: "elementen", verb: "heeft" }, set: { unit: "elementen", verb: "heeft" } };
-  function i(n) {
-    return r[n] ?? null;
-  }
-  let o = { regex: "invoer", email: "emailadres", url: "URL", emoji: "emoji", uuid: "UUID", uuidv4: "UUIDv4", uuidv6: "UUIDv6", nanoid: "nanoid", guid: "GUID", cuid: "cuid", cuid2: "cuid2", ulid: "ULID", xid: "XID", ksuid: "KSUID", datetime: "ISO datum en tijd", date: "ISO datum", time: "ISO tijd", duration: "ISO duur", ipv4: "IPv4-adres", ipv6: "IPv6-adres", cidrv4: "IPv4-bereik", cidrv6: "IPv6-bereik", base64: "base64-gecodeerde tekst", base64url: "base64 URL-gecodeerde tekst", json_string: "JSON string", e164: "E.164-nummer", jwt: "JWT", template_literal: "invoer" }, t = { nan: "NaN", number: "getal" };
-  return (n) => {
-    switch (n.code) {
-      case "invalid_type": {
-        let v = t[n.expected] ?? n.expected, $ = k(n.input), u = t[$] ?? $;
-        if (/^[A-Z]/.test(n.expected))
-          return `Ongeldige invoer: verwacht instanceof ${n.expected}, ontving ${u}`;
-        return `Ongeldige invoer: verwacht ${v}, ontving ${u}`;
-      }
-      case "invalid_value":
-        if (n.values.length === 1)
-          return `Ongeldige invoer: verwacht ${U(n.values[0])}`;
-        return `Ongeldige optie: verwacht één van ${b(n.values, "|")}`;
-      case "too_big": {
-        let v = n.inclusive ? "<=" : "<", $ = i(n.origin), u = n.origin === "date" ? "laat" : n.origin === "string" ? "lang" : "groot";
-        if ($)
-          return `Te ${u}: verwacht dat ${n.origin ?? "waarde"} ${v}${n.maximum.toString()} ${$.unit ?? "elementen"} ${$.verb}`;
-        return `Te ${u}: verwacht dat ${n.origin ?? "waarde"} ${v}${n.maximum.toString()} is`;
-      }
-      case "too_small": {
-        let v = n.inclusive ? ">=" : ">", $ = i(n.origin), u = n.origin === "date" ? "vroeg" : n.origin === "string" ? "kort" : "klein";
-        if ($)
-          return `Te ${u}: verwacht dat ${n.origin} ${v}${n.minimum.toString()} ${$.unit} ${$.verb}`;
-        return `Te ${u}: verwacht dat ${n.origin} ${v}${n.minimum.toString()} is`;
-      }
-      case "invalid_format": {
-        let v = n;
-        if (v.format === "starts_with")
-          return `Ongeldige tekst: moet met "${v.prefix}" beginnen`;
-        if (v.format === "ends_with")
-          return `Ongeldige tekst: moet op "${v.suffix}" eindigen`;
-        if (v.format === "includes")
-          return `Ongeldige tekst: moet "${v.includes}" bevatten`;
-        if (v.format === "regex")
-          return `Ongeldige tekst: moet overeenkomen met patroon ${v.pattern}`;
-        return `Ongeldig: ${o[v.format] ?? n.format}`;
-      }
-      case "not_multiple_of":
-        return `Ongeldig getal: moet een veelvoud van ${n.divisor} zijn`;
-      case "unrecognized_keys":
-        return `Onbekende key${n.keys.length > 1 ? "s" : ""}: ${b(n.keys, ", ")}`;
-      case "invalid_key":
-        return `Ongeldige key in ${n.origin}`;
-      case "invalid_union":
-        return "Ongeldige invoer";
-      case "invalid_element":
-        return `Ongeldige waarde in ${n.origin}`;
-      default:
-        return "Ongeldige invoer";
-    }
-  };
-};
-function I$() {
-  return { localeError: N4() };
-}
-var O4 = () => {
-  let r = { string: { unit: "tegn", verb: "å ha" }, file: { unit: "bytes", verb: "å ha" }, array: { unit: "elementer", verb: "å inneholde" }, set: { unit: "elementer", verb: "å inneholde" } };
-  function i(n) {
-    return r[n] ?? null;
-  }
-  let o = { regex: "input", email: "e-postadresse", url: "URL", emoji: "emoji", uuid: "UUID", uuidv4: "UUIDv4", uuidv6: "UUIDv6", nanoid: "nanoid", guid: "GUID", cuid: "cuid", cuid2: "cuid2", ulid: "ULID", xid: "XID", ksuid: "KSUID", datetime: "ISO dato- og klokkeslett", date: "ISO-dato", time: "ISO-klokkeslett", duration: "ISO-varighet", ipv4: "IPv4-område", ipv6: "IPv6-område", cidrv4: "IPv4-spekter", cidrv6: "IPv6-spekter", base64: "base64-enkodet streng", base64url: "base64url-enkodet streng", json_string: "JSON-streng", e164: "E.164-nummer", jwt: "JWT", template_literal: "input" }, t = { nan: "NaN", number: "tall", array: "liste" };
-  return (n) => {
-    switch (n.code) {
-      case "invalid_type": {
-        let v = t[n.expected] ?? n.expected, $ = k(n.input), u = t[$] ?? $;
-        if (/^[A-Z]/.test(n.expected))
-          return `Ugyldig input: forventet instanceof ${n.expected}, fikk ${u}`;
-        return `Ugyldig input: forventet ${v}, fikk ${u}`;
-      }
-      case "invalid_value":
-        if (n.values.length === 1)
-          return `Ugyldig verdi: forventet ${U(n.values[0])}`;
-        return `Ugyldig valg: forventet en av ${b(n.values, "|")}`;
-      case "too_big": {
-        let v = n.inclusive ? "<=" : "<", $ = i(n.origin);
-        if ($)
-          return `For stor(t): forventet ${n.origin ?? "value"} til å ha ${v}${n.maximum.toString()} ${$.unit ?? "elementer"}`;
-        return `For stor(t): forventet ${n.origin ?? "value"} til å ha ${v}${n.maximum.toString()}`;
-      }
-      case "too_small": {
-        let v = n.inclusive ? ">=" : ">", $ = i(n.origin);
-        if ($)
-          return `For lite(n): forventet ${n.origin} til å ha ${v}${n.minimum.toString()} ${$.unit}`;
-        return `For lite(n): forventet ${n.origin} til å ha ${v}${n.minimum.toString()}`;
-      }
-      case "invalid_format": {
-        let v = n;
-        if (v.format === "starts_with")
-          return `Ugyldig streng: må starte med "${v.prefix}"`;
-        if (v.format === "ends_with")
-          return `Ugyldig streng: må ende med "${v.suffix}"`;
-        if (v.format === "includes")
-          return `Ugyldig streng: må inneholde "${v.includes}"`;
-        if (v.format === "regex")
-          return `Ugyldig streng: må matche mønsteret ${v.pattern}`;
-        return `Ugyldig ${o[v.format] ?? n.format}`;
-      }
-      case "not_multiple_of":
-        return `Ugyldig tall: må være et multiplum av ${n.divisor}`;
-      case "unrecognized_keys":
-        return `${n.keys.length > 1 ? "Ukjente nøkler" : "Ukjent nøkkel"}: ${b(n.keys, ", ")}`;
-      case "invalid_key":
-        return `Ugyldig nøkkel i ${n.origin}`;
-      case "invalid_union":
-        return "Ugyldig input";
-      case "invalid_element":
-        return `Ugyldig verdi i ${n.origin}`;
-      default:
-        return "Ugyldig input";
-    }
-  };
-};
-function c$() {
-  return { localeError: O4() };
-}
-var z4 = () => {
-  let r = { string: { unit: "harf", verb: "olmalıdır" }, file: { unit: "bayt", verb: "olmalıdır" }, array: { unit: "unsur", verb: "olmalıdır" }, set: { unit: "unsur", verb: "olmalıdır" } };
-  function i(n) {
-    return r[n] ?? null;
-  }
-  let o = { regex: "giren", email: "epostagâh", url: "URL", emoji: "emoji", uuid: "UUID", uuidv4: "UUIDv4", uuidv6: "UUIDv6", nanoid: "nanoid", guid: "GUID", cuid: "cuid", cuid2: "cuid2", ulid: "ULID", xid: "XID", ksuid: "KSUID", datetime: "ISO hengâmı", date: "ISO tarihi", time: "ISO zamanı", duration: "ISO müddeti", ipv4: "IPv4 nişânı", ipv6: "IPv6 nişânı", cidrv4: "IPv4 menzili", cidrv6: "IPv6 menzili", base64: "base64-şifreli metin", base64url: "base64url-şifreli metin", json_string: "JSON metin", e164: "E.164 sayısı", jwt: "JWT", template_literal: "giren" }, t = { nan: "NaN", number: "numara", array: "saf", null: "gayb" };
-  return (n) => {
-    switch (n.code) {
-      case "invalid_type": {
-        let v = t[n.expected] ?? n.expected, $ = k(n.input), u = t[$] ?? $;
-        if (/^[A-Z]/.test(n.expected))
-          return `Fâsit giren: umulan instanceof ${n.expected}, alınan ${u}`;
-        return `Fâsit giren: umulan ${v}, alınan ${u}`;
-      }
-      case "invalid_value":
-        if (n.values.length === 1)
-          return `Fâsit giren: umulan ${U(n.values[0])}`;
-        return `Fâsit tercih: mûteberler ${b(n.values, "|")}`;
-      case "too_big": {
-        let v = n.inclusive ? "<=" : "<", $ = i(n.origin);
-        if ($)
-          return `Fazla büyük: ${n.origin ?? "value"}, ${v}${n.maximum.toString()} ${$.unit ?? "elements"} sahip olmalıydı.`;
-        return `Fazla büyük: ${n.origin ?? "value"}, ${v}${n.maximum.toString()} olmalıydı.`;
-      }
-      case "too_small": {
-        let v = n.inclusive ? ">=" : ">", $ = i(n.origin);
-        if ($)
-          return `Fazla küçük: ${n.origin}, ${v}${n.minimum.toString()} ${$.unit} sahip olmalıydı.`;
-        return `Fazla küçük: ${n.origin}, ${v}${n.minimum.toString()} olmalıydı.`;
-      }
-      case "invalid_format": {
-        let v = n;
-        if (v.format === "starts_with")
-          return `Fâsit metin: "${v.prefix}" ile başlamalı.`;
-        if (v.format === "ends_with")
-          return `Fâsit metin: "${v.suffix}" ile bitmeli.`;
-        if (v.format === "includes")
-          return `Fâsit metin: "${v.includes}" ihtivâ etmeli.`;
-        if (v.format === "regex")
-          return `Fâsit metin: ${v.pattern} nakşına uymalı.`;
-        return `Fâsit ${o[v.format] ?? n.format}`;
-      }
-      case "not_multiple_of":
-        return `Fâsit sayı: ${n.divisor} katı olmalıydı.`;
-      case "unrecognized_keys":
-        return `Tanınmayan anahtar ${n.keys.length > 1 ? "s" : ""}: ${b(n.keys, ", ")}`;
-      case "invalid_key":
-        return `${n.origin} için tanınmayan anahtar var.`;
-      case "invalid_union":
-        return "Giren tanınamadı.";
-      case "invalid_element":
-        return `${n.origin} için tanınmayan kıymet var.`;
-      default:
-        return "Kıymet tanınamadı.";
-    }
-  };
-};
-function b$() {
-  return { localeError: z4() };
-}
-var S4 = () => {
-  let r = { string: { unit: "توکي", verb: "ولري" }, file: { unit: "بایټس", verb: "ولري" }, array: { unit: "توکي", verb: "ولري" }, set: { unit: "توکي", verb: "ولري" } };
-  function i(n) {
-    return r[n] ?? null;
-  }
-  let o = { regex: "ورودي", email: "بریښنالیک", url: "یو آر ال", emoji: "ایموجي", uuid: "UUID", uuidv4: "UUIDv4", uuidv6: "UUIDv6", nanoid: "nanoid", guid: "GUID", cuid: "cuid", cuid2: "cuid2", ulid: "ULID", xid: "XID", ksuid: "KSUID", datetime: "نیټه او وخت", date: "نېټه", time: "وخت", duration: "موده", ipv4: "د IPv4 پته", ipv6: "د IPv6 پته", cidrv4: "د IPv4 ساحه", cidrv6: "د IPv6 ساحه", base64: "base64-encoded متن", base64url: "base64url-encoded متن", json_string: "JSON متن", e164: "د E.164 شمېره", jwt: "JWT", template_literal: "ورودي" }, t = { nan: "NaN", number: "عدد", array: "ارې" };
-  return (n) => {
-    switch (n.code) {
-      case "invalid_type": {
-        let v = t[n.expected] ?? n.expected, $ = k(n.input), u = t[$] ?? $;
-        if (/^[A-Z]/.test(n.expected))
-          return `ناسم ورودي: باید instanceof ${n.expected} وای, مګر ${u} ترلاسه شو`;
-        return `ناسم ورودي: باید ${v} وای, مګر ${u} ترلاسه شو`;
-      }
-      case "invalid_value":
-        if (n.values.length === 1)
-          return `ناسم ورودي: باید ${U(n.values[0])} وای`;
-        return `ناسم انتخاب: باید یو له ${b(n.values, "|")} څخه وای`;
-      case "too_big": {
-        let v = n.inclusive ? "<=" : "<", $ = i(n.origin);
-        if ($)
-          return `ډیر لوی: ${n.origin ?? "ارزښت"} باید ${v}${n.maximum.toString()} ${$.unit ?? "عنصرونه"} ولري`;
-        return `ډیر لوی: ${n.origin ?? "ارزښت"} باید ${v}${n.maximum.toString()} وي`;
-      }
-      case "too_small": {
-        let v = n.inclusive ? ">=" : ">", $ = i(n.origin);
-        if ($)
-          return `ډیر کوچنی: ${n.origin} باید ${v}${n.minimum.toString()} ${$.unit} ولري`;
-        return `ډیر کوچنی: ${n.origin} باید ${v}${n.minimum.toString()} وي`;
-      }
-      case "invalid_format": {
-        let v = n;
-        if (v.format === "starts_with")
-          return `ناسم متن: باید د "${v.prefix}" سره پیل شي`;
-        if (v.format === "ends_with")
-          return `ناسم متن: باید د "${v.suffix}" سره پای ته ورسيږي`;
-        if (v.format === "includes")
-          return `ناسم متن: باید "${v.includes}" ولري`;
-        if (v.format === "regex")
-          return `ناسم متن: باید د ${v.pattern} سره مطابقت ولري`;
-        return `${o[v.format] ?? n.format} ناسم دی`;
-      }
-      case "not_multiple_of":
-        return `ناسم عدد: باید د ${n.divisor} مضرب وي`;
-      case "unrecognized_keys":
-        return `ناسم ${n.keys.length > 1 ? "کلیډونه" : "کلیډ"}: ${b(n.keys, ", ")}`;
-      case "invalid_key":
-        return `ناسم کلیډ په ${n.origin} کې`;
-      case "invalid_union":
-        return "ناسمه ورودي";
-      case "invalid_element":
-        return `ناسم عنصر په ${n.origin} کې`;
-      default:
-        return "ناسمه ورودي";
-    }
-  };
-};
-function _$() {
-  return { localeError: S4() };
-}
-var P4 = () => {
-  let r = { string: { unit: "znaków", verb: "mieć" }, file: { unit: "bajtów", verb: "mieć" }, array: { unit: "elementów", verb: "mieć" }, set: { unit: "elementów", verb: "mieć" } };
-  function i(n) {
-    return r[n] ?? null;
-  }
-  let o = { regex: "wyrażenie", email: "adres email", url: "URL", emoji: "emoji", uuid: "UUID", uuidv4: "UUIDv4", uuidv6: "UUIDv6", nanoid: "nanoid", guid: "GUID", cuid: "cuid", cuid2: "cuid2", ulid: "ULID", xid: "XID", ksuid: "KSUID", datetime: "data i godzina w formacie ISO", date: "data w formacie ISO", time: "godzina w formacie ISO", duration: "czas trwania ISO", ipv4: "adres IPv4", ipv6: "adres IPv6", cidrv4: "zakres IPv4", cidrv6: "zakres IPv6", base64: "ciąg znaków zakodowany w formacie base64", base64url: "ciąg znaków zakodowany w formacie base64url", json_string: "ciąg znaków w formacie JSON", e164: "liczba E.164", jwt: "JWT", template_literal: "wejście" }, t = { nan: "NaN", number: "liczba", array: "tablica" };
-  return (n) => {
-    switch (n.code) {
-      case "invalid_type": {
-        let v = t[n.expected] ?? n.expected, $ = k(n.input), u = t[$] ?? $;
-        if (/^[A-Z]/.test(n.expected))
-          return `Nieprawidłowe dane wejściowe: oczekiwano instanceof ${n.expected}, otrzymano ${u}`;
-        return `Nieprawidłowe dane wejściowe: oczekiwano ${v}, otrzymano ${u}`;
-      }
-      case "invalid_value":
-        if (n.values.length === 1)
-          return `Nieprawidłowe dane wejściowe: oczekiwano ${U(n.values[0])}`;
-        return `Nieprawidłowa opcja: oczekiwano jednej z wartości ${b(n.values, "|")}`;
-      case "too_big": {
-        let v = n.inclusive ? "<=" : "<", $ = i(n.origin);
-        if ($)
-          return `Za duża wartość: oczekiwano, że ${n.origin ?? "wartość"} będzie mieć ${v}${n.maximum.toString()} ${$.unit ?? "elementów"}`;
-        return `Zbyt duż(y/a/e): oczekiwano, że ${n.origin ?? "wartość"} będzie wynosić ${v}${n.maximum.toString()}`;
-      }
-      case "too_small": {
-        let v = n.inclusive ? ">=" : ">", $ = i(n.origin);
-        if ($)
-          return `Za mała wartość: oczekiwano, że ${n.origin ?? "wartość"} będzie mieć ${v}${n.minimum.toString()} ${$.unit ?? "elementów"}`;
-        return `Zbyt mał(y/a/e): oczekiwano, że ${n.origin ?? "wartość"} będzie wynosić ${v}${n.minimum.toString()}`;
-      }
-      case "invalid_format": {
-        let v = n;
-        if (v.format === "starts_with")
-          return `Nieprawidłowy ciąg znaków: musi zaczynać się od "${v.prefix}"`;
-        if (v.format === "ends_with")
-          return `Nieprawidłowy ciąg znaków: musi kończyć się na "${v.suffix}"`;
-        if (v.format === "includes")
-          return `Nieprawidłowy ciąg znaków: musi zawierać "${v.includes}"`;
-        if (v.format === "regex")
-          return `Nieprawidłowy ciąg znaków: musi odpowiadać wzorcowi ${v.pattern}`;
-        return `Nieprawidłow(y/a/e) ${o[v.format] ?? n.format}`;
-      }
-      case "not_multiple_of":
-        return `Nieprawidłowa liczba: musi być wielokrotnością ${n.divisor}`;
-      case "unrecognized_keys":
-        return `Nierozpoznane klucze${n.keys.length > 1 ? "s" : ""}: ${b(n.keys, ", ")}`;
-      case "invalid_key":
-        return `Nieprawidłowy klucz w ${n.origin}`;
-      case "invalid_union":
-        return "Nieprawidłowe dane wejściowe";
-      case "invalid_element":
-        return `Nieprawidłowa wartość w ${n.origin}`;
-      default:
-        return "Nieprawidłowe dane wejściowe";
-    }
-  };
-};
-function U$() {
-  return { localeError: P4() };
-}
-var j4 = () => {
-  let r = { string: { unit: "caracteres", verb: "ter" }, file: { unit: "bytes", verb: "ter" }, array: { unit: "itens", verb: "ter" }, set: { unit: "itens", verb: "ter" } };
-  function i(n) {
-    return r[n] ?? null;
-  }
-  let o = { regex: "padrão", email: "endereço de e-mail", url: "URL", emoji: "emoji", uuid: "UUID", uuidv4: "UUIDv4", uuidv6: "UUIDv6", nanoid: "nanoid", guid: "GUID", cuid: "cuid", cuid2: "cuid2", ulid: "ULID", xid: "XID", ksuid: "KSUID", datetime: "data e hora ISO", date: "data ISO", time: "hora ISO", duration: "duração ISO", ipv4: "endereço IPv4", ipv6: "endereço IPv6", cidrv4: "faixa de IPv4", cidrv6: "faixa de IPv6", base64: "texto codificado em base64", base64url: "URL codificada em base64", json_string: "texto JSON", e164: "número E.164", jwt: "JWT", template_literal: "entrada" }, t = { nan: "NaN", number: "número", null: "nulo" };
-  return (n) => {
-    switch (n.code) {
-      case "invalid_type": {
-        let v = t[n.expected] ?? n.expected, $ = k(n.input), u = t[$] ?? $;
-        if (/^[A-Z]/.test(n.expected))
-          return `Tipo inválido: esperado instanceof ${n.expected}, recebido ${u}`;
-        return `Tipo inválido: esperado ${v}, recebido ${u}`;
-      }
-      case "invalid_value":
-        if (n.values.length === 1)
-          return `Entrada inválida: esperado ${U(n.values[0])}`;
-        return `Opção inválida: esperada uma das ${b(n.values, "|")}`;
-      case "too_big": {
-        let v = n.inclusive ? "<=" : "<", $ = i(n.origin);
-        if ($)
-          return `Muito grande: esperado que ${n.origin ?? "valor"} tivesse ${v}${n.maximum.toString()} ${$.unit ?? "elementos"}`;
-        return `Muito grande: esperado que ${n.origin ?? "valor"} fosse ${v}${n.maximum.toString()}`;
-      }
-      case "too_small": {
-        let v = n.inclusive ? ">=" : ">", $ = i(n.origin);
-        if ($)
-          return `Muito pequeno: esperado que ${n.origin} tivesse ${v}${n.minimum.toString()} ${$.unit}`;
-        return `Muito pequeno: esperado que ${n.origin} fosse ${v}${n.minimum.toString()}`;
-      }
-      case "invalid_format": {
-        let v = n;
-        if (v.format === "starts_with")
-          return `Texto inválido: deve começar com "${v.prefix}"`;
-        if (v.format === "ends_with")
-          return `Texto inválido: deve terminar com "${v.suffix}"`;
-        if (v.format === "includes")
-          return `Texto inválido: deve incluir "${v.includes}"`;
-        if (v.format === "regex")
-          return `Texto inválido: deve corresponder ao padrão ${v.pattern}`;
-        return `${o[v.format] ?? n.format} inválido`;
-      }
-      case "not_multiple_of":
-        return `Número inválido: deve ser múltiplo de ${n.divisor}`;
-      case "unrecognized_keys":
-        return `Chave${n.keys.length > 1 ? "s" : ""} desconhecida${n.keys.length > 1 ? "s" : ""}: ${b(n.keys, ", ")}`;
-      case "invalid_key":
-        return `Chave inválida em ${n.origin}`;
-      case "invalid_union":
-        return "Entrada inválida";
-      case "invalid_element":
-        return `Valor inválido em ${n.origin}`;
-      default:
-        return "Campo inválido";
-    }
-  };
-};
-function k$() {
-  return { localeError: j4() };
-}
-function il(r, i, o, t) {
-  let n = Math.abs(r), v = n % 10, $ = n % 100;
-  if ($ >= 11 && $ <= 19)
-    return t;
-  if (v === 1)
-    return i;
-  if (v >= 2 && v <= 4)
-    return o;
-  return t;
-}
-var J4 = () => {
-  let r = { string: { unit: { one: "символ", few: "символа", many: "символов" }, verb: "иметь" }, file: { unit: { one: "байт", few: "байта", many: "байт" }, verb: "иметь" }, array: { unit: { one: "элемент", few: "элемента", many: "элементов" }, verb: "иметь" }, set: { unit: { one: "элемент", few: "элемента", many: "элементов" }, verb: "иметь" } };
-  function i(n) {
-    return r[n] ?? null;
-  }
-  let o = { regex: "ввод", email: "email адрес", url: "URL", emoji: "эмодзи", uuid: "UUID", uuidv4: "UUIDv4", uuidv6: "UUIDv6", nanoid: "nanoid", guid: "GUID", cuid: "cuid", cuid2: "cuid2", ulid: "ULID", xid: "XID", ksuid: "KSUID", datetime: "ISO дата и время", date: "ISO дата", time: "ISO время", duration: "ISO длительность", ipv4: "IPv4 адрес", ipv6: "IPv6 адрес", cidrv4: "IPv4 диапазон", cidrv6: "IPv6 диапазон", base64: "строка в формате base64", base64url: "строка в формате base64url", json_string: "JSON строка", e164: "номер E.164", jwt: "JWT", template_literal: "ввод" }, t = { nan: "NaN", number: "число", array: "массив" };
-  return (n) => {
-    switch (n.code) {
-      case "invalid_type": {
-        let v = t[n.expected] ?? n.expected, $ = k(n.input), u = t[$] ?? $;
-        if (/^[A-Z]/.test(n.expected))
-          return `Неверный ввод: ожидалось instanceof ${n.expected}, получено ${u}`;
-        return `Неверный ввод: ожидалось ${v}, получено ${u}`;
-      }
-      case "invalid_value":
-        if (n.values.length === 1)
-          return `Неверный ввод: ожидалось ${U(n.values[0])}`;
-        return `Неверный вариант: ожидалось одно из ${b(n.values, "|")}`;
-      case "too_big": {
-        let v = n.inclusive ? "<=" : "<", $ = i(n.origin);
-        if ($) {
-          let u = Number(n.maximum), l = il(u, $.unit.one, $.unit.few, $.unit.many);
-          return `Слишком большое значение: ожидалось, что ${n.origin ?? "значение"} будет иметь ${v}${n.maximum.toString()} ${l}`;
-        }
-        return `Слишком большое значение: ожидалось, что ${n.origin ?? "значение"} будет ${v}${n.maximum.toString()}`;
-      }
-      case "too_small": {
-        let v = n.inclusive ? ">=" : ">", $ = i(n.origin);
-        if ($) {
-          let u = Number(n.minimum), l = il(u, $.unit.one, $.unit.few, $.unit.many);
-          return `Слишком маленькое значение: ожидалось, что ${n.origin} будет иметь ${v}${n.minimum.toString()} ${l}`;
-        }
-        return `Слишком маленькое значение: ожидалось, что ${n.origin} будет ${v}${n.minimum.toString()}`;
-      }
-      case "invalid_format": {
-        let v = n;
-        if (v.format === "starts_with")
-          return `Неверная строка: должна начинаться с "${v.prefix}"`;
-        if (v.format === "ends_with")
-          return `Неверная строка: должна заканчиваться на "${v.suffix}"`;
-        if (v.format === "includes")
-          return `Неверная строка: должна содержать "${v.includes}"`;
-        if (v.format === "regex")
-          return `Неверная строка: должна соответствовать шаблону ${v.pattern}`;
-        return `Неверный ${o[v.format] ?? n.format}`;
-      }
-      case "not_multiple_of":
-        return `Неверное число: должно быть кратным ${n.divisor}`;
-      case "unrecognized_keys":
-        return `Нераспознанн${n.keys.length > 1 ? "ые" : "ый"} ключ${n.keys.length > 1 ? "и" : ""}: ${b(n.keys, ", ")}`;
-      case "invalid_key":
-        return `Неверный ключ в ${n.origin}`;
-      case "invalid_union":
-        return "Неверные входные данные";
-      case "invalid_element":
-        return `Неверное значение в ${n.origin}`;
-      default:
-        return "Неверные входные данные";
-    }
-  };
-};
-function D$() {
-  return { localeError: J4() };
-}
-var L4 = () => {
-  let r = { string: { unit: "znakov", verb: "imeti" }, file: { unit: "bajtov", verb: "imeti" }, array: { unit: "elementov", verb: "imeti" }, set: { unit: "elementov", verb: "imeti" } };
-  function i(n) {
-    return r[n] ?? null;
-  }
-  let o = { regex: "vnos", email: "e-poštni naslov", url: "URL", emoji: "emoji", uuid: "UUID", uuidv4: "UUIDv4", uuidv6: "UUIDv6", nanoid: "nanoid", guid: "GUID", cuid: "cuid", cuid2: "cuid2", ulid: "ULID", xid: "XID", ksuid: "KSUID", datetime: "ISO datum in čas", date: "ISO datum", time: "ISO čas", duration: "ISO trajanje", ipv4: "IPv4 naslov", ipv6: "IPv6 naslov", cidrv4: "obseg IPv4", cidrv6: "obseg IPv6", base64: "base64 kodiran niz", base64url: "base64url kodiran niz", json_string: "JSON niz", e164: "E.164 številka", jwt: "JWT", template_literal: "vnos" }, t = { nan: "NaN", number: "število", array: "tabela" };
-  return (n) => {
-    switch (n.code) {
-      case "invalid_type": {
-        let v = t[n.expected] ?? n.expected, $ = k(n.input), u = t[$] ?? $;
-        if (/^[A-Z]/.test(n.expected))
-          return `Neveljaven vnos: pričakovano instanceof ${n.expected}, prejeto ${u}`;
-        return `Neveljaven vnos: pričakovano ${v}, prejeto ${u}`;
-      }
-      case "invalid_value":
-        if (n.values.length === 1)
-          return `Neveljaven vnos: pričakovano ${U(n.values[0])}`;
-        return `Neveljavna možnost: pričakovano eno izmed ${b(n.values, "|")}`;
-      case "too_big": {
-        let v = n.inclusive ? "<=" : "<", $ = i(n.origin);
-        if ($)
-          return `Preveliko: pričakovano, da bo ${n.origin ?? "vrednost"} imelo ${v}${n.maximum.toString()} ${$.unit ?? "elementov"}`;
-        return `Preveliko: pričakovano, da bo ${n.origin ?? "vrednost"} ${v}${n.maximum.toString()}`;
-      }
-      case "too_small": {
-        let v = n.inclusive ? ">=" : ">", $ = i(n.origin);
-        if ($)
-          return `Premajhno: pričakovano, da bo ${n.origin} imelo ${v}${n.minimum.toString()} ${$.unit}`;
-        return `Premajhno: pričakovano, da bo ${n.origin} ${v}${n.minimum.toString()}`;
-      }
-      case "invalid_format": {
-        let v = n;
-        if (v.format === "starts_with")
-          return `Neveljaven niz: mora se začeti z "${v.prefix}"`;
-        if (v.format === "ends_with")
-          return `Neveljaven niz: mora se končati z "${v.suffix}"`;
-        if (v.format === "includes")
-          return `Neveljaven niz: mora vsebovati "${v.includes}"`;
-        if (v.format === "regex")
-          return `Neveljaven niz: mora ustrezati vzorcu ${v.pattern}`;
-        return `Neveljaven ${o[v.format] ?? n.format}`;
-      }
-      case "not_multiple_of":
-        return `Neveljavno število: mora biti večkratnik ${n.divisor}`;
-      case "unrecognized_keys":
-        return `Neprepoznan${n.keys.length > 1 ? "i ključi" : " ključ"}: ${b(n.keys, ", ")}`;
-      case "invalid_key":
-        return `Neveljaven ključ v ${n.origin}`;
-      case "invalid_union":
-        return "Neveljaven vnos";
-      case "invalid_element":
-        return `Neveljavna vrednost v ${n.origin}`;
-      default:
-        return "Neveljaven vnos";
-    }
-  };
-};
-function w$() {
-  return { localeError: L4() };
-}
-var G4 = () => {
-  let r = { string: { unit: "tecken", verb: "att ha" }, file: { unit: "bytes", verb: "att ha" }, array: { unit: "objekt", verb: "att innehålla" }, set: { unit: "objekt", verb: "att innehålla" } };
-  function i(n) {
-    return r[n] ?? null;
-  }
-  let o = { regex: "reguljärt uttryck", email: "e-postadress", url: "URL", emoji: "emoji", uuid: "UUID", uuidv4: "UUIDv4", uuidv6: "UUIDv6", nanoid: "nanoid", guid: "GUID", cuid: "cuid", cuid2: "cuid2", ulid: "ULID", xid: "XID", ksuid: "KSUID", datetime: "ISO-datum och tid", date: "ISO-datum", time: "ISO-tid", duration: "ISO-varaktighet", ipv4: "IPv4-intervall", ipv6: "IPv6-intervall", cidrv4: "IPv4-spektrum", cidrv6: "IPv6-spektrum", base64: "base64-kodad sträng", base64url: "base64url-kodad sträng", json_string: "JSON-sträng", e164: "E.164-nummer", jwt: "JWT", template_literal: "mall-literal" }, t = { nan: "NaN", number: "antal", array: "lista" };
-  return (n) => {
-    switch (n.code) {
-      case "invalid_type": {
-        let v = t[n.expected] ?? n.expected, $ = k(n.input), u = t[$] ?? $;
-        if (/^[A-Z]/.test(n.expected))
-          return `Ogiltig inmatning: förväntat instanceof ${n.expected}, fick ${u}`;
-        return `Ogiltig inmatning: förväntat ${v}, fick ${u}`;
-      }
-      case "invalid_value":
-        if (n.values.length === 1)
-          return `Ogiltig inmatning: förväntat ${U(n.values[0])}`;
-        return `Ogiltigt val: förväntade en av ${b(n.values, "|")}`;
-      case "too_big": {
-        let v = n.inclusive ? "<=" : "<", $ = i(n.origin);
-        if ($)
-          return `För stor(t): förväntade ${n.origin ?? "värdet"} att ha ${v}${n.maximum.toString()} ${$.unit ?? "element"}`;
-        return `För stor(t): förväntat ${n.origin ?? "värdet"} att ha ${v}${n.maximum.toString()}`;
-      }
-      case "too_small": {
-        let v = n.inclusive ? ">=" : ">", $ = i(n.origin);
-        if ($)
-          return `För lite(t): förväntade ${n.origin ?? "värdet"} att ha ${v}${n.minimum.toString()} ${$.unit}`;
-        return `För lite(t): förväntade ${n.origin ?? "värdet"} att ha ${v}${n.minimum.toString()}`;
-      }
-      case "invalid_format": {
-        let v = n;
-        if (v.format === "starts_with")
-          return `Ogiltig sträng: måste börja med "${v.prefix}"`;
-        if (v.format === "ends_with")
-          return `Ogiltig sträng: måste sluta med "${v.suffix}"`;
-        if (v.format === "includes")
-          return `Ogiltig sträng: måste innehålla "${v.includes}"`;
-        if (v.format === "regex")
-          return `Ogiltig sträng: måste matcha mönstret "${v.pattern}"`;
-        return `Ogiltig(t) ${o[v.format] ?? n.format}`;
-      }
-      case "not_multiple_of":
-        return `Ogiltigt tal: måste vara en multipel av ${n.divisor}`;
-      case "unrecognized_keys":
-        return `${n.keys.length > 1 ? "Okända nycklar" : "Okänd nyckel"}: ${b(n.keys, ", ")}`;
-      case "invalid_key":
-        return `Ogiltig nyckel i ${n.origin ?? "värdet"}`;
-      case "invalid_union":
-        return "Ogiltig input";
-      case "invalid_element":
-        return `Ogiltigt värde i ${n.origin ?? "värdet"}`;
-      default:
-        return "Ogiltig input";
-    }
-  };
-};
-function N$() {
-  return { localeError: G4() };
-}
-var W4 = () => {
-  let r = { string: { unit: "எழுத்துக்கள்", verb: "கொண்டிருக்க வேண்டும்" }, file: { unit: "பைட்டுகள்", verb: "கொண்டிருக்க வேண்டும்" }, array: { unit: "உறுப்புகள்", verb: "கொண்டிருக்க வேண்டும்" }, set: { unit: "உறுப்புகள்", verb: "கொண்டிருக்க வேண்டும்" } };
-  function i(n) {
-    return r[n] ?? null;
-  }
-  let o = { regex: "உள்ளீடு", email: "மின்னஞ்சல் முகவரி", url: "URL", emoji: "emoji", uuid: "UUID", uuidv4: "UUIDv4", uuidv6: "UUIDv6", nanoid: "nanoid", guid: "GUID", cuid: "cuid", cuid2: "cuid2", ulid: "ULID", xid: "XID", ksuid: "KSUID", datetime: "ISO தேதி நேரம்", date: "ISO தேதி", time: "ISO நேரம்", duration: "ISO கால அளவு", ipv4: "IPv4 முகவரி", ipv6: "IPv6 முகவரி", cidrv4: "IPv4 வரம்பு", cidrv6: "IPv6 வரம்பு", base64: "base64-encoded சரம்", base64url: "base64url-encoded சரம்", json_string: "JSON சரம்", e164: "E.164 எண்", jwt: "JWT", template_literal: "input" }, t = { nan: "NaN", number: "எண்", array: "அணி", null: "வெறுமை" };
-  return (n) => {
-    switch (n.code) {
-      case "invalid_type": {
-        let v = t[n.expected] ?? n.expected, $ = k(n.input), u = t[$] ?? $;
-        if (/^[A-Z]/.test(n.expected))
-          return `தவறான உள்ளீடு: எதிர்பார்க்கப்பட்டது instanceof ${n.expected}, பெறப்பட்டது ${u}`;
-        return `தவறான உள்ளீடு: எதிர்பார்க்கப்பட்டது ${v}, பெறப்பட்டது ${u}`;
-      }
-      case "invalid_value":
-        if (n.values.length === 1)
-          return `தவறான உள்ளீடு: எதிர்பார்க்கப்பட்டது ${U(n.values[0])}`;
-        return `தவறான விருப்பம்: எதிர்பார்க்கப்பட்டது ${b(n.values, "|")} இல் ஒன்று`;
-      case "too_big": {
-        let v = n.inclusive ? "<=" : "<", $ = i(n.origin);
-        if ($)
-          return `மிக பெரியது: எதிர்பார்க்கப்பட்டது ${n.origin ?? "மதிப்பு"} ${v}${n.maximum.toString()} ${$.unit ?? "உறுப்புகள்"} ஆக இருக்க வேண்டும்`;
-        return `மிக பெரியது: எதிர்பார்க்கப்பட்டது ${n.origin ?? "மதிப்பு"} ${v}${n.maximum.toString()} ஆக இருக்க வேண்டும்`;
-      }
-      case "too_small": {
-        let v = n.inclusive ? ">=" : ">", $ = i(n.origin);
-        if ($)
-          return `மிகச் சிறியது: எதிர்பார்க்கப்பட்டது ${n.origin} ${v}${n.minimum.toString()} ${$.unit} ஆக இருக்க வேண்டும்`;
-        return `மிகச் சிறியது: எதிர்பார்க்கப்பட்டது ${n.origin} ${v}${n.minimum.toString()} ஆக இருக்க வேண்டும்`;
-      }
-      case "invalid_format": {
-        let v = n;
-        if (v.format === "starts_with")
-          return `தவறான சரம்: "${v.prefix}" இல் தொடங்க வேண்டும்`;
-        if (v.format === "ends_with")
-          return `தவறான சரம்: "${v.suffix}" இல் முடிவடைய வேண்டும்`;
-        if (v.format === "includes")
-          return `தவறான சரம்: "${v.includes}" ஐ உள்ளடக்க வேண்டும்`;
-        if (v.format === "regex")
-          return `தவறான சரம்: ${v.pattern} முறைபாட்டுடன் பொருந்த வேண்டும்`;
-        return `தவறான ${o[v.format] ?? n.format}`;
-      }
-      case "not_multiple_of":
-        return `தவறான எண்: ${n.divisor} இன் பலமாக இருக்க வேண்டும்`;
-      case "unrecognized_keys":
-        return `அடையாளம் தெரியாத விசை${n.keys.length > 1 ? "கள்" : ""}: ${b(n.keys, ", ")}`;
-      case "invalid_key":
-        return `${n.origin} இல் தவறான விசை`;
-      case "invalid_union":
-        return "தவறான உள்ளீடு";
-      case "invalid_element":
-        return `${n.origin} இல் தவறான மதிப்பு`;
-      default:
-        return "தவறான உள்ளீடு";
-    }
-  };
-};
-function O$() {
-  return { localeError: W4() };
-}
-var V4 = () => {
-  let r = { string: { unit: "ตัวอักษร", verb: "ควรมี" }, file: { unit: "ไบต์", verb: "ควรมี" }, array: { unit: "รายการ", verb: "ควรมี" }, set: { unit: "รายการ", verb: "ควรมี" } };
-  function i(n) {
-    return r[n] ?? null;
-  }
-  let o = { regex: "ข้อมูลที่ป้อน", email: "ที่อยู่อีเมล", url: "URL", emoji: "อิโมจิ", uuid: "UUID", uuidv4: "UUIDv4", uuidv6: "UUIDv6", nanoid: "nanoid", guid: "GUID", cuid: "cuid", cuid2: "cuid2", ulid: "ULID", xid: "XID", ksuid: "KSUID", datetime: "วันที่เวลาแบบ ISO", date: "วันที่แบบ ISO", time: "เวลาแบบ ISO", duration: "ช่วงเวลาแบบ ISO", ipv4: "ที่อยู่ IPv4", ipv6: "ที่อยู่ IPv6", cidrv4: "ช่วง IP แบบ IPv4", cidrv6: "ช่วง IP แบบ IPv6", base64: "ข้อความแบบ Base64", base64url: "ข้อความแบบ Base64 สำหรับ URL", json_string: "ข้อความแบบ JSON", e164: "เบอร์โทรศัพท์ระหว่างประเทศ (E.164)", jwt: "โทเคน JWT", template_literal: "ข้อมูลที่ป้อน" }, t = { nan: "NaN", number: "ตัวเลข", array: "อาร์เรย์ (Array)", null: "ไม่มีค่า (null)" };
-  return (n) => {
-    switch (n.code) {
-      case "invalid_type": {
-        let v = t[n.expected] ?? n.expected, $ = k(n.input), u = t[$] ?? $;
-        if (/^[A-Z]/.test(n.expected))
-          return `ประเภทข้อมูลไม่ถูกต้อง: ควรเป็น instanceof ${n.expected} แต่ได้รับ ${u}`;
-        return `ประเภทข้อมูลไม่ถูกต้อง: ควรเป็น ${v} แต่ได้รับ ${u}`;
-      }
-      case "invalid_value":
-        if (n.values.length === 1)
-          return `ค่าไม่ถูกต้อง: ควรเป็น ${U(n.values[0])}`;
-        return `ตัวเลือกไม่ถูกต้อง: ควรเป็นหนึ่งใน ${b(n.values, "|")}`;
-      case "too_big": {
-        let v = n.inclusive ? "ไม่เกิน" : "น้อยกว่า", $ = i(n.origin);
-        if ($)
-          return `เกินกำหนด: ${n.origin ?? "ค่า"} ควรมี${v} ${n.maximum.toString()} ${$.unit ?? "รายการ"}`;
-        return `เกินกำหนด: ${n.origin ?? "ค่า"} ควรมี${v} ${n.maximum.toString()}`;
-      }
-      case "too_small": {
-        let v = n.inclusive ? "อย่างน้อย" : "มากกว่า", $ = i(n.origin);
-        if ($)
-          return `น้อยกว่ากำหนด: ${n.origin} ควรมี${v} ${n.minimum.toString()} ${$.unit}`;
-        return `น้อยกว่ากำหนด: ${n.origin} ควรมี${v} ${n.minimum.toString()}`;
-      }
-      case "invalid_format": {
-        let v = n;
-        if (v.format === "starts_with")
-          return `รูปแบบไม่ถูกต้อง: ข้อความต้องขึ้นต้นด้วย "${v.prefix}"`;
-        if (v.format === "ends_with")
-          return `รูปแบบไม่ถูกต้อง: ข้อความต้องลงท้ายด้วย "${v.suffix}"`;
-        if (v.format === "includes")
-          return `รูปแบบไม่ถูกต้อง: ข้อความต้องมี "${v.includes}" อยู่ในข้อความ`;
-        if (v.format === "regex")
-          return `รูปแบบไม่ถูกต้อง: ต้องตรงกับรูปแบบที่กำหนด ${v.pattern}`;
-        return `รูปแบบไม่ถูกต้อง: ${o[v.format] ?? n.format}`;
-      }
-      case "not_multiple_of":
-        return `ตัวเลขไม่ถูกต้อง: ต้องเป็นจำนวนที่หารด้วย ${n.divisor} ได้ลงตัว`;
-      case "unrecognized_keys":
-        return `พบคีย์ที่ไม่รู้จัก: ${b(n.keys, ", ")}`;
-      case "invalid_key":
-        return `คีย์ไม่ถูกต้องใน ${n.origin}`;
-      case "invalid_union":
-        return "ข้อมูลไม่ถูกต้อง: ไม่ตรงกับรูปแบบยูเนียนที่กำหนดไว้";
-      case "invalid_element":
-        return `ข้อมูลไม่ถูกต้องใน ${n.origin}`;
-      default:
-        return "ข้อมูลไม่ถูกต้อง";
-    }
-  };
-};
-function z$() {
-  return { localeError: V4() };
-}
-var X4 = () => {
-  let r = { string: { unit: "karakter", verb: "olmalı" }, file: { unit: "bayt", verb: "olmalı" }, array: { unit: "öğe", verb: "olmalı" }, set: { unit: "öğe", verb: "olmalı" } };
-  function i(n) {
-    return r[n] ?? null;
-  }
-  let o = { regex: "girdi", email: "e-posta adresi", url: "URL", emoji: "emoji", uuid: "UUID", uuidv4: "UUIDv4", uuidv6: "UUIDv6", nanoid: "nanoid", guid: "GUID", cuid: "cuid", cuid2: "cuid2", ulid: "ULID", xid: "XID", ksuid: "KSUID", datetime: "ISO tarih ve saat", date: "ISO tarih", time: "ISO saat", duration: "ISO süre", ipv4: "IPv4 adresi", ipv6: "IPv6 adresi", cidrv4: "IPv4 aralığı", cidrv6: "IPv6 aralığı", base64: "base64 ile şifrelenmiş metin", base64url: "base64url ile şifrelenmiş metin", json_string: "JSON dizesi", e164: "E.164 sayısı", jwt: "JWT", template_literal: "Şablon dizesi" }, t = { nan: "NaN" };
-  return (n) => {
-    switch (n.code) {
-      case "invalid_type": {
-        let v = t[n.expected] ?? n.expected, $ = k(n.input), u = t[$] ?? $;
-        if (/^[A-Z]/.test(n.expected))
-          return `Geçersiz değer: beklenen instanceof ${n.expected}, alınan ${u}`;
-        return `Geçersiz değer: beklenen ${v}, alınan ${u}`;
-      }
-      case "invalid_value":
-        if (n.values.length === 1)
-          return `Geçersiz değer: beklenen ${U(n.values[0])}`;
-        return `Geçersiz seçenek: aşağıdakilerden biri olmalı: ${b(n.values, "|")}`;
-      case "too_big": {
-        let v = n.inclusive ? "<=" : "<", $ = i(n.origin);
-        if ($)
-          return `Çok büyük: beklenen ${n.origin ?? "değer"} ${v}${n.maximum.toString()} ${$.unit ?? "öğe"}`;
-        return `Çok büyük: beklenen ${n.origin ?? "değer"} ${v}${n.maximum.toString()}`;
-      }
-      case "too_small": {
-        let v = n.inclusive ? ">=" : ">", $ = i(n.origin);
-        if ($)
-          return `Çok küçük: beklenen ${n.origin} ${v}${n.minimum.toString()} ${$.unit}`;
-        return `Çok küçük: beklenen ${n.origin} ${v}${n.minimum.toString()}`;
-      }
-      case "invalid_format": {
-        let v = n;
-        if (v.format === "starts_with")
-          return `Geçersiz metin: "${v.prefix}" ile başlamalı`;
-        if (v.format === "ends_with")
-          return `Geçersiz metin: "${v.suffix}" ile bitmeli`;
-        if (v.format === "includes")
-          return `Geçersiz metin: "${v.includes}" içermeli`;
-        if (v.format === "regex")
-          return `Geçersiz metin: ${v.pattern} desenine uymalı`;
-        return `Geçersiz ${o[v.format] ?? n.format}`;
-      }
-      case "not_multiple_of":
-        return `Geçersiz sayı: ${n.divisor} ile tam bölünebilmeli`;
-      case "unrecognized_keys":
-        return `Tanınmayan anahtar${n.keys.length > 1 ? "lar" : ""}: ${b(n.keys, ", ")}`;
-      case "invalid_key":
-        return `${n.origin} içinde geçersiz anahtar`;
-      case "invalid_union":
-        return "Geçersiz değer";
-      case "invalid_element":
-        return `${n.origin} içinde geçersiz değer`;
-      default:
-        return "Geçersiz değer";
-    }
-  };
-};
-function S$() {
-  return { localeError: X4() };
-}
-var E4 = () => {
-  let r = { string: { unit: "символів", verb: "матиме" }, file: { unit: "байтів", verb: "матиме" }, array: { unit: "елементів", verb: "матиме" }, set: { unit: "елементів", verb: "матиме" } };
-  function i(n) {
-    return r[n] ?? null;
-  }
-  let o = { regex: "вхідні дані", email: "адреса електронної пошти", url: "URL", emoji: "емодзі", uuid: "UUID", uuidv4: "UUIDv4", uuidv6: "UUIDv6", nanoid: "nanoid", guid: "GUID", cuid: "cuid", cuid2: "cuid2", ulid: "ULID", xid: "XID", ksuid: "KSUID", datetime: "дата та час ISO", date: "дата ISO", time: "час ISO", duration: "тривалість ISO", ipv4: "адреса IPv4", ipv6: "адреса IPv6", cidrv4: "діапазон IPv4", cidrv6: "діапазон IPv6", base64: "рядок у кодуванні base64", base64url: "рядок у кодуванні base64url", json_string: "рядок JSON", e164: "номер E.164", jwt: "JWT", template_literal: "вхідні дані" }, t = { nan: "NaN", number: "число", array: "масив" };
-  return (n) => {
-    switch (n.code) {
-      case "invalid_type": {
-        let v = t[n.expected] ?? n.expected, $ = k(n.input), u = t[$] ?? $;
-        if (/^[A-Z]/.test(n.expected))
-          return `Неправильні вхідні дані: очікується instanceof ${n.expected}, отримано ${u}`;
-        return `Неправильні вхідні дані: очікується ${v}, отримано ${u}`;
-      }
-      case "invalid_value":
-        if (n.values.length === 1)
-          return `Неправильні вхідні дані: очікується ${U(n.values[0])}`;
-        return `Неправильна опція: очікується одне з ${b(n.values, "|")}`;
-      case "too_big": {
-        let v = n.inclusive ? "<=" : "<", $ = i(n.origin);
-        if ($)
-          return `Занадто велике: очікується, що ${n.origin ?? "значення"} ${$.verb} ${v}${n.maximum.toString()} ${$.unit ?? "елементів"}`;
-        return `Занадто велике: очікується, що ${n.origin ?? "значення"} буде ${v}${n.maximum.toString()}`;
-      }
-      case "too_small": {
-        let v = n.inclusive ? ">=" : ">", $ = i(n.origin);
-        if ($)
-          return `Занадто мале: очікується, що ${n.origin} ${$.verb} ${v}${n.minimum.toString()} ${$.unit}`;
-        return `Занадто мале: очікується, що ${n.origin} буде ${v}${n.minimum.toString()}`;
-      }
-      case "invalid_format": {
-        let v = n;
-        if (v.format === "starts_with")
-          return `Неправильний рядок: повинен починатися з "${v.prefix}"`;
-        if (v.format === "ends_with")
-          return `Неправильний рядок: повинен закінчуватися на "${v.suffix}"`;
-        if (v.format === "includes")
-          return `Неправильний рядок: повинен містити "${v.includes}"`;
-        if (v.format === "regex")
-          return `Неправильний рядок: повинен відповідати шаблону ${v.pattern}`;
-        return `Неправильний ${o[v.format] ?? n.format}`;
-      }
-      case "not_multiple_of":
-        return `Неправильне число: повинно бути кратним ${n.divisor}`;
-      case "unrecognized_keys":
-        return `Нерозпізнаний ключ${n.keys.length > 1 ? "і" : ""}: ${b(n.keys, ", ")}`;
-      case "invalid_key":
-        return `Неправильний ключ у ${n.origin}`;
-      case "invalid_union":
-        return "Неправильні вхідні дані";
-      case "invalid_element":
-        return `Неправильне значення у ${n.origin}`;
-      default:
-        return "Неправильні вхідні дані";
-    }
-  };
-};
-function Nn() {
-  return { localeError: E4() };
-}
-function P$() {
-  return Nn();
-}
-var A4 = () => {
-  let r = { string: { unit: "حروف", verb: "ہونا" }, file: { unit: "بائٹس", verb: "ہونا" }, array: { unit: "آئٹمز", verb: "ہونا" }, set: { unit: "آئٹمز", verb: "ہونا" } };
-  function i(n) {
-    return r[n] ?? null;
-  }
-  let o = { regex: "ان پٹ", email: "ای میل ایڈریس", url: "یو آر ایل", emoji: "ایموجی", uuid: "یو یو آئی ڈی", uuidv4: "یو یو آئی ڈی وی 4", uuidv6: "یو یو آئی ڈی وی 6", nanoid: "نینو آئی ڈی", guid: "جی یو آئی ڈی", cuid: "سی یو آئی ڈی", cuid2: "سی یو آئی ڈی 2", ulid: "یو ایل آئی ڈی", xid: "ایکس آئی ڈی", ksuid: "کے ایس یو آئی ڈی", datetime: "آئی ایس او ڈیٹ ٹائم", date: "آئی ایس او تاریخ", time: "آئی ایس او وقت", duration: "آئی ایس او مدت", ipv4: "آئی پی وی 4 ایڈریس", ipv6: "آئی پی وی 6 ایڈریس", cidrv4: "آئی پی وی 4 رینج", cidrv6: "آئی پی وی 6 رینج", base64: "بیس 64 ان کوڈڈ سٹرنگ", base64url: "بیس 64 یو آر ایل ان کوڈڈ سٹرنگ", json_string: "جے ایس او این سٹرنگ", e164: "ای 164 نمبر", jwt: "جے ڈبلیو ٹی", template_literal: "ان پٹ" }, t = { nan: "NaN", number: "نمبر", array: "آرے", null: "نل" };
-  return (n) => {
-    switch (n.code) {
-      case "invalid_type": {
-        let v = t[n.expected] ?? n.expected, $ = k(n.input), u = t[$] ?? $;
-        if (/^[A-Z]/.test(n.expected))
-          return `غلط ان پٹ: instanceof ${n.expected} متوقع تھا، ${u} موصول ہوا`;
-        return `غلط ان پٹ: ${v} متوقع تھا، ${u} موصول ہوا`;
-      }
-      case "invalid_value":
-        if (n.values.length === 1)
-          return `غلط ان پٹ: ${U(n.values[0])} متوقع تھا`;
-        return `غلط آپشن: ${b(n.values, "|")} میں سے ایک متوقع تھا`;
-      case "too_big": {
-        let v = n.inclusive ? "<=" : "<", $ = i(n.origin);
-        if ($)
-          return `بہت بڑا: ${n.origin ?? "ویلیو"} کے ${v}${n.maximum.toString()} ${$.unit ?? "عناصر"} ہونے متوقع تھے`;
-        return `بہت بڑا: ${n.origin ?? "ویلیو"} کا ${v}${n.maximum.toString()} ہونا متوقع تھا`;
-      }
-      case "too_small": {
-        let v = n.inclusive ? ">=" : ">", $ = i(n.origin);
-        if ($)
-          return `بہت چھوٹا: ${n.origin} کے ${v}${n.minimum.toString()} ${$.unit} ہونے متوقع تھے`;
-        return `بہت چھوٹا: ${n.origin} کا ${v}${n.minimum.toString()} ہونا متوقع تھا`;
-      }
-      case "invalid_format": {
-        let v = n;
-        if (v.format === "starts_with")
-          return `غلط سٹرنگ: "${v.prefix}" سے شروع ہونا چاہیے`;
-        if (v.format === "ends_with")
-          return `غلط سٹرنگ: "${v.suffix}" پر ختم ہونا چاہیے`;
-        if (v.format === "includes")
-          return `غلط سٹرنگ: "${v.includes}" شامل ہونا چاہیے`;
-        if (v.format === "regex")
-          return `غلط سٹرنگ: پیٹرن ${v.pattern} سے میچ ہونا چاہیے`;
-        return `غلط ${o[v.format] ?? n.format}`;
-      }
-      case "not_multiple_of":
-        return `غلط نمبر: ${n.divisor} کا مضاعف ہونا چاہیے`;
-      case "unrecognized_keys":
-        return `غیر تسلیم شدہ کی${n.keys.length > 1 ? "ز" : ""}: ${b(n.keys, "، ")}`;
-      case "invalid_key":
-        return `${n.origin} میں غلط کی`;
-      case "invalid_union":
-        return "غلط ان پٹ";
-      case "invalid_element":
-        return `${n.origin} میں غلط ویلیو`;
-      default:
-        return "غلط ان پٹ";
-    }
-  };
-};
-function j$() {
-  return { localeError: A4() };
-}
-var K4 = () => {
-  let r = { string: { unit: "belgi", verb: "bo‘lishi kerak" }, file: { unit: "bayt", verb: "bo‘lishi kerak" }, array: { unit: "element", verb: "bo‘lishi kerak" }, set: { unit: "element", verb: "bo‘lishi kerak" } };
-  function i(n) {
-    return r[n] ?? null;
-  }
-  let o = { regex: "kirish", email: "elektron pochta manzili", url: "URL", emoji: "emoji", uuid: "UUID", uuidv4: "UUIDv4", uuidv6: "UUIDv6", nanoid: "nanoid", guid: "GUID", cuid: "cuid", cuid2: "cuid2", ulid: "ULID", xid: "XID", ksuid: "KSUID", datetime: "ISO sana va vaqti", date: "ISO sana", time: "ISO vaqt", duration: "ISO davomiylik", ipv4: "IPv4 manzil", ipv6: "IPv6 manzil", mac: "MAC manzil", cidrv4: "IPv4 diapazon", cidrv6: "IPv6 diapazon", base64: "base64 kodlangan satr", base64url: "base64url kodlangan satr", json_string: "JSON satr", e164: "E.164 raqam", jwt: "JWT", template_literal: "kirish" }, t = { nan: "NaN", number: "raqam", array: "massiv" };
-  return (n) => {
-    switch (n.code) {
-      case "invalid_type": {
-        let v = t[n.expected] ?? n.expected, $ = k(n.input), u = t[$] ?? $;
-        if (/^[A-Z]/.test(n.expected))
-          return `Noto‘g‘ri kirish: kutilgan instanceof ${n.expected}, qabul qilingan ${u}`;
-        return `Noto‘g‘ri kirish: kutilgan ${v}, qabul qilingan ${u}`;
-      }
-      case "invalid_value":
-        if (n.values.length === 1)
-          return `Noto‘g‘ri kirish: kutilgan ${U(n.values[0])}`;
-        return `Noto‘g‘ri variant: quyidagilardan biri kutilgan ${b(n.values, "|")}`;
-      case "too_big": {
-        let v = n.inclusive ? "<=" : "<", $ = i(n.origin);
-        if ($)
-          return `Juda katta: kutilgan ${n.origin ?? "qiymat"} ${v}${n.maximum.toString()} ${$.unit} ${$.verb}`;
-        return `Juda katta: kutilgan ${n.origin ?? "qiymat"} ${v}${n.maximum.toString()}`;
-      }
-      case "too_small": {
-        let v = n.inclusive ? ">=" : ">", $ = i(n.origin);
-        if ($)
-          return `Juda kichik: kutilgan ${n.origin} ${v}${n.minimum.toString()} ${$.unit} ${$.verb}`;
-        return `Juda kichik: kutilgan ${n.origin} ${v}${n.minimum.toString()}`;
-      }
-      case "invalid_format": {
-        let v = n;
-        if (v.format === "starts_with")
-          return `Noto‘g‘ri satr: "${v.prefix}" bilan boshlanishi kerak`;
-        if (v.format === "ends_with")
-          return `Noto‘g‘ri satr: "${v.suffix}" bilan tugashi kerak`;
-        if (v.format === "includes")
-          return `Noto‘g‘ri satr: "${v.includes}" ni o‘z ichiga olishi kerak`;
-        if (v.format === "regex")
-          return `Noto‘g‘ri satr: ${v.pattern} shabloniga mos kelishi kerak`;
-        return `Noto‘g‘ri ${o[v.format] ?? n.format}`;
-      }
-      case "not_multiple_of":
-        return `Noto‘g‘ri raqam: ${n.divisor} ning karralisi bo‘lishi kerak`;
-      case "unrecognized_keys":
-        return `Noma’lum kalit${n.keys.length > 1 ? "lar" : ""}: ${b(n.keys, ", ")}`;
-      case "invalid_key":
-        return `${n.origin} dagi kalit noto‘g‘ri`;
-      case "invalid_union":
-        return "Noto‘g‘ri kirish";
-      case "invalid_element":
-        return `${n.origin} da noto‘g‘ri qiymat`;
-      default:
-        return "Noto‘g‘ri kirish";
-    }
-  };
-};
-function J$() {
-  return { localeError: K4() };
-}
-var q4 = () => {
-  let r = { string: { unit: "ký tự", verb: "có" }, file: { unit: "byte", verb: "có" }, array: { unit: "phần tử", verb: "có" }, set: { unit: "phần tử", verb: "có" } };
-  function i(n) {
-    return r[n] ?? null;
-  }
-  let o = { regex: "đầu vào", email: "địa chỉ email", url: "URL", emoji: "emoji", uuid: "UUID", uuidv4: "UUIDv4", uuidv6: "UUIDv6", nanoid: "nanoid", guid: "GUID", cuid: "cuid", cuid2: "cuid2", ulid: "ULID", xid: "XID", ksuid: "KSUID", datetime: "ngày giờ ISO", date: "ngày ISO", time: "giờ ISO", duration: "khoảng thời gian ISO", ipv4: "địa chỉ IPv4", ipv6: "địa chỉ IPv6", cidrv4: "dải IPv4", cidrv6: "dải IPv6", base64: "chuỗi mã hóa base64", base64url: "chuỗi mã hóa base64url", json_string: "chuỗi JSON", e164: "số E.164", jwt: "JWT", template_literal: "đầu vào" }, t = { nan: "NaN", number: "số", array: "mảng" };
-  return (n) => {
-    switch (n.code) {
-      case "invalid_type": {
-        let v = t[n.expected] ?? n.expected, $ = k(n.input), u = t[$] ?? $;
-        if (/^[A-Z]/.test(n.expected))
-          return `Đầu vào không hợp lệ: mong đợi instanceof ${n.expected}, nhận được ${u}`;
-        return `Đầu vào không hợp lệ: mong đợi ${v}, nhận được ${u}`;
-      }
-      case "invalid_value":
-        if (n.values.length === 1)
-          return `Đầu vào không hợp lệ: mong đợi ${U(n.values[0])}`;
-        return `Tùy chọn không hợp lệ: mong đợi một trong các giá trị ${b(n.values, "|")}`;
-      case "too_big": {
-        let v = n.inclusive ? "<=" : "<", $ = i(n.origin);
-        if ($)
-          return `Quá lớn: mong đợi ${n.origin ?? "giá trị"} ${$.verb} ${v}${n.maximum.toString()} ${$.unit ?? "phần tử"}`;
-        return `Quá lớn: mong đợi ${n.origin ?? "giá trị"} ${v}${n.maximum.toString()}`;
-      }
-      case "too_small": {
-        let v = n.inclusive ? ">=" : ">", $ = i(n.origin);
-        if ($)
-          return `Quá nhỏ: mong đợi ${n.origin} ${$.verb} ${v}${n.minimum.toString()} ${$.unit}`;
-        return `Quá nhỏ: mong đợi ${n.origin} ${v}${n.minimum.toString()}`;
-      }
-      case "invalid_format": {
-        let v = n;
-        if (v.format === "starts_with")
-          return `Chuỗi không hợp lệ: phải bắt đầu bằng "${v.prefix}"`;
-        if (v.format === "ends_with")
-          return `Chuỗi không hợp lệ: phải kết thúc bằng "${v.suffix}"`;
-        if (v.format === "includes")
-          return `Chuỗi không hợp lệ: phải bao gồm "${v.includes}"`;
-        if (v.format === "regex")
-          return `Chuỗi không hợp lệ: phải khớp với mẫu ${v.pattern}`;
-        return `${o[v.format] ?? n.format} không hợp lệ`;
-      }
-      case "not_multiple_of":
-        return `Số không hợp lệ: phải là bội số của ${n.divisor}`;
-      case "unrecognized_keys":
-        return `Khóa không được nhận dạng: ${b(n.keys, ", ")}`;
-      case "invalid_key":
-        return `Khóa không hợp lệ trong ${n.origin}`;
-      case "invalid_union":
-        return "Đầu vào không hợp lệ";
-      case "invalid_element":
-        return `Giá trị không hợp lệ trong ${n.origin}`;
-      default:
-        return "Đầu vào không hợp lệ";
-    }
-  };
-};
-function L$() {
-  return { localeError: q4() };
-}
-var Q4 = () => {
-  let r = { string: { unit: "字符", verb: "包含" }, file: { unit: "字节", verb: "包含" }, array: { unit: "项", verb: "包含" }, set: { unit: "项", verb: "包含" } };
-  function i(n) {
-    return r[n] ?? null;
-  }
-  let o = { regex: "输入", email: "电子邮件", url: "URL", emoji: "表情符号", uuid: "UUID", uuidv4: "UUIDv4", uuidv6: "UUIDv6", nanoid: "nanoid", guid: "GUID", cuid: "cuid", cuid2: "cuid2", ulid: "ULID", xid: "XID", ksuid: "KSUID", datetime: "ISO日期时间", date: "ISO日期", time: "ISO时间", duration: "ISO时长", ipv4: "IPv4地址", ipv6: "IPv6地址", cidrv4: "IPv4网段", cidrv6: "IPv6网段", base64: "base64编码字符串", base64url: "base64url编码字符串", json_string: "JSON字符串", e164: "E.164号码", jwt: "JWT", template_literal: "输入" }, t = { nan: "NaN", number: "数字", array: "数组", null: "空值(null)" };
-  return (n) => {
-    switch (n.code) {
-      case "invalid_type": {
-        let v = t[n.expected] ?? n.expected, $ = k(n.input), u = t[$] ?? $;
-        if (/^[A-Z]/.test(n.expected))
-          return `无效输入：期望 instanceof ${n.expected}，实际接收 ${u}`;
-        return `无效输入：期望 ${v}，实际接收 ${u}`;
-      }
-      case "invalid_value":
-        if (n.values.length === 1)
-          return `无效输入：期望 ${U(n.values[0])}`;
-        return `无效选项：期望以下之一 ${b(n.values, "|")}`;
-      case "too_big": {
-        let v = n.inclusive ? "<=" : "<", $ = i(n.origin);
-        if ($)
-          return `数值过大：期望 ${n.origin ?? "值"} ${v}${n.maximum.toString()} ${$.unit ?? "个元素"}`;
-        return `数值过大：期望 ${n.origin ?? "值"} ${v}${n.maximum.toString()}`;
-      }
-      case "too_small": {
-        let v = n.inclusive ? ">=" : ">", $ = i(n.origin);
-        if ($)
-          return `数值过小：期望 ${n.origin} ${v}${n.minimum.toString()} ${$.unit}`;
-        return `数值过小：期望 ${n.origin} ${v}${n.minimum.toString()}`;
-      }
-      case "invalid_format": {
-        let v = n;
-        if (v.format === "starts_with")
-          return `无效字符串：必须以 "${v.prefix}" 开头`;
-        if (v.format === "ends_with")
-          return `无效字符串：必须以 "${v.suffix}" 结尾`;
-        if (v.format === "includes")
-          return `无效字符串：必须包含 "${v.includes}"`;
-        if (v.format === "regex")
-          return `无效字符串：必须满足正则表达式 ${v.pattern}`;
-        return `无效${o[v.format] ?? n.format}`;
-      }
-      case "not_multiple_of":
-        return `无效数字：必须是 ${n.divisor} 的倍数`;
-      case "unrecognized_keys":
-        return `出现未知的键(key): ${b(n.keys, ", ")}`;
-      case "invalid_key":
-        return `${n.origin} 中的键(key)无效`;
-      case "invalid_union":
-        return "无效输入";
-      case "invalid_element":
-        return `${n.origin} 中包含无效值(value)`;
-      default:
-        return "无效输入";
-    }
-  };
-};
-function G$() {
-  return { localeError: Q4() };
-}
-var Y4 = () => {
-  let r = { string: { unit: "字元", verb: "擁有" }, file: { unit: "位元組", verb: "擁有" }, array: { unit: "項目", verb: "擁有" }, set: { unit: "項目", verb: "擁有" } };
-  function i(n) {
-    return r[n] ?? null;
-  }
-  let o = { regex: "輸入", email: "郵件地址", url: "URL", emoji: "emoji", uuid: "UUID", uuidv4: "UUIDv4", uuidv6: "UUIDv6", nanoid: "nanoid", guid: "GUID", cuid: "cuid", cuid2: "cuid2", ulid: "ULID", xid: "XID", ksuid: "KSUID", datetime: "ISO 日期時間", date: "ISO 日期", time: "ISO 時間", duration: "ISO 期間", ipv4: "IPv4 位址", ipv6: "IPv6 位址", cidrv4: "IPv4 範圍", cidrv6: "IPv6 範圍", base64: "base64 編碼字串", base64url: "base64url 編碼字串", json_string: "JSON 字串", e164: "E.164 數值", jwt: "JWT", template_literal: "輸入" }, t = { nan: "NaN" };
-  return (n) => {
-    switch (n.code) {
-      case "invalid_type": {
-        let v = t[n.expected] ?? n.expected, $ = k(n.input), u = t[$] ?? $;
-        if (/^[A-Z]/.test(n.expected))
-          return `無效的輸入值：預期為 instanceof ${n.expected}，但收到 ${u}`;
-        return `無效的輸入值：預期為 ${v}，但收到 ${u}`;
-      }
-      case "invalid_value":
-        if (n.values.length === 1)
-          return `無效的輸入值：預期為 ${U(n.values[0])}`;
-        return `無效的選項：預期為以下其中之一 ${b(n.values, "|")}`;
-      case "too_big": {
-        let v = n.inclusive ? "<=" : "<", $ = i(n.origin);
-        if ($)
-          return `數值過大：預期 ${n.origin ?? "值"} 應為 ${v}${n.maximum.toString()} ${$.unit ?? "個元素"}`;
-        return `數值過大：預期 ${n.origin ?? "值"} 應為 ${v}${n.maximum.toString()}`;
-      }
-      case "too_small": {
-        let v = n.inclusive ? ">=" : ">", $ = i(n.origin);
-        if ($)
-          return `數值過小：預期 ${n.origin} 應為 ${v}${n.minimum.toString()} ${$.unit}`;
-        return `數值過小：預期 ${n.origin} 應為 ${v}${n.minimum.toString()}`;
-      }
-      case "invalid_format": {
-        let v = n;
-        if (v.format === "starts_with")
-          return `無效的字串：必須以 "${v.prefix}" 開頭`;
-        if (v.format === "ends_with")
-          return `無效的字串：必須以 "${v.suffix}" 結尾`;
-        if (v.format === "includes")
-          return `無效的字串：必須包含 "${v.includes}"`;
-        if (v.format === "regex")
-          return `無效的字串：必須符合格式 ${v.pattern}`;
-        return `無效的 ${o[v.format] ?? n.format}`;
-      }
-      case "not_multiple_of":
-        return `無效的數字：必須為 ${n.divisor} 的倍數`;
-      case "unrecognized_keys":
-        return `無法識別的鍵值${n.keys.length > 1 ? "們" : ""}：${b(n.keys, "、")}`;
-      case "invalid_key":
-        return `${n.origin} 中有無效的鍵值`;
-      case "invalid_union":
-        return "無效的輸入值";
-      case "invalid_element":
-        return `${n.origin} 中有無效的值`;
-      default:
-        return "無效的輸入值";
-    }
-  };
-};
-function W$() {
-  return { localeError: Y4() };
-}
-var F4 = () => {
-  let r = { string: { unit: "àmi", verb: "ní" }, file: { unit: "bytes", verb: "ní" }, array: { unit: "nkan", verb: "ní" }, set: { unit: "nkan", verb: "ní" } };
-  function i(n) {
-    return r[n] ?? null;
-  }
-  let o = { regex: "ẹ̀rọ ìbáwọlé", email: "àdírẹ́sì ìmẹ́lì", url: "URL", emoji: "emoji", uuid: "UUID", uuidv4: "UUIDv4", uuidv6: "UUIDv6", nanoid: "nanoid", guid: "GUID", cuid: "cuid", cuid2: "cuid2", ulid: "ULID", xid: "XID", ksuid: "KSUID", datetime: "àkókò ISO", date: "ọjọ́ ISO", time: "àkókò ISO", duration: "àkókò tó pé ISO", ipv4: "àdírẹ́sì IPv4", ipv6: "àdírẹ́sì IPv6", cidrv4: "àgbègbè IPv4", cidrv6: "àgbègbè IPv6", base64: "ọ̀rọ̀ tí a kọ́ ní base64", base64url: "ọ̀rọ̀ base64url", json_string: "ọ̀rọ̀ JSON", e164: "nọ́mbà E.164", jwt: "JWT", template_literal: "ẹ̀rọ ìbáwọlé" }, t = { nan: "NaN", number: "nọ́mbà", array: "akopọ" };
-  return (n) => {
-    switch (n.code) {
-      case "invalid_type": {
-        let v = t[n.expected] ?? n.expected, $ = k(n.input), u = t[$] ?? $;
-        if (/^[A-Z]/.test(n.expected))
-          return `Ìbáwọlé aṣìṣe: a ní láti fi instanceof ${n.expected}, àmọ̀ a rí ${u}`;
-        return `Ìbáwọlé aṣìṣe: a ní láti fi ${v}, àmọ̀ a rí ${u}`;
-      }
-      case "invalid_value":
-        if (n.values.length === 1)
-          return `Ìbáwọlé aṣìṣe: a ní láti fi ${U(n.values[0])}`;
-        return `Àṣàyàn aṣìṣe: yan ọ̀kan lára ${b(n.values, "|")}`;
-      case "too_big": {
-        let v = n.inclusive ? "<=" : "<", $ = i(n.origin);
-        if ($)
-          return `Tó pọ̀ jù: a ní láti jẹ́ pé ${n.origin ?? "iye"} ${$.verb} ${v}${n.maximum} ${$.unit}`;
-        return `Tó pọ̀ jù: a ní láti jẹ́ ${v}${n.maximum}`;
-      }
-      case "too_small": {
-        let v = n.inclusive ? ">=" : ">", $ = i(n.origin);
-        if ($)
-          return `Kéré ju: a ní láti jẹ́ pé ${n.origin} ${$.verb} ${v}${n.minimum} ${$.unit}`;
-        return `Kéré ju: a ní láti jẹ́ ${v}${n.minimum}`;
-      }
-      case "invalid_format": {
-        let v = n;
-        if (v.format === "starts_with")
-          return `Ọ̀rọ̀ aṣìṣe: gbọ́dọ̀ bẹ̀rẹ̀ pẹ̀lú "${v.prefix}"`;
-        if (v.format === "ends_with")
-          return `Ọ̀rọ̀ aṣìṣe: gbọ́dọ̀ parí pẹ̀lú "${v.suffix}"`;
-        if (v.format === "includes")
-          return `Ọ̀rọ̀ aṣìṣe: gbọ́dọ̀ ní "${v.includes}"`;
-        if (v.format === "regex")
-          return `Ọ̀rọ̀ aṣìṣe: gbọ́dọ̀ bá àpẹẹrẹ mu ${v.pattern}`;
-        return `Aṣìṣe: ${o[v.format] ?? n.format}`;
-      }
-      case "not_multiple_of":
-        return `Nọ́mbà aṣìṣe: gbọ́dọ̀ jẹ́ èyà pípín ti ${n.divisor}`;
-      case "unrecognized_keys":
-        return `Bọtìnì àìmọ̀: ${b(n.keys, ", ")}`;
-      case "invalid_key":
-        return `Bọtìnì aṣìṣe nínú ${n.origin}`;
-      case "invalid_union":
-        return "Ìbáwọlé aṣìṣe";
-      case "invalid_element":
-        return `Iye aṣìṣe nínú ${n.origin}`;
-      default:
-        return "Ìbáwọlé aṣìṣe";
-    }
-  };
-};
-function V$() {
-  return { localeError: F4() };
-}
-var vl;
-var X$ = Symbol("ZodOutput");
-var E$ = Symbol("ZodInput");
-
-class A$ {
-  constructor() {
-    this._map = new WeakMap, this._idmap = new Map;
-  }
-  add(r, ...i) {
-    let o = i[0];
-    if (this._map.set(r, o), o && typeof o === "object" && "id" in o)
-      this._idmap.set(o.id, r);
-    return this;
-  }
-  clear() {
-    return this._map = new WeakMap, this._idmap = new Map, this;
-  }
-  remove(r) {
-    let i = this._map.get(r);
-    if (i && typeof i === "object" && "id" in i)
-      this._idmap.delete(i.id);
-    return this._map.delete(r), this;
-  }
-  get(r) {
-    let i = r._zod.parent;
-    if (i) {
-      let o = { ...this.get(i) ?? {} };
-      delete o.id;
-      let t = { ...o, ...this._map.get(r) };
-      return Object.keys(t).length ? t : undefined;
-    }
-    return this._map.get(r);
-  }
-  has(r) {
-    return this._map.has(r);
-  }
-}
-function ui() {
-  return new A$;
-}
-(vl = globalThis).__zod_globalRegistry ?? (vl.__zod_globalRegistry = ui());
-var A = globalThis.__zod_globalRegistry;
-function K$(r, i) {
-  return new r({ type: "string", ...w(i) });
-}
-function q$(r, i) {
-  return new r({ type: "string", coerce: true, ...w(i) });
-}
-function gi(r, i) {
-  return new r({ type: "string", format: "email", check: "string_format", abort: false, ...w(i) });
-}
-function zn(r, i) {
-  return new r({ type: "string", format: "guid", check: "string_format", abort: false, ...w(i) });
-}
-function ei(r, i) {
-  return new r({ type: "string", format: "uuid", check: "string_format", abort: false, ...w(i) });
-}
-function li(r, i) {
-  return new r({ type: "string", format: "uuid", check: "string_format", abort: false, version: "v4", ...w(i) });
-}
-function Ii(r, i) {
-  return new r({ type: "string", format: "uuid", check: "string_format", abort: false, version: "v6", ...w(i) });
-}
-function ci(r, i) {
-  return new r({ type: "string", format: "uuid", check: "string_format", abort: false, version: "v7", ...w(i) });
-}
-function Sn(r, i) {
-  return new r({ type: "string", format: "url", check: "string_format", abort: false, ...w(i) });
-}
-function bi(r, i) {
-  return new r({ type: "string", format: "emoji", check: "string_format", abort: false, ...w(i) });
-}
-function _i(r, i) {
-  return new r({ type: "string", format: "nanoid", check: "string_format", abort: false, ...w(i) });
-}
-function Ui(r, i) {
-  return new r({ type: "string", format: "cuid", check: "string_format", abort: false, ...w(i) });
-}
-function ki(r, i) {
-  return new r({ type: "string", format: "cuid2", check: "string_format", abort: false, ...w(i) });
-}
-function Di(r, i) {
-  return new r({ type: "string", format: "ulid", check: "string_format", abort: false, ...w(i) });
-}
-function wi(r, i) {
-  return new r({ type: "string", format: "xid", check: "string_format", abort: false, ...w(i) });
-}
-function Ni(r, i) {
-  return new r({ type: "string", format: "ksuid", check: "string_format", abort: false, ...w(i) });
-}
-function Oi(r, i) {
-  return new r({ type: "string", format: "ipv4", check: "string_format", abort: false, ...w(i) });
-}
-function zi(r, i) {
-  return new r({ type: "string", format: "ipv6", check: "string_format", abort: false, ...w(i) });
-}
-function Q$(r, i) {
-  return new r({ type: "string", format: "mac", check: "string_format", abort: false, ...w(i) });
-}
-function Si(r, i) {
-  return new r({ type: "string", format: "cidrv4", check: "string_format", abort: false, ...w(i) });
-}
-function Pi(r, i) {
-  return new r({ type: "string", format: "cidrv6", check: "string_format", abort: false, ...w(i) });
-}
-function ji(r, i) {
-  return new r({ type: "string", format: "base64", check: "string_format", abort: false, ...w(i) });
-}
-function Ji(r, i) {
-  return new r({ type: "string", format: "base64url", check: "string_format", abort: false, ...w(i) });
-}
-function Li(r, i) {
-  return new r({ type: "string", format: "e164", check: "string_format", abort: false, ...w(i) });
-}
-function Gi(r, i) {
-  return new r({ type: "string", format: "jwt", check: "string_format", abort: false, ...w(i) });
-}
-var Y$ = { Any: null, Minute: -1, Second: 0, Millisecond: 3, Microsecond: 6 };
-function F$(r, i) {
-  return new r({ type: "string", format: "datetime", check: "string_format", offset: false, local: false, precision: null, ...w(i) });
-}
-function B$(r, i) {
-  return new r({ type: "string", format: "date", check: "string_format", ...w(i) });
-}
-function m$(r, i) {
-  return new r({ type: "string", format: "time", check: "string_format", precision: null, ...w(i) });
-}
-function H$(r, i) {
-  return new r({ type: "string", format: "duration", check: "string_format", ...w(i) });
-}
-function T$(r, i) {
-  return new r({ type: "number", checks: [], ...w(i) });
-}
-function M$(r, i) {
-  return new r({ type: "number", coerce: true, checks: [], ...w(i) });
-}
-function R$(r, i) {
-  return new r({ type: "number", check: "number_format", abort: false, format: "safeint", ...w(i) });
-}
-function x$(r, i) {
-  return new r({ type: "number", check: "number_format", abort: false, format: "float32", ...w(i) });
-}
-function Z$(r, i) {
-  return new r({ type: "number", check: "number_format", abort: false, format: "float64", ...w(i) });
-}
-function d$(r, i) {
-  return new r({ type: "number", check: "number_format", abort: false, format: "int32", ...w(i) });
-}
-function C$(r, i) {
-  return new r({ type: "number", check: "number_format", abort: false, format: "uint32", ...w(i) });
-}
-function f$(r, i) {
-  return new r({ type: "boolean", ...w(i) });
-}
-function y$(r, i) {
-  return new r({ type: "boolean", coerce: true, ...w(i) });
-}
-function h$(r, i) {
-  return new r({ type: "bigint", ...w(i) });
-}
-function a$(r, i) {
-  return new r({ type: "bigint", coerce: true, ...w(i) });
-}
-function p$(r, i) {
-  return new r({ type: "bigint", check: "bigint_format", abort: false, format: "int64", ...w(i) });
-}
-function s$(r, i) {
-  return new r({ type: "bigint", check: "bigint_format", abort: false, format: "uint64", ...w(i) });
-}
-function ru(r, i) {
-  return new r({ type: "symbol", ...w(i) });
-}
-function nu(r, i) {
-  return new r({ type: "undefined", ...w(i) });
-}
-function iu(r, i) {
-  return new r({ type: "null", ...w(i) });
-}
-function vu(r) {
-  return new r({ type: "any" });
-}
-function ou(r) {
-  return new r({ type: "unknown" });
-}
-function tu(r, i) {
-  return new r({ type: "never", ...w(i) });
-}
-function $u(r, i) {
-  return new r({ type: "void", ...w(i) });
-}
-function uu(r, i) {
-  return new r({ type: "date", ...w(i) });
-}
-function gu(r, i) {
-  return new r({ type: "date", coerce: true, ...w(i) });
-}
-function eu(r, i) {
-  return new r({ type: "nan", ...w(i) });
-}
-function y(r, i) {
-  return new yn({ check: "less_than", ...w(i), value: r, inclusive: false });
-}
-function M(r, i) {
-  return new yn({ check: "less_than", ...w(i), value: r, inclusive: true });
-}
-function h(r, i) {
-  return new hn({ check: "greater_than", ...w(i), value: r, inclusive: false });
-}
-function Q(r, i) {
-  return new hn({ check: "greater_than", ...w(i), value: r, inclusive: true });
-}
-function Wi(r) {
-  return h(0, r);
-}
-function Vi(r) {
-  return y(0, r);
-}
-function Xi(r) {
-  return M(0, r);
-}
-function Ei(r) {
-  return Q(0, r);
-}
-function ur(r, i) {
-  return new go({ check: "multiple_of", ...w(i), value: r });
-}
-function gr(r, i) {
-  return new Io({ check: "max_size", ...w(i), maximum: r });
-}
-function a(r, i) {
-  return new co({ check: "min_size", ...w(i), minimum: r });
-}
-function kr(r, i) {
-  return new bo({ check: "size_equals", ...w(i), size: r });
-}
-function Dr(r, i) {
-  return new _o({ check: "max_length", ...w(i), maximum: r });
-}
-function nr(r, i) {
-  return new Uo({ check: "min_length", ...w(i), minimum: r });
-}
-function wr(r, i) {
-  return new ko({ check: "length_equals", ...w(i), length: r });
-}
-function Er(r, i) {
-  return new Do({ check: "string_format", format: "regex", ...w(i), pattern: r });
-}
-function Ar(r) {
-  return new wo({ check: "string_format", format: "lowercase", ...w(r) });
-}
-function Kr(r) {
-  return new No({ check: "string_format", format: "uppercase", ...w(r) });
-}
-function qr(r, i) {
-  return new Oo({ check: "string_format", format: "includes", ...w(i), includes: r });
-}
-function Qr(r, i) {
-  return new zo({ check: "string_format", format: "starts_with", ...w(i), prefix: r });
-}
-function Yr(r, i) {
-  return new So({ check: "string_format", format: "ends_with", ...w(i), suffix: r });
-}
-function Ai(r, i, o) {
-  return new Po({ check: "property", property: r, schema: i, ...w(o) });
-}
-function Fr(r, i) {
-  return new jo({ check: "mime_type", mime: r, ...w(i) });
-}
-function d(r) {
-  return new Jo({ check: "overwrite", tx: r });
-}
-function Br(r) {
-  return d((i) => i.normalize(r));
-}
-function mr() {
-  return d((r) => r.trim());
-}
-function Hr() {
-  return d((r) => r.toLowerCase());
-}
-function Tr() {
-  return d((r) => r.toUpperCase());
-}
-function Mr() {
-  return d((r) => Pv(r));
-}
-function lu(r, i, o) {
-  return new r({ type: "array", element: i, ...w(o) });
-}
-function m4(r, i, o) {
-  return new r({ type: "union", options: i, ...w(o) });
-}
-function H4(r, i, o) {
-  return new r({ type: "union", options: i, inclusive: false, ...w(o) });
-}
-function T4(r, i, o, t) {
-  return new r({ type: "union", options: o, discriminator: i, ...w(t) });
-}
-function M4(r, i, o) {
-  return new r({ type: "intersection", left: i, right: o });
-}
-function R4(r, i, o, t) {
-  let n = o instanceof S;
-  return new r({ type: "tuple", items: i, rest: n ? o : null, ...w(n ? t : o) });
-}
-function x4(r, i, o, t) {
-  return new r({ type: "record", keyType: i, valueType: o, ...w(t) });
-}
-function Z4(r, i, o, t) {
-  return new r({ type: "map", keyType: i, valueType: o, ...w(t) });
-}
-function d4(r, i, o) {
-  return new r({ type: "set", valueType: i, ...w(o) });
-}
-function C4(r, i, o) {
-  let t = Array.isArray(i) ? Object.fromEntries(i.map((n) => [n, n])) : i;
-  return new r({ type: "enum", entries: t, ...w(o) });
-}
-function f4(r, i, o) {
-  return new r({ type: "enum", entries: i, ...w(o) });
-}
-function y4(r, i, o) {
-  return new r({ type: "literal", values: Array.isArray(i) ? i : [i], ...w(o) });
-}
-function Iu(r, i) {
-  return new r({ type: "file", ...w(i) });
-}
-function h4(r, i) {
-  return new r({ type: "transform", transform: i });
-}
-function a4(r, i) {
-  return new r({ type: "optional", innerType: i });
-}
-function p4(r, i) {
-  return new r({ type: "nullable", innerType: i });
-}
-function s4(r, i, o) {
-  return new r({ type: "default", innerType: i, get defaultValue() {
-    return typeof o === "function" ? o() : Jv(o);
-  } });
-}
-function r6(r, i, o) {
-  return new r({ type: "nonoptional", innerType: i, ...w(o) });
-}
-function n6(r, i) {
-  return new r({ type: "success", innerType: i });
-}
-function i6(r, i, o) {
-  return new r({ type: "catch", innerType: i, catchValue: typeof o === "function" ? o : () => o });
-}
-function v6(r, i, o) {
-  return new r({ type: "pipe", in: i, out: o });
-}
-function o6(r, i) {
-  return new r({ type: "readonly", innerType: i });
-}
-function t6(r, i, o) {
-  return new r({ type: "template_literal", parts: i, ...w(o) });
-}
-function $6(r, i) {
-  return new r({ type: "lazy", getter: i });
-}
-function u6(r, i) {
-  return new r({ type: "promise", innerType: i });
-}
-function cu(r, i, o) {
-  let t = w(o);
-  return t.abort ?? (t.abort = true), new r({ type: "custom", check: "custom", fn: i, ...t });
-}
-function bu(r, i, o) {
-  return new r({ type: "custom", check: "custom", fn: i, ...w(o) });
-}
-function _u(r) {
-  let i = ol((o) => {
-    return o.addIssue = (t) => {
-      if (typeof t === "string")
-        o.issues.push(jr(t, o.value, i._zod.def));
-      else {
-        let n = t;
-        if (n.fatal)
-          n.continue = false;
-        n.code ?? (n.code = "custom"), n.input ?? (n.input = o.value), n.inst ?? (n.inst = i), n.continue ?? (n.continue = !i._zod.def.abort), o.issues.push(jr(n));
-      }
-    }, r(o.value, o);
-  });
-  return i;
-}
-function ol(r, i) {
-  let o = new V({ check: "custom", ...w(i) });
-  return o._zod.check = r, o;
-}
-function Uu(r) {
-  let i = new V({ check: "describe" });
-  return i._zod.onattach = [(o) => {
-    let t = A.get(o) ?? {};
-    A.add(o, { ...t, description: r });
-  }], i._zod.check = () => {}, i;
-}
-function ku(r) {
-  let i = new V({ check: "meta" });
-  return i._zod.onattach = [(o) => {
-    let t = A.get(o) ?? {};
-    A.add(o, { ...t, ...r });
-  }], i._zod.check = () => {}, i;
-}
-function Du(r, i) {
-  let o = w(i), t = o.truthy ?? ["true", "1", "yes", "on", "y", "enabled"], n = o.falsy ?? ["false", "0", "no", "off", "n", "disabled"];
-  if (o.case !== "sensitive")
-    t = t.map((O) => typeof O === "string" ? O.toLowerCase() : O), n = n.map((O) => typeof O === "string" ? O.toLowerCase() : O);
-  let v = new Set(t), $ = new Set(n), u = r.Codec ?? Un, l = r.Boolean ?? bn, c = new (r.String ?? Ur)({ type: "string", error: o.error }), _ = new l({ type: "boolean", error: o.error }), N = new u({ type: "pipe", in: c, out: _, transform: (O, J) => {
-    let X = O;
-    if (o.case !== "sensitive")
-      X = X.toLowerCase();
-    if (v.has(X))
-      return true;
-    else if ($.has(X))
-      return false;
-    else
-      return J.issues.push({ code: "invalid_value", expected: "stringbool", values: [...v, ...$], input: J.value, inst: N, continue: false }), {};
-  }, reverseTransform: (O, J) => {
-    if (O === true)
-      return t[0] || "true";
-    else
-      return n[0] || "false";
-  }, error: o.error });
-  return N;
-}
-function Rr(r, i, o, t = {}) {
-  let n = w(t), v = { ...w(t), check: "string_format", type: "string", format: i, fn: typeof o === "function" ? o : (u) => o.test(u), ...n };
-  if (o instanceof RegExp)
-    v.pattern = o;
-  return new r(v);
-}
-function er(r) {
-  let i = r?.target ?? "draft-2020-12";
-  if (i === "draft-4")
-    i = "draft-04";
-  if (i === "draft-7")
-    i = "draft-07";
-  return { processors: r.processors ?? {}, metadataRegistry: r?.metadata ?? A, target: i, unrepresentable: r?.unrepresentable ?? "throw", override: r?.override ?? (() => {}), io: r?.io ?? "output", counter: 0, seen: new Map, cycles: r?.cycles ?? "ref", reused: r?.reused ?? "inline", external: r?.external ?? undefined };
-}
-function L(r, i, o = { path: [], schemaPath: [] }) {
-  var t;
-  let n = r._zod.def, v = i.seen.get(r);
-  if (v) {
-    if (v.count++, o.schemaPath.includes(r))
-      v.cycle = o.path;
-    return v.schema;
-  }
-  let $ = { schema: {}, count: 1, cycle: undefined, path: o.path };
-  i.seen.set(r, $);
-  let u = r._zod.toJSONSchema?.();
-  if (u)
-    $.schema = u;
-  else {
-    let c = { ...o, schemaPath: [...o.schemaPath, r], path: o.path };
-    if (r._zod.processJSONSchema)
-      r._zod.processJSONSchema(i, $.schema, c);
-    else {
-      let N = $.schema, O = i.processors[n.type];
-      if (!O)
-        throw Error(`[toJSONSchema]: Non-representable type encountered: ${n.type}`);
-      O(r, i, N, c);
-    }
-    let _ = r._zod.parent;
-    if (_) {
-      if (!$.ref)
-        $.ref = _;
-      L(_, i, c), i.seen.get(_).isParent = true;
-    }
-  }
-  let l = i.metadataRegistry.get(r);
-  if (l)
-    Object.assign($.schema, l);
-  if (i.io === "input" && Y(r))
-    delete $.schema.examples, delete $.schema.default;
-  if (i.io === "input" && $.schema._prefault)
-    (t = $.schema).default ?? (t.default = $.schema._prefault);
-  return delete $.schema._prefault, i.seen.get(r).schema;
-}
-function lr(r, i) {
-  let o = r.seen.get(i);
-  if (!o)
-    throw Error("Unprocessed schema. This is a bug in Zod.");
-  let t = new Map;
-  for (let $ of r.seen.entries()) {
-    let u = r.metadataRegistry.get($[0])?.id;
-    if (u) {
-      let l = t.get(u);
-      if (l && l !== $[0])
-        throw Error(`Duplicate schema id "${u}" detected during JSON Schema conversion. Two different schemas cannot share the same id when converted together.`);
-      t.set(u, $[0]);
-    }
-  }
-  let n = ($) => {
-    let u = r.target === "draft-2020-12" ? "$defs" : "definitions";
-    if (r.external) {
-      let _ = r.external.registry.get($[0])?.id, N = r.external.uri ?? ((J) => J);
-      if (_)
-        return { ref: N(_) };
-      let O = $[1].defId ?? $[1].schema.id ?? `schema${r.counter++}`;
-      return $[1].defId = O, { defId: O, ref: `${N("__shared")}#/${u}/${O}` };
-    }
-    if ($[1] === o)
-      return { ref: "#" };
-    let e = `${"#"}/${u}/`, c = $[1].schema.id ?? `__schema${r.counter++}`;
-    return { defId: c, ref: e + c };
-  }, v = ($) => {
-    if ($[1].schema.$ref)
-      return;
-    let u = $[1], { ref: l, defId: e } = n($);
-    if (u.def = { ...u.schema }, e)
-      u.defId = e;
-    let c = u.schema;
-    for (let _ in c)
-      delete c[_];
-    c.$ref = l;
-  };
-  if (r.cycles === "throw")
-    for (let $ of r.seen.entries()) {
-      let u = $[1];
-      if (u.cycle)
-        throw Error(`Cycle detected: #/${u.cycle?.join("/")}/<root>
-
-Set the \`cycles\` parameter to \`"ref"\` to resolve cyclical schemas with defs.`);
-    }
-  for (let $ of r.seen.entries()) {
-    let u = $[1];
-    if (i === $[0]) {
-      v($);
-      continue;
-    }
-    if (r.external) {
-      let e = r.external.registry.get($[0])?.id;
-      if (i !== $[0] && e) {
-        v($);
-        continue;
-      }
-    }
-    if (r.metadataRegistry.get($[0])?.id) {
-      v($);
-      continue;
-    }
-    if (u.cycle) {
-      v($);
-      continue;
-    }
-    if (u.count > 1) {
-      if (r.reused === "ref") {
-        v($);
-        continue;
-      }
-    }
-  }
-}
-function Ir(r, i) {
-  let o = r.seen.get(i);
-  if (!o)
-    throw Error("Unprocessed schema. This is a bug in Zod.");
-  let t = ($) => {
-    let u = r.seen.get($);
-    if (u.ref === null)
-      return;
-    let l = u.def ?? u.schema, e = { ...l }, c = u.ref;
-    if (u.ref = null, c) {
-      t(c);
-      let N = r.seen.get(c), O = N.schema;
-      if (O.$ref && (r.target === "draft-07" || r.target === "draft-04" || r.target === "openapi-3.0"))
-        l.allOf = l.allOf ?? [], l.allOf.push(O);
-      else
-        Object.assign(l, O);
-      if (Object.assign(l, e), $._zod.parent === c)
-        for (let X in l) {
-          if (X === "$ref" || X === "allOf")
-            continue;
-          if (!(X in e))
-            delete l[X];
-        }
-      if (O.$ref && N.def)
-        for (let X in l) {
-          if (X === "$ref" || X === "allOf")
-            continue;
-          if (X in N.def && JSON.stringify(l[X]) === JSON.stringify(N.def[X]))
-            delete l[X];
-        }
-    }
-    let _ = $._zod.parent;
-    if (_ && _ !== c) {
-      t(_);
-      let N = r.seen.get(_);
-      if (N?.schema.$ref) {
-        if (l.$ref = N.schema.$ref, N.def)
-          for (let O in l) {
-            if (O === "$ref" || O === "allOf")
-              continue;
-            if (O in N.def && JSON.stringify(l[O]) === JSON.stringify(N.def[O]))
-              delete l[O];
-          }
-      }
-    }
-    r.override({ zodSchema: $, jsonSchema: l, path: u.path ?? [] });
-  };
-  for (let $ of [...r.seen.entries()].reverse())
-    t($[0]);
-  let n = {};
-  if (r.target === "draft-2020-12")
-    n.$schema = "https://json-schema.org/draft/2020-12/schema";
-  else if (r.target === "draft-07")
-    n.$schema = "http://json-schema.org/draft-07/schema#";
-  else if (r.target === "draft-04")
-    n.$schema = "http://json-schema.org/draft-04/schema#";
-  else if (r.target === "openapi-3.0")
-    ;
-  if (r.external?.uri) {
-    let $ = r.external.registry.get(i)?.id;
-    if (!$)
-      throw Error("Schema is missing an `id` property");
-    n.$id = r.external.uri($);
-  }
-  Object.assign(n, o.def ?? o.schema);
-  let v = r.external?.defs ?? {};
-  for (let $ of r.seen.entries()) {
-    let u = $[1];
-    if (u.def && u.defId)
-      v[u.defId] = u.def;
-  }
-  if (r.external)
-    ;
-  else if (Object.keys(v).length > 0)
-    if (r.target === "draft-2020-12")
-      n.$defs = v;
-    else
-      n.definitions = v;
-  try {
-    let $ = JSON.parse(JSON.stringify(n));
-    return Object.defineProperty($, "~standard", { value: { ...i["~standard"], jsonSchema: { input: xr(i, "input", r.processors), output: xr(i, "output", r.processors) } }, enumerable: false, writable: false }), $;
-  } catch ($) {
-    throw Error("Error converting schema to JSON.");
-  }
-}
-function Y(r, i) {
-  let o = i ?? { seen: new Set };
-  if (o.seen.has(r))
-    return false;
-  o.seen.add(r);
-  let t = r._zod.def;
-  if (t.type === "transform")
-    return true;
-  if (t.type === "array")
-    return Y(t.element, o);
-  if (t.type === "set")
-    return Y(t.valueType, o);
-  if (t.type === "lazy")
-    return Y(t.getter(), o);
-  if (t.type === "promise" || t.type === "optional" || t.type === "nonoptional" || t.type === "nullable" || t.type === "readonly" || t.type === "default" || t.type === "prefault")
-    return Y(t.innerType, o);
-  if (t.type === "intersection")
-    return Y(t.left, o) || Y(t.right, o);
-  if (t.type === "record" || t.type === "map")
-    return Y(t.keyType, o) || Y(t.valueType, o);
-  if (t.type === "pipe")
-    return Y(t.in, o) || Y(t.out, o);
-  if (t.type === "object") {
-    for (let n in t.shape)
-      if (Y(t.shape[n], o))
-        return true;
-    return false;
-  }
-  if (t.type === "union") {
-    for (let n of t.options)
-      if (Y(n, o))
-        return true;
-    return false;
-  }
-  if (t.type === "tuple") {
-    for (let n of t.items)
-      if (Y(n, o))
-        return true;
-    if (t.rest && Y(t.rest, o))
-      return true;
-    return false;
-  }
-  return false;
-}
-var wu = (r, i = {}) => (o) => {
-  let t = er({ ...o, processors: i });
-  return L(r, t), lr(t, r), Ir(t, r);
-};
-var xr = (r, i, o = {}) => (t) => {
-  let { libraryOptions: n, target: v } = t ?? {}, $ = er({ ...n ?? {}, target: v, io: i, processors: o });
-  return L(r, $), lr($, r), Ir($, r);
-};
-var g6 = { guid: "uuid", url: "uri", datetime: "date-time", json_string: "json-string", regex: "" };
-var Nu = (r, i, o, t) => {
-  let n = o;
-  n.type = "string";
-  let { minimum: v, maximum: $, format: u, patterns: l, contentEncoding: e } = r._zod.bag;
-  if (typeof v === "number")
-    n.minLength = v;
-  if (typeof $ === "number")
-    n.maxLength = $;
-  if (u) {
-    if (n.format = g6[u] ?? u, n.format === "")
-      delete n.format;
-    if (u === "time")
-      delete n.format;
-  }
-  if (e)
-    n.contentEncoding = e;
-  if (l && l.size > 0) {
-    let c = [...l];
-    if (c.length === 1)
-      n.pattern = c[0].source;
-    else if (c.length > 1)
-      n.allOf = [...c.map((_) => ({ ...i.target === "draft-07" || i.target === "draft-04" || i.target === "openapi-3.0" ? { type: "string" } : {}, pattern: _.source }))];
-  }
-};
-var Ou = (r, i, o, t) => {
-  let n = o, { minimum: v, maximum: $, format: u, multipleOf: l, exclusiveMaximum: e, exclusiveMinimum: c } = r._zod.bag;
-  if (typeof u === "string" && u.includes("int"))
-    n.type = "integer";
-  else
-    n.type = "number";
-  if (typeof c === "number")
-    if (i.target === "draft-04" || i.target === "openapi-3.0")
-      n.minimum = c, n.exclusiveMinimum = true;
-    else
-      n.exclusiveMinimum = c;
-  if (typeof v === "number") {
-    if (n.minimum = v, typeof c === "number" && i.target !== "draft-04")
-      if (c >= v)
-        delete n.minimum;
-      else
-        delete n.exclusiveMinimum;
-  }
-  if (typeof e === "number")
-    if (i.target === "draft-04" || i.target === "openapi-3.0")
-      n.maximum = e, n.exclusiveMaximum = true;
-    else
-      n.exclusiveMaximum = e;
-  if (typeof $ === "number") {
-    if (n.maximum = $, typeof e === "number" && i.target !== "draft-04")
-      if (e <= $)
-        delete n.maximum;
-      else
-        delete n.exclusiveMaximum;
-  }
-  if (typeof l === "number")
-    n.multipleOf = l;
-};
-var zu = (r, i, o, t) => {
-  o.type = "boolean";
-};
-var Su = (r, i, o, t) => {
-  if (i.unrepresentable === "throw")
-    throw Error("BigInt cannot be represented in JSON Schema");
-};
-var Pu = (r, i, o, t) => {
-  if (i.unrepresentable === "throw")
-    throw Error("Symbols cannot be represented in JSON Schema");
-};
-var ju = (r, i, o, t) => {
-  if (i.target === "openapi-3.0")
-    o.type = "string", o.nullable = true, o.enum = [null];
-  else
-    o.type = "null";
-};
-var Ju = (r, i, o, t) => {
-  if (i.unrepresentable === "throw")
-    throw Error("Undefined cannot be represented in JSON Schema");
-};
-var Lu = (r, i, o, t) => {
-  if (i.unrepresentable === "throw")
-    throw Error("Void cannot be represented in JSON Schema");
-};
-var Gu = (r, i, o, t) => {
-  o.not = {};
-};
-var Wu = (r, i, o, t) => {};
-var Vu = (r, i, o, t) => {};
-var Xu = (r, i, o, t) => {
-  if (i.unrepresentable === "throw")
-    throw Error("Date cannot be represented in JSON Schema");
-};
-var Eu = (r, i, o, t) => {
-  let n = r._zod.def, v = nn(n.entries);
-  if (v.every(($) => typeof $ === "number"))
-    o.type = "number";
-  if (v.every(($) => typeof $ === "string"))
-    o.type = "string";
-  o.enum = v;
-};
-var Au = (r, i, o, t) => {
-  let n = r._zod.def, v = [];
-  for (let $ of n.values)
-    if ($ === undefined) {
-      if (i.unrepresentable === "throw")
-        throw Error("Literal `undefined` cannot be represented in JSON Schema");
-    } else if (typeof $ === "bigint")
-      if (i.unrepresentable === "throw")
-        throw Error("BigInt literals cannot be represented in JSON Schema");
-      else
-        v.push(Number($));
-    else
-      v.push($);
-  if (v.length === 0)
-    ;
-  else if (v.length === 1) {
-    let $ = v[0];
-    if (o.type = $ === null ? "null" : typeof $, i.target === "draft-04" || i.target === "openapi-3.0")
-      o.enum = [$];
-    else
-      o.const = $;
-  } else {
-    if (v.every(($) => typeof $ === "number"))
-      o.type = "number";
-    if (v.every(($) => typeof $ === "string"))
-      o.type = "string";
-    if (v.every(($) => typeof $ === "boolean"))
-      o.type = "boolean";
-    if (v.every(($) => $ === null))
-      o.type = "null";
-    o.enum = v;
-  }
-};
-var Ku = (r, i, o, t) => {
-  if (i.unrepresentable === "throw")
-    throw Error("NaN cannot be represented in JSON Schema");
-};
-var qu = (r, i, o, t) => {
-  let n = o, v = r._zod.pattern;
-  if (!v)
-    throw Error("Pattern not found in template literal");
-  n.type = "string", n.pattern = v.source;
-};
-var Qu = (r, i, o, t) => {
-  let n = o, v = { type: "string", format: "binary", contentEncoding: "binary" }, { minimum: $, maximum: u, mime: l } = r._zod.bag;
-  if ($ !== undefined)
-    v.minLength = $;
-  if (u !== undefined)
-    v.maxLength = u;
-  if (l)
-    if (l.length === 1)
-      v.contentMediaType = l[0], Object.assign(n, v);
-    else
-      Object.assign(n, v), n.anyOf = l.map((e) => ({ contentMediaType: e }));
-  else
-    Object.assign(n, v);
-};
-var Yu = (r, i, o, t) => {
-  o.type = "boolean";
-};
-var Fu = (r, i, o, t) => {
-  if (i.unrepresentable === "throw")
-    throw Error("Custom types cannot be represented in JSON Schema");
-};
-var Bu = (r, i, o, t) => {
-  if (i.unrepresentable === "throw")
-    throw Error("Function types cannot be represented in JSON Schema");
-};
-var mu = (r, i, o, t) => {
-  if (i.unrepresentable === "throw")
-    throw Error("Transforms cannot be represented in JSON Schema");
-};
-var Hu = (r, i, o, t) => {
-  if (i.unrepresentable === "throw")
-    throw Error("Map cannot be represented in JSON Schema");
-};
-var Tu = (r, i, o, t) => {
-  if (i.unrepresentable === "throw")
-    throw Error("Set cannot be represented in JSON Schema");
-};
-var Mu = (r, i, o, t) => {
-  let n = o, v = r._zod.def, { minimum: $, maximum: u } = r._zod.bag;
-  if (typeof $ === "number")
-    n.minItems = $;
-  if (typeof u === "number")
-    n.maxItems = u;
-  n.type = "array", n.items = L(v.element, i, { ...t, path: [...t.path, "items"] });
-};
-var Ru = (r, i, o, t) => {
-  let n = o, v = r._zod.def;
-  n.type = "object", n.properties = {};
-  let $ = v.shape;
-  for (let e in $)
-    n.properties[e] = L($[e], i, { ...t, path: [...t.path, "properties", e] });
-  let u = new Set(Object.keys($)), l = new Set([...u].filter((e) => {
-    let c = v.shape[e]._zod;
-    if (i.io === "input")
-      return c.optin === undefined;
-    else
-      return c.optout === undefined;
-  }));
-  if (l.size > 0)
-    n.required = Array.from(l);
-  if (v.catchall?._zod.def.type === "never")
-    n.additionalProperties = false;
-  else if (!v.catchall) {
-    if (i.io === "output")
-      n.additionalProperties = false;
-  } else if (v.catchall)
-    n.additionalProperties = L(v.catchall, i, { ...t, path: [...t.path, "additionalProperties"] });
-};
-var qi = (r, i, o, t) => {
-  let n = r._zod.def, v = n.inclusive === false, $ = n.options.map((u, l) => L(u, i, { ...t, path: [...t.path, v ? "oneOf" : "anyOf", l] }));
-  if (v)
-    o.oneOf = $;
-  else
-    o.anyOf = $;
-};
-var xu = (r, i, o, t) => {
-  let n = r._zod.def, v = L(n.left, i, { ...t, path: [...t.path, "allOf", 0] }), $ = L(n.right, i, { ...t, path: [...t.path, "allOf", 1] }), u = (e) => ("allOf" in e) && Object.keys(e).length === 1, l = [...u(v) ? v.allOf : [v], ...u($) ? $.allOf : [$]];
-  o.allOf = l;
-};
-var Zu = (r, i, o, t) => {
-  let n = o, v = r._zod.def;
-  n.type = "array";
-  let $ = i.target === "draft-2020-12" ? "prefixItems" : "items", u = i.target === "draft-2020-12" ? "items" : i.target === "openapi-3.0" ? "items" : "additionalItems", l = v.items.map((N, O) => L(N, i, { ...t, path: [...t.path, $, O] })), e = v.rest ? L(v.rest, i, { ...t, path: [...t.path, u, ...i.target === "openapi-3.0" ? [v.items.length] : []] }) : null;
-  if (i.target === "draft-2020-12") {
-    if (n.prefixItems = l, e)
-      n.items = e;
-  } else if (i.target === "openapi-3.0") {
-    if (n.items = { anyOf: l }, e)
-      n.items.anyOf.push(e);
-    if (n.minItems = l.length, !e)
-      n.maxItems = l.length;
-  } else if (n.items = l, e)
-    n.additionalItems = e;
-  let { minimum: c, maximum: _ } = r._zod.bag;
-  if (typeof c === "number")
-    n.minItems = c;
-  if (typeof _ === "number")
-    n.maxItems = _;
-};
-var du = (r, i, o, t) => {
-  let n = o, v = r._zod.def;
-  n.type = "object";
-  let $ = v.keyType, l = $._zod.bag?.patterns;
-  if (v.mode === "loose" && l && l.size > 0) {
-    let c = L(v.valueType, i, { ...t, path: [...t.path, "patternProperties", "*"] });
-    n.patternProperties = {};
-    for (let _ of l)
-      n.patternProperties[_.source] = c;
-  } else {
-    if (i.target === "draft-07" || i.target === "draft-2020-12")
-      n.propertyNames = L(v.keyType, i, { ...t, path: [...t.path, "propertyNames"] });
-    n.additionalProperties = L(v.valueType, i, { ...t, path: [...t.path, "additionalProperties"] });
-  }
-  let e = $._zod.values;
-  if (e) {
-    let c = [...e].filter((_) => typeof _ === "string" || typeof _ === "number");
-    if (c.length > 0)
-      n.required = c;
-  }
-};
-var Cu = (r, i, o, t) => {
-  let n = r._zod.def, v = L(n.innerType, i, t), $ = i.seen.get(r);
-  if (i.target === "openapi-3.0")
-    $.ref = n.innerType, o.nullable = true;
-  else
-    o.anyOf = [v, { type: "null" }];
-};
-var fu = (r, i, o, t) => {
-  let n = r._zod.def;
-  L(n.innerType, i, t);
-  let v = i.seen.get(r);
-  v.ref = n.innerType;
-};
-var yu = (r, i, o, t) => {
-  let n = r._zod.def;
-  L(n.innerType, i, t);
-  let v = i.seen.get(r);
-  v.ref = n.innerType, o.default = JSON.parse(JSON.stringify(n.defaultValue));
-};
-var hu = (r, i, o, t) => {
-  let n = r._zod.def;
-  L(n.innerType, i, t);
-  let v = i.seen.get(r);
-  if (v.ref = n.innerType, i.io === "input")
-    o._prefault = JSON.parse(JSON.stringify(n.defaultValue));
-};
-var au = (r, i, o, t) => {
-  let n = r._zod.def;
-  L(n.innerType, i, t);
-  let v = i.seen.get(r);
-  v.ref = n.innerType;
-  let $;
-  try {
-    $ = n.catchValue(undefined);
-  } catch {
-    throw Error("Dynamic catch values are not supported in JSON Schema");
-  }
-  o.default = $;
-};
-var pu = (r, i, o, t) => {
-  let n = r._zod.def, v = i.io === "input" ? n.in._zod.def.type === "transform" ? n.out : n.in : n.out;
-  L(v, i, t);
-  let $ = i.seen.get(r);
-  $.ref = v;
-};
-var su = (r, i, o, t) => {
-  let n = r._zod.def;
-  L(n.innerType, i, t);
-  let v = i.seen.get(r);
-  v.ref = n.innerType, o.readOnly = true;
-};
-var rg = (r, i, o, t) => {
-  let n = r._zod.def;
-  L(n.innerType, i, t);
-  let v = i.seen.get(r);
-  v.ref = n.innerType;
-};
-var Qi = (r, i, o, t) => {
-  let n = r._zod.def;
-  L(n.innerType, i, t);
-  let v = i.seen.get(r);
-  v.ref = n.innerType;
-};
-var ng = (r, i, o, t) => {
-  let n = r._zod.innerType;
-  L(n, i, t);
-  let v = i.seen.get(r);
-  v.ref = n;
-};
-var Ki = { string: Nu, number: Ou, boolean: zu, bigint: Su, symbol: Pu, null: ju, undefined: Ju, void: Lu, never: Gu, any: Wu, unknown: Vu, date: Xu, enum: Eu, literal: Au, nan: Ku, template_literal: qu, file: Qu, success: Yu, custom: Fu, function: Bu, transform: mu, map: Hu, set: Tu, array: Mu, object: Ru, union: qi, intersection: xu, tuple: Zu, record: du, nullable: Cu, nonoptional: fu, default: yu, prefault: hu, catch: au, pipe: pu, readonly: su, promise: rg, optional: Qi, lazy: ng };
-function Yi(r, i) {
-  if ("_idmap" in r) {
-    let t = r, n = er({ ...i, processors: Ki }), v = {};
-    for (let l of t._idmap.entries()) {
-      let [e, c] = l;
-      L(c, n);
-    }
-    let $ = {}, u = { registry: t, uri: i?.uri, defs: v };
-    n.external = u;
-    for (let l of t._idmap.entries()) {
-      let [e, c] = l;
-      lr(n, c), $[e] = Ir(n, c);
-    }
-    if (Object.keys(v).length > 0) {
-      let l = n.target === "draft-2020-12" ? "$defs" : "definitions";
-      $.__shared = { [l]: v };
-    }
-    return { schemas: $ };
-  }
-  let o = er({ ...i, processors: Ki });
-  return L(r, o), lr(o, r), Ir(o, r);
-}
-
-class ig {
-  get metadataRegistry() {
-    return this.ctx.metadataRegistry;
-  }
-  get target() {
-    return this.ctx.target;
-  }
-  get unrepresentable() {
-    return this.ctx.unrepresentable;
-  }
-  get override() {
-    return this.ctx.override;
-  }
-  get io() {
-    return this.ctx.io;
-  }
-  get counter() {
-    return this.ctx.counter;
-  }
-  set counter(r) {
-    this.ctx.counter = r;
-  }
-  get seen() {
-    return this.ctx.seen;
-  }
-  constructor(r) {
-    let i = r?.target ?? "draft-2020-12";
-    if (i === "draft-4")
-      i = "draft-04";
-    if (i === "draft-7")
-      i = "draft-07";
-    this.ctx = er({ processors: Ki, target: i, ...r?.metadata && { metadata: r.metadata }, ...r?.unrepresentable && { unrepresentable: r.unrepresentable }, ...r?.override && { override: r.override }, ...r?.io && { io: r.io } });
-  }
-  process(r, i = { path: [], schemaPath: [] }) {
-    return L(r, this.ctx, i);
-  }
-  emit(r, i) {
-    if (i) {
-      if (i.cycles)
-        this.ctx.cycles = i.cycles;
-      if (i.reused)
-        this.ctx.reused = i.reused;
-      if (i.external)
-        this.ctx.external = i.external;
-    }
-    lr(this.ctx, r);
-    let o = Ir(this.ctx, r), { "~standard": t, ...n } = o;
-    return n;
-  }
-}
-var tl = {};
-var Pn = {};
-s(Pn, { xor: () => al, xid: () => Ol, void: () => Zl, uuidv7: () => cl, uuidv6: () => Il, uuidv4: () => ll, uuid: () => el, url: () => bl, unknown: () => Nr, union: () => ev, undefined: () => Rl, ulid: () => Nl, uint64: () => Tl, uint32: () => Bl, tuple: () => Yg, transform: () => Iv, templateLiteral: () => lI, symbol: () => Ml, superRefine: () => ee, success: () => uI, stringbool: () => wI, stringFormat: () => El, string: () => Mi, strictObject: () => yl, set: () => iI, refine: () => ge, record: () => Fg, readonly: () => ie, promise: () => II, preprocess: () => OI, prefault: () => yg, pipe: () => Gn, partialRecord: () => sl, optional: () => Jn, object: () => fl, number: () => Og, nullish: () => $I, nullable: () => Ln, null: () => Jg, nonoptional: () => hg, never: () => gv, nativeEnum: () => vI, nanoid: () => kl, nan: () => gI, meta: () => kI, map: () => nI, mac: () => Pl, looseRecord: () => rI, looseObject: () => hl, literal: () => oI, lazy: () => te, ksuid: () => zl, keyof: () => Cl, jwt: () => Xl, json: () => NI, ipv6: () => jl, ipv4: () => Sl, intersection: () => qg, int64: () => Hl, int32: () => Fl, int: () => Ri, instanceof: () => DI, httpUrl: () => _l, hostname: () => Al, hex: () => Kl, hash: () => ql, guid: () => gl, function: () => cI, float64: () => Yl, float32: () => Ql, file: () => tI, exactOptional: () => xg, enum: () => lv, emoji: () => Ul, email: () => ul, e164: () => Vl, discriminatedUnion: () => pl, describe: () => UI, date: () => dl, custom: () => _I, cuid2: () => wl, cuid: () => Dl, codec: () => eI, cidrv6: () => Ll, cidrv4: () => Jl, check: () => bI, catch: () => sg, boolean: () => zg, bigint: () => ml, base64url: () => Wl, base64: () => Gl, array: () => Xn, any: () => xl, _function: () => cI, _default: () => Cg, _ZodString: () => xi, ZodXor: () => Eg, ZodXID: () => ai, ZodVoid: () => Vg, ZodUnknown: () => Gg, ZodUnion: () => An, ZodUndefined: () => Pg, ZodUUID: () => p, ZodURL: () => Wn, ZodULID: () => hi, ZodType: () => P, ZodTuple: () => Qg, ZodTransform: () => Mg, ZodTemplateLiteral: () => ve, ZodSymbol: () => Sg, ZodSuccess: () => ag, ZodStringFormat: () => W, ZodString: () => Cr, ZodSet: () => mg, ZodRecord: () => Kn, ZodReadonly: () => ne, ZodPromise: () => $e, ZodPrefault: () => fg, ZodPipe: () => _v, ZodOptional: () => cv, ZodObject: () => En, ZodNumberFormat: () => Or, ZodNumber: () => yr, ZodNullable: () => Zg, ZodNull: () => jg, ZodNonOptional: () => bv, ZodNever: () => Wg, ZodNanoID: () => Ci, ZodNaN: () => re, ZodMap: () => Bg, ZodMAC: () => Ng, ZodLiteral: () => Hg, ZodLazy: () => oe, ZodKSUID: () => pi, ZodJWT: () => $v, ZodIntersection: () => Kg, ZodIPv6: () => rv, ZodIPv4: () => si, ZodGUID: () => jn, ZodFunction: () => ue, ZodFile: () => Tg, ZodExactOptional: () => Rg, ZodEnum: () => dr, ZodEmoji: () => di, ZodEmail: () => Zi, ZodE164: () => tv, ZodDiscriminatedUnion: () => Ag, ZodDefault: () => dg, ZodDate: () => Vn, ZodCustomStringFormat: () => fr, ZodCustom: () => qn, ZodCodec: () => Uv, ZodCatch: () => pg, ZodCUID2: () => yi, ZodCUID: () => fi, ZodCIDRv6: () => iv, ZodCIDRv4: () => nv, ZodBoolean: () => hr, ZodBigIntFormat: () => uv, ZodBigInt: () => ar, ZodBase64URL: () => ov, ZodBase64: () => vv, ZodArray: () => Xg, ZodAny: () => Lg });
-var Fi = {};
-s(Fi, { uppercase: () => Kr, trim: () => mr, toUpperCase: () => Tr, toLowerCase: () => Hr, startsWith: () => Qr, slugify: () => Mr, size: () => kr, regex: () => Er, property: () => Ai, positive: () => Wi, overwrite: () => d, normalize: () => Br, nonpositive: () => Xi, nonnegative: () => Ei, negative: () => Vi, multipleOf: () => ur, minSize: () => a, minLength: () => nr, mime: () => Fr, maxSize: () => gr, maxLength: () => Dr, lte: () => M, lt: () => y, lowercase: () => Ar, length: () => wr, includes: () => qr, gte: () => Q, gt: () => h, endsWith: () => Yr });
-var Zr = {};
-s(Zr, { time: () => tg, duration: () => $g, datetime: () => vg, date: () => og, ZodISOTime: () => Hi, ZodISODuration: () => Ti, ZodISODateTime: () => Bi, ZodISODate: () => mi });
-var Bi = I("ZodISODateTime", (r, i) => {
-  mo.init(r, i), W.init(r, i);
-});
-function vg(r) {
-  return F$(Bi, r);
-}
-var mi = I("ZodISODate", (r, i) => {
-  Ho.init(r, i), W.init(r, i);
-});
-function og(r) {
-  return B$(mi, r);
-}
-var Hi = I("ZodISOTime", (r, i) => {
-  To.init(r, i), W.init(r, i);
-});
-function tg(r) {
-  return m$(Hi, r);
-}
-var Ti = I("ZodISODuration", (r, i) => {
-  Mo.init(r, i), W.init(r, i);
-});
-function $g(r) {
-  return H$(Ti, r);
-}
-var $l = (r, i) => {
-  un.init(r, i), r.name = "ZodError", Object.defineProperties(r, { format: { value: (o) => en(r, o) }, flatten: { value: (o) => gn(r, o) }, addIssue: { value: (o) => {
-    r.issues.push(o), r.message = JSON.stringify(r.issues, Sr, 2);
-  } }, addIssues: { value: (o) => {
-    r.issues.push(...o), r.message = JSON.stringify(r.issues, Sr, 2);
-  } }, isEmpty: { get() {
-    return r.issues.length === 0;
-  } } });
-};
-var l6 = I("ZodError", $l);
-var H = I("ZodError", $l, { Parent: Error });
-var ug = Jr(H);
-var gg = Lr(H);
-var eg = Gr(H);
-var lg = Wr(H);
-var Ig = Hn(H);
-var cg = Tn(H);
-var bg = Mn(H);
-var _g = Rn(H);
-var Ug = xn(H);
-var kg = Zn(H);
-var Dg = dn(H);
-var wg = Cn(H);
-var P = I("ZodType", (r, i) => {
-  return S.init(r, i), Object.assign(r["~standard"], { jsonSchema: { input: xr(r, "input"), output: xr(r, "output") } }), r.toJSONSchema = wu(r, {}), r.def = i, r.type = i.type, Object.defineProperty(r, "_def", { value: i }), r.check = (...o) => {
-    return r.clone(D.mergeDefs(i, { checks: [...i.checks ?? [], ...o.map((t) => typeof t === "function" ? { _zod: { check: t, def: { check: "custom" }, onattach: [] } } : t)] }), { parent: true });
-  }, r.with = r.check, r.clone = (o, t) => q(r, o, t), r.brand = () => r, r.register = (o, t) => {
-    return o.add(r, t), r;
-  }, r.parse = (o, t) => ug(r, o, t, { callee: r.parse }), r.safeParse = (o, t) => eg(r, o, t), r.parseAsync = async (o, t) => gg(r, o, t, { callee: r.parseAsync }), r.safeParseAsync = async (o, t) => lg(r, o, t), r.spa = r.safeParseAsync, r.encode = (o, t) => Ig(r, o, t), r.decode = (o, t) => cg(r, o, t), r.encodeAsync = async (o, t) => bg(r, o, t), r.decodeAsync = async (o, t) => _g(r, o, t), r.safeEncode = (o, t) => Ug(r, o, t), r.safeDecode = (o, t) => kg(r, o, t), r.safeEncodeAsync = async (o, t) => Dg(r, o, t), r.safeDecodeAsync = async (o, t) => wg(r, o, t), r.refine = (o, t) => r.check(ge(o, t)), r.superRefine = (o) => r.check(ee(o)), r.overwrite = (o) => r.check(d(o)), r.optional = () => Jn(r), r.exactOptional = () => xg(r), r.nullable = () => Ln(r), r.nullish = () => Jn(Ln(r)), r.nonoptional = (o) => hg(r, o), r.array = () => Xn(r), r.or = (o) => ev([r, o]), r.and = (o) => qg(r, o), r.transform = (o) => Gn(r, Iv(o)), r.default = (o) => Cg(r, o), r.prefault = (o) => yg(r, o), r.catch = (o) => sg(r, o), r.pipe = (o) => Gn(r, o), r.readonly = () => ie(r), r.describe = (o) => {
-    let t = r.clone();
-    return A.add(t, { description: o }), t;
-  }, Object.defineProperty(r, "description", { get() {
-    return A.get(r)?.description;
-  }, configurable: true }), r.meta = (...o) => {
-    if (o.length === 0)
-      return A.get(r);
-    let t = r.clone();
-    return A.add(t, o[0]), t;
-  }, r.isOptional = () => r.safeParse(undefined).success, r.isNullable = () => r.safeParse(null).success, r.apply = (o) => o(r), r;
-});
-var xi = I("_ZodString", (r, i) => {
-  Ur.init(r, i), P.init(r, i), r._zod.processJSONSchema = (t, n, v) => Nu(r, t, n, v);
-  let o = r._zod.bag;
-  r.format = o.format ?? null, r.minLength = o.minimum ?? null, r.maxLength = o.maximum ?? null, r.regex = (...t) => r.check(Er(...t)), r.includes = (...t) => r.check(qr(...t)), r.startsWith = (...t) => r.check(Qr(...t)), r.endsWith = (...t) => r.check(Yr(...t)), r.min = (...t) => r.check(nr(...t)), r.max = (...t) => r.check(Dr(...t)), r.length = (...t) => r.check(wr(...t)), r.nonempty = (...t) => r.check(nr(1, ...t)), r.lowercase = (t) => r.check(Ar(t)), r.uppercase = (t) => r.check(Kr(t)), r.trim = () => r.check(mr()), r.normalize = (...t) => r.check(Br(...t)), r.toLowerCase = () => r.check(Hr()), r.toUpperCase = () => r.check(Tr()), r.slugify = () => r.check(Mr());
-});
-var Cr = I("ZodString", (r, i) => {
-  Ur.init(r, i), xi.init(r, i), r.email = (o) => r.check(gi(Zi, o)), r.url = (o) => r.check(Sn(Wn, o)), r.jwt = (o) => r.check(Gi($v, o)), r.emoji = (o) => r.check(bi(di, o)), r.guid = (o) => r.check(zn(jn, o)), r.uuid = (o) => r.check(ei(p, o)), r.uuidv4 = (o) => r.check(li(p, o)), r.uuidv6 = (o) => r.check(Ii(p, o)), r.uuidv7 = (o) => r.check(ci(p, o)), r.nanoid = (o) => r.check(_i(Ci, o)), r.guid = (o) => r.check(zn(jn, o)), r.cuid = (o) => r.check(Ui(fi, o)), r.cuid2 = (o) => r.check(ki(yi, o)), r.ulid = (o) => r.check(Di(hi, o)), r.base64 = (o) => r.check(ji(vv, o)), r.base64url = (o) => r.check(Ji(ov, o)), r.xid = (o) => r.check(wi(ai, o)), r.ksuid = (o) => r.check(Ni(pi, o)), r.ipv4 = (o) => r.check(Oi(si, o)), r.ipv6 = (o) => r.check(zi(rv, o)), r.cidrv4 = (o) => r.check(Si(nv, o)), r.cidrv6 = (o) => r.check(Pi(iv, o)), r.e164 = (o) => r.check(Li(tv, o)), r.datetime = (o) => r.check(vg(o)), r.date = (o) => r.check(og(o)), r.time = (o) => r.check(tg(o)), r.duration = (o) => r.check($g(o));
-});
-function Mi(r) {
-  return K$(Cr, r);
-}
-var W = I("ZodStringFormat", (r, i) => {
-  G.init(r, i), xi.init(r, i);
-});
-var Zi = I("ZodEmail", (r, i) => {
-  Xo.init(r, i), W.init(r, i);
-});
-function ul(r) {
-  return gi(Zi, r);
-}
-var jn = I("ZodGUID", (r, i) => {
-  Wo.init(r, i), W.init(r, i);
-});
-function gl(r) {
-  return zn(jn, r);
-}
-var p = I("ZodUUID", (r, i) => {
-  Vo.init(r, i), W.init(r, i);
-});
-function el(r) {
-  return ei(p, r);
-}
-function ll(r) {
-  return li(p, r);
-}
-function Il(r) {
-  return Ii(p, r);
-}
-function cl(r) {
-  return ci(p, r);
-}
-var Wn = I("ZodURL", (r, i) => {
-  Eo.init(r, i), W.init(r, i);
-});
-function bl(r) {
-  return Sn(Wn, r);
-}
-function _l(r) {
-  return Sn(Wn, { protocol: /^https?$/, hostname: x.domain, ...D.normalizeParams(r) });
-}
-var di = I("ZodEmoji", (r, i) => {
-  Ao.init(r, i), W.init(r, i);
-});
-function Ul(r) {
-  return bi(di, r);
-}
-var Ci = I("ZodNanoID", (r, i) => {
-  Ko.init(r, i), W.init(r, i);
-});
-function kl(r) {
-  return _i(Ci, r);
-}
-var fi = I("ZodCUID", (r, i) => {
-  qo.init(r, i), W.init(r, i);
-});
-function Dl(r) {
-  return Ui(fi, r);
-}
-var yi = I("ZodCUID2", (r, i) => {
-  Qo.init(r, i), W.init(r, i);
-});
-function wl(r) {
-  return ki(yi, r);
-}
-var hi = I("ZodULID", (r, i) => {
-  Yo.init(r, i), W.init(r, i);
-});
-function Nl(r) {
-  return Di(hi, r);
-}
-var ai = I("ZodXID", (r, i) => {
-  Fo.init(r, i), W.init(r, i);
-});
-function Ol(r) {
-  return wi(ai, r);
-}
-var pi = I("ZodKSUID", (r, i) => {
-  Bo.init(r, i), W.init(r, i);
-});
-function zl(r) {
-  return Ni(pi, r);
-}
-var si = I("ZodIPv4", (r, i) => {
-  Ro.init(r, i), W.init(r, i);
-});
-function Sl(r) {
-  return Oi(si, r);
-}
-var Ng = I("ZodMAC", (r, i) => {
-  Zo.init(r, i), W.init(r, i);
-});
-function Pl(r) {
-  return Q$(Ng, r);
-}
-var rv = I("ZodIPv6", (r, i) => {
-  xo.init(r, i), W.init(r, i);
-});
-function jl(r) {
-  return zi(rv, r);
-}
-var nv = I("ZodCIDRv4", (r, i) => {
-  Co.init(r, i), W.init(r, i);
-});
-function Jl(r) {
-  return Si(nv, r);
-}
-var iv = I("ZodCIDRv6", (r, i) => {
-  fo.init(r, i), W.init(r, i);
-});
-function Ll(r) {
-  return Pi(iv, r);
-}
-var vv = I("ZodBase64", (r, i) => {
-  ho.init(r, i), W.init(r, i);
-});
-function Gl(r) {
-  return ji(vv, r);
-}
-var ov = I("ZodBase64URL", (r, i) => {
-  ao.init(r, i), W.init(r, i);
-});
-function Wl(r) {
-  return Ji(ov, r);
-}
-var tv = I("ZodE164", (r, i) => {
-  po.init(r, i), W.init(r, i);
-});
-function Vl(r) {
-  return Li(tv, r);
-}
-var $v = I("ZodJWT", (r, i) => {
-  so.init(r, i), W.init(r, i);
-});
-function Xl(r) {
-  return Gi($v, r);
-}
-var fr = I("ZodCustomStringFormat", (r, i) => {
-  rt.init(r, i), W.init(r, i);
-});
-function El(r, i, o = {}) {
-  return Rr(fr, r, i, o);
-}
-function Al(r) {
-  return Rr(fr, "hostname", x.hostname, r);
-}
-function Kl(r) {
-  return Rr(fr, "hex", x.hex, r);
-}
-function ql(r, i) {
-  let o = i?.enc ?? "hex", t = `${r}_${o}`, n = x[t];
-  if (!n)
-    throw Error(`Unrecognized hash format: ${t}`);
-  return Rr(fr, t, n, i);
-}
-var yr = I("ZodNumber", (r, i) => {
-  vi.init(r, i), P.init(r, i), r._zod.processJSONSchema = (t, n, v) => Ou(r, t, n, v), r.gt = (t, n) => r.check(h(t, n)), r.gte = (t, n) => r.check(Q(t, n)), r.min = (t, n) => r.check(Q(t, n)), r.lt = (t, n) => r.check(y(t, n)), r.lte = (t, n) => r.check(M(t, n)), r.max = (t, n) => r.check(M(t, n)), r.int = (t) => r.check(Ri(t)), r.safe = (t) => r.check(Ri(t)), r.positive = (t) => r.check(h(0, t)), r.nonnegative = (t) => r.check(Q(0, t)), r.negative = (t) => r.check(y(0, t)), r.nonpositive = (t) => r.check(M(0, t)), r.multipleOf = (t, n) => r.check(ur(t, n)), r.step = (t, n) => r.check(ur(t, n)), r.finite = () => r;
-  let o = r._zod.bag;
-  r.minValue = Math.max(o.minimum ?? Number.NEGATIVE_INFINITY, o.exclusiveMinimum ?? Number.NEGATIVE_INFINITY) ?? null, r.maxValue = Math.min(o.maximum ?? Number.POSITIVE_INFINITY, o.exclusiveMaximum ?? Number.POSITIVE_INFINITY) ?? null, r.isInt = (o.format ?? "").includes("int") || Number.isSafeInteger(o.multipleOf ?? 0.5), r.isFinite = true, r.format = o.format ?? null;
-});
-function Og(r) {
-  return T$(yr, r);
-}
-var Or = I("ZodNumberFormat", (r, i) => {
-  nt.init(r, i), yr.init(r, i);
-});
-function Ri(r) {
-  return R$(Or, r);
-}
-function Ql(r) {
-  return x$(Or, r);
-}
-function Yl(r) {
-  return Z$(Or, r);
-}
-function Fl(r) {
-  return d$(Or, r);
-}
-function Bl(r) {
-  return C$(Or, r);
-}
-var hr = I("ZodBoolean", (r, i) => {
-  bn.init(r, i), P.init(r, i), r._zod.processJSONSchema = (o, t, n) => zu(r, o, t, n);
-});
-function zg(r) {
-  return f$(hr, r);
-}
-var ar = I("ZodBigInt", (r, i) => {
-  oi.init(r, i), P.init(r, i), r._zod.processJSONSchema = (t, n, v) => Su(r, t, n, v), r.gte = (t, n) => r.check(Q(t, n)), r.min = (t, n) => r.check(Q(t, n)), r.gt = (t, n) => r.check(h(t, n)), r.gte = (t, n) => r.check(Q(t, n)), r.min = (t, n) => r.check(Q(t, n)), r.lt = (t, n) => r.check(y(t, n)), r.lte = (t, n) => r.check(M(t, n)), r.max = (t, n) => r.check(M(t, n)), r.positive = (t) => r.check(h(BigInt(0), t)), r.negative = (t) => r.check(y(BigInt(0), t)), r.nonpositive = (t) => r.check(M(BigInt(0), t)), r.nonnegative = (t) => r.check(Q(BigInt(0), t)), r.multipleOf = (t, n) => r.check(ur(t, n));
-  let o = r._zod.bag;
-  r.minValue = o.minimum ?? null, r.maxValue = o.maximum ?? null, r.format = o.format ?? null;
-});
-function ml(r) {
-  return h$(ar, r);
-}
-var uv = I("ZodBigIntFormat", (r, i) => {
-  it.init(r, i), ar.init(r, i);
-});
-function Hl(r) {
-  return p$(uv, r);
-}
-function Tl(r) {
-  return s$(uv, r);
-}
-var Sg = I("ZodSymbol", (r, i) => {
-  vt.init(r, i), P.init(r, i), r._zod.processJSONSchema = (o, t, n) => Pu(r, o, t, n);
-});
-function Ml(r) {
-  return ru(Sg, r);
-}
-var Pg = I("ZodUndefined", (r, i) => {
-  ot.init(r, i), P.init(r, i), r._zod.processJSONSchema = (o, t, n) => Ju(r, o, t, n);
-});
-function Rl(r) {
-  return nu(Pg, r);
-}
-var jg = I("ZodNull", (r, i) => {
-  tt.init(r, i), P.init(r, i), r._zod.processJSONSchema = (o, t, n) => ju(r, o, t, n);
-});
-function Jg(r) {
-  return iu(jg, r);
-}
-var Lg = I("ZodAny", (r, i) => {
-  $t.init(r, i), P.init(r, i), r._zod.processJSONSchema = (o, t, n) => Wu(r, o, t, n);
-});
-function xl() {
-  return vu(Lg);
-}
-var Gg = I("ZodUnknown", (r, i) => {
-  ut.init(r, i), P.init(r, i), r._zod.processJSONSchema = (o, t, n) => Vu(r, o, t, n);
-});
-function Nr() {
-  return ou(Gg);
-}
-var Wg = I("ZodNever", (r, i) => {
-  gt.init(r, i), P.init(r, i), r._zod.processJSONSchema = (o, t, n) => Gu(r, o, t, n);
-});
-function gv(r) {
-  return tu(Wg, r);
-}
-var Vg = I("ZodVoid", (r, i) => {
-  et.init(r, i), P.init(r, i), r._zod.processJSONSchema = (o, t, n) => Lu(r, o, t, n);
-});
-function Zl(r) {
-  return $u(Vg, r);
-}
-var Vn = I("ZodDate", (r, i) => {
-  lt.init(r, i), P.init(r, i), r._zod.processJSONSchema = (t, n, v) => Xu(r, t, n, v), r.min = (t, n) => r.check(Q(t, n)), r.max = (t, n) => r.check(M(t, n));
-  let o = r._zod.bag;
-  r.minDate = o.minimum ? new Date(o.minimum) : null, r.maxDate = o.maximum ? new Date(o.maximum) : null;
-});
-function dl(r) {
-  return uu(Vn, r);
-}
-var Xg = I("ZodArray", (r, i) => {
-  It.init(r, i), P.init(r, i), r._zod.processJSONSchema = (o, t, n) => Mu(r, o, t, n), r.element = i.element, r.min = (o, t) => r.check(nr(o, t)), r.nonempty = (o) => r.check(nr(1, o)), r.max = (o, t) => r.check(Dr(o, t)), r.length = (o, t) => r.check(wr(o, t)), r.unwrap = () => r.element;
-});
-function Xn(r, i) {
-  return lu(Xg, r, i);
-}
-function Cl(r) {
-  let i = r._zod.def.shape;
-  return lv(Object.keys(i));
-}
-var En = I("ZodObject", (r, i) => {
-  ct.init(r, i), P.init(r, i), r._zod.processJSONSchema = (o, t, n) => Ru(r, o, t, n), D.defineLazy(r, "shape", () => {
-    return i.shape;
-  }), r.keyof = () => lv(Object.keys(r._zod.def.shape)), r.catchall = (o) => r.clone({ ...r._zod.def, catchall: o }), r.passthrough = () => r.clone({ ...r._zod.def, catchall: Nr() }), r.loose = () => r.clone({ ...r._zod.def, catchall: Nr() }), r.strict = () => r.clone({ ...r._zod.def, catchall: gv() }), r.strip = () => r.clone({ ...r._zod.def, catchall: undefined }), r.extend = (o) => {
-    return D.extend(r, o);
-  }, r.safeExtend = (o) => {
-    return D.safeExtend(r, o);
-  }, r.merge = (o) => D.merge(r, o), r.pick = (o) => D.pick(r, o), r.omit = (o) => D.omit(r, o), r.partial = (...o) => D.partial(cv, r, o[0]), r.required = (...o) => D.required(bv, r, o[0]);
-});
-function fl(r, i) {
-  let o = { type: "object", shape: r ?? {}, ...D.normalizeParams(i) };
-  return new En(o);
-}
-function yl(r, i) {
-  return new En({ type: "object", shape: r, catchall: gv(), ...D.normalizeParams(i) });
-}
-function hl(r, i) {
-  return new En({ type: "object", shape: r, catchall: Nr(), ...D.normalizeParams(i) });
-}
-var An = I("ZodUnion", (r, i) => {
-  _n.init(r, i), P.init(r, i), r._zod.processJSONSchema = (o, t, n) => qi(r, o, t, n), r.options = i.options;
-});
-function ev(r, i) {
-  return new An({ type: "union", options: r, ...D.normalizeParams(i) });
-}
-var Eg = I("ZodXor", (r, i) => {
-  An.init(r, i), bt.init(r, i), r._zod.processJSONSchema = (o, t, n) => qi(r, o, t, n), r.options = i.options;
-});
-function al(r, i) {
-  return new Eg({ type: "union", options: r, inclusive: false, ...D.normalizeParams(i) });
-}
-var Ag = I("ZodDiscriminatedUnion", (r, i) => {
-  An.init(r, i), _t.init(r, i);
-});
-function pl(r, i, o) {
-  return new Ag({ type: "union", options: i, discriminator: r, ...D.normalizeParams(o) });
-}
-var Kg = I("ZodIntersection", (r, i) => {
-  Ut.init(r, i), P.init(r, i), r._zod.processJSONSchema = (o, t, n) => xu(r, o, t, n);
-});
-function qg(r, i) {
-  return new Kg({ type: "intersection", left: r, right: i });
-}
-var Qg = I("ZodTuple", (r, i) => {
-  ti.init(r, i), P.init(r, i), r._zod.processJSONSchema = (o, t, n) => Zu(r, o, t, n), r.rest = (o) => r.clone({ ...r._zod.def, rest: o });
-});
-function Yg(r, i, o) {
-  let t = i instanceof S, n = t ? o : i;
-  return new Qg({ type: "tuple", items: r, rest: t ? i : null, ...D.normalizeParams(n) });
-}
-var Kn = I("ZodRecord", (r, i) => {
-  kt.init(r, i), P.init(r, i), r._zod.processJSONSchema = (o, t, n) => du(r, o, t, n), r.keyType = i.keyType, r.valueType = i.valueType;
-});
-function Fg(r, i, o) {
-  return new Kn({ type: "record", keyType: r, valueType: i, ...D.normalizeParams(o) });
-}
-function sl(r, i, o) {
-  let t = q(r);
-  return t._zod.values = undefined, new Kn({ type: "record", keyType: t, valueType: i, ...D.normalizeParams(o) });
-}
-function rI(r, i, o) {
-  return new Kn({ type: "record", keyType: r, valueType: i, mode: "loose", ...D.normalizeParams(o) });
-}
-var Bg = I("ZodMap", (r, i) => {
-  Dt.init(r, i), P.init(r, i), r._zod.processJSONSchema = (o, t, n) => Hu(r, o, t, n), r.keyType = i.keyType, r.valueType = i.valueType, r.min = (...o) => r.check(a(...o)), r.nonempty = (o) => r.check(a(1, o)), r.max = (...o) => r.check(gr(...o)), r.size = (...o) => r.check(kr(...o));
-});
-function nI(r, i, o) {
-  return new Bg({ type: "map", keyType: r, valueType: i, ...D.normalizeParams(o) });
-}
-var mg = I("ZodSet", (r, i) => {
-  wt.init(r, i), P.init(r, i), r._zod.processJSONSchema = (o, t, n) => Tu(r, o, t, n), r.min = (...o) => r.check(a(...o)), r.nonempty = (o) => r.check(a(1, o)), r.max = (...o) => r.check(gr(...o)), r.size = (...o) => r.check(kr(...o));
-});
-function iI(r, i) {
-  return new mg({ type: "set", valueType: r, ...D.normalizeParams(i) });
-}
-var dr = I("ZodEnum", (r, i) => {
-  Nt.init(r, i), P.init(r, i), r._zod.processJSONSchema = (t, n, v) => Eu(r, t, n, v), r.enum = i.entries, r.options = Object.values(i.entries);
-  let o = new Set(Object.keys(i.entries));
-  r.extract = (t, n) => {
-    let v = {};
-    for (let $ of t)
-      if (o.has($))
-        v[$] = i.entries[$];
-      else
-        throw Error(`Key ${$} not found in enum`);
-    return new dr({ ...i, checks: [], ...D.normalizeParams(n), entries: v });
-  }, r.exclude = (t, n) => {
-    let v = { ...i.entries };
-    for (let $ of t)
-      if (o.has($))
-        delete v[$];
-      else
-        throw Error(`Key ${$} not found in enum`);
-    return new dr({ ...i, checks: [], ...D.normalizeParams(n), entries: v });
-  };
-});
-function lv(r, i) {
-  let o = Array.isArray(r) ? Object.fromEntries(r.map((t) => [t, t])) : r;
-  return new dr({ type: "enum", entries: o, ...D.normalizeParams(i) });
-}
-function vI(r, i) {
-  return new dr({ type: "enum", entries: r, ...D.normalizeParams(i) });
-}
-var Hg = I("ZodLiteral", (r, i) => {
-  Ot.init(r, i), P.init(r, i), r._zod.processJSONSchema = (o, t, n) => Au(r, o, t, n), r.values = new Set(i.values), Object.defineProperty(r, "value", { get() {
-    if (i.values.length > 1)
-      throw Error("This schema contains multiple valid literal values. Use `.values` instead.");
-    return i.values[0];
-  } });
-});
-function oI(r, i) {
-  return new Hg({ type: "literal", values: Array.isArray(r) ? r : [r], ...D.normalizeParams(i) });
-}
-var Tg = I("ZodFile", (r, i) => {
-  zt.init(r, i), P.init(r, i), r._zod.processJSONSchema = (o, t, n) => Qu(r, o, t, n), r.min = (o, t) => r.check(a(o, t)), r.max = (o, t) => r.check(gr(o, t)), r.mime = (o, t) => r.check(Fr(Array.isArray(o) ? o : [o], t));
-});
-function tI(r) {
-  return Iu(Tg, r);
-}
-var Mg = I("ZodTransform", (r, i) => {
-  St.init(r, i), P.init(r, i), r._zod.processJSONSchema = (o, t, n) => mu(r, o, t, n), r._zod.parse = (o, t) => {
-    if (t.direction === "backward")
-      throw new cr(r.constructor.name);
-    o.addIssue = (v) => {
-      if (typeof v === "string")
-        o.issues.push(D.issue(v, o.value, i));
-      else {
-        let $ = v;
-        if ($.fatal)
-          $.continue = false;
-        $.code ?? ($.code = "custom"), $.input ?? ($.input = o.value), $.inst ?? ($.inst = r), o.issues.push(D.issue($));
-      }
-    };
-    let n = i.transform(o.value, o);
-    if (n instanceof Promise)
-      return n.then((v) => {
-        return o.value = v, o;
-      });
-    return o.value = n, o;
-  };
-});
-function Iv(r) {
-  return new Mg({ type: "transform", transform: r });
-}
-var cv = I("ZodOptional", (r, i) => {
-  $i.init(r, i), P.init(r, i), r._zod.processJSONSchema = (o, t, n) => Qi(r, o, t, n), r.unwrap = () => r._zod.def.innerType;
-});
-function Jn(r) {
-  return new cv({ type: "optional", innerType: r });
-}
-var Rg = I("ZodExactOptional", (r, i) => {
-  Pt.init(r, i), P.init(r, i), r._zod.processJSONSchema = (o, t, n) => Qi(r, o, t, n), r.unwrap = () => r._zod.def.innerType;
-});
-function xg(r) {
-  return new Rg({ type: "optional", innerType: r });
-}
-var Zg = I("ZodNullable", (r, i) => {
-  jt.init(r, i), P.init(r, i), r._zod.processJSONSchema = (o, t, n) => Cu(r, o, t, n), r.unwrap = () => r._zod.def.innerType;
-});
-function Ln(r) {
-  return new Zg({ type: "nullable", innerType: r });
-}
-function $I(r) {
-  return Jn(Ln(r));
-}
-var dg = I("ZodDefault", (r, i) => {
-  Jt.init(r, i), P.init(r, i), r._zod.processJSONSchema = (o, t, n) => yu(r, o, t, n), r.unwrap = () => r._zod.def.innerType, r.removeDefault = r.unwrap;
-});
-function Cg(r, i) {
-  return new dg({ type: "default", innerType: r, get defaultValue() {
-    return typeof i === "function" ? i() : D.shallowClone(i);
-  } });
-}
-var fg = I("ZodPrefault", (r, i) => {
-  Lt.init(r, i), P.init(r, i), r._zod.processJSONSchema = (o, t, n) => hu(r, o, t, n), r.unwrap = () => r._zod.def.innerType;
-});
-function yg(r, i) {
-  return new fg({ type: "prefault", innerType: r, get defaultValue() {
-    return typeof i === "function" ? i() : D.shallowClone(i);
-  } });
-}
-var bv = I("ZodNonOptional", (r, i) => {
-  Gt.init(r, i), P.init(r, i), r._zod.processJSONSchema = (o, t, n) => fu(r, o, t, n), r.unwrap = () => r._zod.def.innerType;
-});
-function hg(r, i) {
-  return new bv({ type: "nonoptional", innerType: r, ...D.normalizeParams(i) });
-}
-var ag = I("ZodSuccess", (r, i) => {
-  Wt.init(r, i), P.init(r, i), r._zod.processJSONSchema = (o, t, n) => Yu(r, o, t, n), r.unwrap = () => r._zod.def.innerType;
-});
-function uI(r) {
-  return new ag({ type: "success", innerType: r });
-}
-var pg = I("ZodCatch", (r, i) => {
-  Vt.init(r, i), P.init(r, i), r._zod.processJSONSchema = (o, t, n) => au(r, o, t, n), r.unwrap = () => r._zod.def.innerType, r.removeCatch = r.unwrap;
-});
-function sg(r, i) {
-  return new pg({ type: "catch", innerType: r, catchValue: typeof i === "function" ? i : () => i });
-}
-var re = I("ZodNaN", (r, i) => {
-  Xt.init(r, i), P.init(r, i), r._zod.processJSONSchema = (o, t, n) => Ku(r, o, t, n);
-});
-function gI(r) {
-  return eu(re, r);
-}
-var _v = I("ZodPipe", (r, i) => {
-  Et.init(r, i), P.init(r, i), r._zod.processJSONSchema = (o, t, n) => pu(r, o, t, n), r.in = i.in, r.out = i.out;
-});
-function Gn(r, i) {
-  return new _v({ type: "pipe", in: r, out: i });
-}
-var Uv = I("ZodCodec", (r, i) => {
-  _v.init(r, i), Un.init(r, i);
-});
-function eI(r, i, o) {
-  return new Uv({ type: "pipe", in: r, out: i, transform: o.decode, reverseTransform: o.encode });
-}
-var ne = I("ZodReadonly", (r, i) => {
-  At.init(r, i), P.init(r, i), r._zod.processJSONSchema = (o, t, n) => su(r, o, t, n), r.unwrap = () => r._zod.def.innerType;
-});
-function ie(r) {
-  return new ne({ type: "readonly", innerType: r });
-}
-var ve = I("ZodTemplateLiteral", (r, i) => {
-  Kt.init(r, i), P.init(r, i), r._zod.processJSONSchema = (o, t, n) => qu(r, o, t, n);
-});
-function lI(r, i) {
-  return new ve({ type: "template_literal", parts: r, ...D.normalizeParams(i) });
-}
-var oe = I("ZodLazy", (r, i) => {
-  Yt.init(r, i), P.init(r, i), r._zod.processJSONSchema = (o, t, n) => ng(r, o, t, n), r.unwrap = () => r._zod.def.getter();
-});
-function te(r) {
-  return new oe({ type: "lazy", getter: r });
-}
-var $e = I("ZodPromise", (r, i) => {
-  Qt.init(r, i), P.init(r, i), r._zod.processJSONSchema = (o, t, n) => rg(r, o, t, n), r.unwrap = () => r._zod.def.innerType;
-});
-function II(r) {
-  return new $e({ type: "promise", innerType: r });
-}
-var ue = I("ZodFunction", (r, i) => {
-  qt.init(r, i), P.init(r, i), r._zod.processJSONSchema = (o, t, n) => Bu(r, o, t, n);
-});
-function cI(r) {
-  return new ue({ type: "function", input: Array.isArray(r?.input) ? Yg(r?.input) : r?.input ?? Xn(Nr()), output: r?.output ?? Nr() });
-}
-var qn = I("ZodCustom", (r, i) => {
-  Ft.init(r, i), P.init(r, i), r._zod.processJSONSchema = (o, t, n) => Fu(r, o, t, n);
-});
-function bI(r) {
-  let i = new V({ check: "custom" });
-  return i._zod.check = r, i;
-}
-function _I(r, i) {
-  return cu(qn, r ?? (() => true), i);
-}
-function ge(r, i = {}) {
-  return bu(qn, r, i);
-}
-function ee(r) {
-  return _u(r);
-}
-var UI = Uu;
-var kI = ku;
-function DI(r, i = {}) {
-  let o = new qn({ type: "custom", check: "custom", fn: (t) => t instanceof r, abort: true, ...D.normalizeParams(i) });
-  return o._zod.bag.Class = r, o._zod.check = (t) => {
-    if (!(t.value instanceof r))
-      t.issues.push({ code: "invalid_type", expected: r.name, input: t.value, inst: o, path: [...o._zod.def.path ?? []] });
-  }, o;
-}
-var wI = (...r) => Du({ Codec: Uv, Boolean: hr, String: Cr }, ...r);
-function NI(r) {
-  let i = te(() => {
-    return ev([Mi(r), Og(), zg(), Jg(), Xn(i), Fg(Mi(), i)]);
-  });
-  return i;
-}
-function OI(r, i) {
-  return Gn(Iv(r), i);
-}
-var c6 = { invalid_type: "invalid_type", too_big: "too_big", too_small: "too_small", invalid_format: "invalid_format", not_multiple_of: "not_multiple_of", unrecognized_keys: "unrecognized_keys", invalid_union: "invalid_union", invalid_key: "invalid_key", invalid_element: "invalid_element", invalid_value: "invalid_value", custom: "custom" };
-function b6(r) {
-  E({ customError: r });
-}
-function _6() {
-  return E().customError;
-}
-var le;
-(function(r) {})(le || (le = {}));
-var z2 = { ...Pn, ...Fi, iso: Zr };
-var U6 = new Set(["$schema", "$ref", "$defs", "definitions", "$id", "id", "$comment", "$anchor", "$vocabulary", "$dynamicRef", "$dynamicAnchor", "type", "enum", "const", "anyOf", "oneOf", "allOf", "not", "properties", "required", "additionalProperties", "patternProperties", "propertyNames", "minProperties", "maxProperties", "items", "prefixItems", "additionalItems", "minItems", "maxItems", "uniqueItems", "contains", "minContains", "maxContains", "minLength", "maxLength", "pattern", "format", "minimum", "maximum", "exclusiveMinimum", "exclusiveMaximum", "multipleOf", "description", "default", "contentEncoding", "contentMediaType", "contentSchema", "unevaluatedItems", "unevaluatedProperties", "if", "then", "else", "dependentSchemas", "dependentRequired", "nullable", "readOnly"]);
-function k6(r, i) {
-  let o = r.$schema;
-  if (o === "https://json-schema.org/draft/2020-12/schema")
-    return "draft-2020-12";
-  if (o === "http://json-schema.org/draft-07/schema#")
-    return "draft-7";
-  if (o === "http://json-schema.org/draft-04/schema#")
-    return "draft-4";
-  return i ?? "draft-2020-12";
-}
-function D6(r, i) {
-  if (!r.startsWith("#"))
-    throw Error("External $ref is not supported, only local refs (#/...) are allowed");
-  let o = r.slice(1).split("/").filter(Boolean);
-  if (o.length === 0)
-    return i.rootSchema;
-  let t = i.version === "draft-2020-12" ? "$defs" : "definitions";
-  if (o[0] === t) {
-    let n = o[1];
-    if (!n || !i.defs[n])
-      throw Error(`Reference not found: ${r}`);
-    return i.defs[n];
-  }
-  throw Error(`Reference not found: ${r}`);
-}
-function zI(r, i) {
-  if (r.not !== undefined) {
-    if (typeof r.not === "object" && Object.keys(r.not).length === 0)
-      return z2.never();
-    throw Error("not is not supported in Zod (except { not: {} } for never)");
-  }
-  if (r.unevaluatedItems !== undefined)
-    throw Error("unevaluatedItems is not supported");
-  if (r.unevaluatedProperties !== undefined)
-    throw Error("unevaluatedProperties is not supported");
-  if (r.if !== undefined || r.then !== undefined || r.else !== undefined)
-    throw Error("Conditional schemas (if/then/else) are not supported");
-  if (r.dependentSchemas !== undefined || r.dependentRequired !== undefined)
-    throw Error("dependentSchemas and dependentRequired are not supported");
-  if (r.$ref) {
-    let n = r.$ref;
-    if (i.refs.has(n))
-      return i.refs.get(n);
-    if (i.processing.has(n))
-      return z2.lazy(() => {
-        if (!i.refs.has(n))
-          throw Error(`Circular reference not resolved: ${n}`);
-        return i.refs.get(n);
-      });
-    i.processing.add(n);
-    let v = D6(n, i), $ = K(v, i);
-    return i.refs.set(n, $), i.processing.delete(n), $;
-  }
-  if (r.enum !== undefined) {
-    let n = r.enum;
-    if (i.version === "openapi-3.0" && r.nullable === true && n.length === 1 && n[0] === null)
-      return z2.null();
-    if (n.length === 0)
-      return z2.never();
-    if (n.length === 1)
-      return z2.literal(n[0]);
-    if (n.every(($) => typeof $ === "string"))
-      return z2.enum(n);
-    let v = n.map(($) => z2.literal($));
-    if (v.length < 2)
-      return v[0];
-    return z2.union([v[0], v[1], ...v.slice(2)]);
-  }
-  if (r.const !== undefined)
-    return z2.literal(r.const);
-  let o = r.type;
-  if (Array.isArray(o)) {
-    let n = o.map((v) => {
-      let $ = { ...r, type: v };
-      return zI($, i);
-    });
-    if (n.length === 0)
-      return z2.never();
-    if (n.length === 1)
-      return n[0];
-    return z2.union(n);
-  }
-  if (!o)
-    return z2.any();
-  let t;
-  switch (o) {
-    case "string": {
-      let n = z2.string();
-      if (r.format) {
-        let v = r.format;
-        if (v === "email")
-          n = n.check(z2.email());
-        else if (v === "uri" || v === "uri-reference")
-          n = n.check(z2.url());
-        else if (v === "uuid" || v === "guid")
-          n = n.check(z2.uuid());
-        else if (v === "date-time")
-          n = n.check(z2.iso.datetime());
-        else if (v === "date")
-          n = n.check(z2.iso.date());
-        else if (v === "time")
-          n = n.check(z2.iso.time());
-        else if (v === "duration")
-          n = n.check(z2.iso.duration());
-        else if (v === "ipv4")
-          n = n.check(z2.ipv4());
-        else if (v === "ipv6")
-          n = n.check(z2.ipv6());
-        else if (v === "mac")
-          n = n.check(z2.mac());
-        else if (v === "cidr")
-          n = n.check(z2.cidrv4());
-        else if (v === "cidr-v6")
-          n = n.check(z2.cidrv6());
-        else if (v === "base64")
-          n = n.check(z2.base64());
-        else if (v === "base64url")
-          n = n.check(z2.base64url());
-        else if (v === "e164")
-          n = n.check(z2.e164());
-        else if (v === "jwt")
-          n = n.check(z2.jwt());
-        else if (v === "emoji")
-          n = n.check(z2.emoji());
-        else if (v === "nanoid")
-          n = n.check(z2.nanoid());
-        else if (v === "cuid")
-          n = n.check(z2.cuid());
-        else if (v === "cuid2")
-          n = n.check(z2.cuid2());
-        else if (v === "ulid")
-          n = n.check(z2.ulid());
-        else if (v === "xid")
-          n = n.check(z2.xid());
-        else if (v === "ksuid")
-          n = n.check(z2.ksuid());
-      }
-      if (typeof r.minLength === "number")
-        n = n.min(r.minLength);
-      if (typeof r.maxLength === "number")
-        n = n.max(r.maxLength);
-      if (r.pattern)
-        n = n.regex(new RegExp(r.pattern));
-      t = n;
-      break;
-    }
-    case "number":
-    case "integer": {
-      let n = o === "integer" ? z2.number().int() : z2.number();
-      if (typeof r.minimum === "number")
-        n = n.min(r.minimum);
-      if (typeof r.maximum === "number")
-        n = n.max(r.maximum);
-      if (typeof r.exclusiveMinimum === "number")
-        n = n.gt(r.exclusiveMinimum);
-      else if (r.exclusiveMinimum === true && typeof r.minimum === "number")
-        n = n.gt(r.minimum);
-      if (typeof r.exclusiveMaximum === "number")
-        n = n.lt(r.exclusiveMaximum);
-      else if (r.exclusiveMaximum === true && typeof r.maximum === "number")
-        n = n.lt(r.maximum);
-      if (typeof r.multipleOf === "number")
-        n = n.multipleOf(r.multipleOf);
-      t = n;
-      break;
-    }
-    case "boolean": {
-      t = z2.boolean();
-      break;
-    }
-    case "null": {
-      t = z2.null();
-      break;
-    }
-    case "object": {
-      let n = {}, v = r.properties || {}, $ = new Set(r.required || []);
-      for (let [l, e] of Object.entries(v)) {
-        let c = K(e, i);
-        n[l] = $.has(l) ? c : c.optional();
-      }
-      if (r.propertyNames) {
-        let l = K(r.propertyNames, i), e = r.additionalProperties && typeof r.additionalProperties === "object" ? K(r.additionalProperties, i) : z2.any();
-        if (Object.keys(n).length === 0) {
-          t = z2.record(l, e);
-          break;
-        }
-        let c = z2.object(n).passthrough(), _ = z2.looseRecord(l, e);
-        t = z2.intersection(c, _);
-        break;
-      }
-      if (r.patternProperties) {
-        let l = r.patternProperties, e = Object.keys(l), c = [];
-        for (let N of e) {
-          let O = K(l[N], i), J = z2.string().regex(new RegExp(N));
-          c.push(z2.looseRecord(J, O));
-        }
-        let _ = [];
-        if (Object.keys(n).length > 0)
-          _.push(z2.object(n).passthrough());
-        if (_.push(...c), _.length === 0)
-          t = z2.object({}).passthrough();
-        else if (_.length === 1)
-          t = _[0];
-        else {
-          let N = z2.intersection(_[0], _[1]);
-          for (let O = 2;O < _.length; O++)
-            N = z2.intersection(N, _[O]);
-          t = N;
-        }
-        break;
-      }
-      let u = z2.object(n);
-      if (r.additionalProperties === false)
-        t = u.strict();
-      else if (typeof r.additionalProperties === "object")
-        t = u.catchall(K(r.additionalProperties, i));
-      else
-        t = u.passthrough();
-      break;
-    }
-    case "array": {
-      let { prefixItems: n, items: v } = r;
-      if (n && Array.isArray(n)) {
-        let $ = n.map((l) => K(l, i)), u = v && typeof v === "object" && !Array.isArray(v) ? K(v, i) : undefined;
-        if (u)
-          t = z2.tuple($).rest(u);
-        else
-          t = z2.tuple($);
-        if (typeof r.minItems === "number")
-          t = t.check(z2.minLength(r.minItems));
-        if (typeof r.maxItems === "number")
-          t = t.check(z2.maxLength(r.maxItems));
-      } else if (Array.isArray(v)) {
-        let $ = v.map((l) => K(l, i)), u = r.additionalItems && typeof r.additionalItems === "object" ? K(r.additionalItems, i) : undefined;
-        if (u)
-          t = z2.tuple($).rest(u);
-        else
-          t = z2.tuple($);
-        if (typeof r.minItems === "number")
-          t = t.check(z2.minLength(r.minItems));
-        if (typeof r.maxItems === "number")
-          t = t.check(z2.maxLength(r.maxItems));
-      } else if (v !== undefined) {
-        let $ = K(v, i), u = z2.array($);
-        if (typeof r.minItems === "number")
-          u = u.min(r.minItems);
-        if (typeof r.maxItems === "number")
-          u = u.max(r.maxItems);
-        t = u;
-      } else
-        t = z2.array(z2.any());
-      break;
-    }
-    default:
-      throw Error(`Unsupported type: ${o}`);
-  }
-  if (r.description)
-    t = t.describe(r.description);
-  if (r.default !== undefined)
-    t = t.default(r.default);
-  return t;
-}
-function K(r, i) {
-  if (typeof r === "boolean")
-    return r ? z2.any() : z2.never();
-  let o = zI(r, i), t = r.type || r.enum !== undefined || r.const !== undefined;
-  if (r.anyOf && Array.isArray(r.anyOf)) {
-    let u = r.anyOf.map((e) => K(e, i)), l = z2.union(u);
-    o = t ? z2.intersection(o, l) : l;
-  }
-  if (r.oneOf && Array.isArray(r.oneOf)) {
-    let u = r.oneOf.map((e) => K(e, i)), l = z2.xor(u);
-    o = t ? z2.intersection(o, l) : l;
-  }
-  if (r.allOf && Array.isArray(r.allOf))
-    if (r.allOf.length === 0)
-      o = t ? o : z2.any();
-    else {
-      let u = t ? o : K(r.allOf[0], i), l = t ? 0 : 1;
-      for (let e = l;e < r.allOf.length; e++)
-        u = z2.intersection(u, K(r.allOf[e], i));
-      o = u;
-    }
-  if (r.nullable === true && i.version === "openapi-3.0")
-    o = z2.nullable(o);
-  if (r.readOnly === true)
-    o = z2.readonly(o);
-  let n = {}, v = ["$id", "id", "$comment", "$anchor", "$vocabulary", "$dynamicRef", "$dynamicAnchor"];
-  for (let u of v)
-    if (u in r)
-      n[u] = r[u];
-  let $ = ["contentEncoding", "contentMediaType", "contentSchema"];
-  for (let u of $)
-    if (u in r)
-      n[u] = r[u];
-  for (let u of Object.keys(r))
-    if (!U6.has(u))
-      n[u] = r[u];
-  if (Object.keys(n).length > 0)
-    i.registry.add(o, n);
-  return o;
-}
-function SI(r, i) {
-  if (typeof r === "boolean")
-    return r ? z2.any() : z2.never();
-  let o = k6(r, i?.defaultTarget), t = r.$defs || r.definitions || {}, n = { version: o, defs: t, refs: new Map, processing: new Set, rootSchema: r, registry: i?.registry ?? A };
-  return K(r, n);
-}
-var Ie = {};
-s(Ie, { string: () => w6, number: () => N6, date: () => S6, boolean: () => O6, bigint: () => z6 });
-function w6(r) {
-  return q$(Cr, r);
-}
-function N6(r) {
-  return M$(yr, r);
-}
-function O6(r) {
-  return y$(hr, r);
-}
-function z6(r) {
-  return a$(ar, r);
-}
-function S6(r) {
-  return gu(Vn, r);
-}
-E(kn());
-var JI = g.union([g.literal("light"), g.literal("dark")]).describe("Color theme preference for the host environment.");
-var pr = g.union([g.literal("inline"), g.literal("fullscreen"), g.literal("pip")]).describe("Display mode for UI presentation.");
-var L6 = g.union([g.literal("--color-background-primary"), g.literal("--color-background-secondary"), g.literal("--color-background-tertiary"), g.literal("--color-background-inverse"), g.literal("--color-background-ghost"), g.literal("--color-background-info"), g.literal("--color-background-danger"), g.literal("--color-background-success"), g.literal("--color-background-warning"), g.literal("--color-background-disabled"), g.literal("--color-text-primary"), g.literal("--color-text-secondary"), g.literal("--color-text-tertiary"), g.literal("--color-text-inverse"), g.literal("--color-text-ghost"), g.literal("--color-text-info"), g.literal("--color-text-danger"), g.literal("--color-text-success"), g.literal("--color-text-warning"), g.literal("--color-text-disabled"), g.literal("--color-text-ghost"), g.literal("--color-border-primary"), g.literal("--color-border-secondary"), g.literal("--color-border-tertiary"), g.literal("--color-border-inverse"), g.literal("--color-border-ghost"), g.literal("--color-border-info"), g.literal("--color-border-danger"), g.literal("--color-border-success"), g.literal("--color-border-warning"), g.literal("--color-border-disabled"), g.literal("--color-ring-primary"), g.literal("--color-ring-secondary"), g.literal("--color-ring-inverse"), g.literal("--color-ring-info"), g.literal("--color-ring-danger"), g.literal("--color-ring-success"), g.literal("--color-ring-warning"), g.literal("--font-sans"), g.literal("--font-mono"), g.literal("--font-weight-normal"), g.literal("--font-weight-medium"), g.literal("--font-weight-semibold"), g.literal("--font-weight-bold"), g.literal("--font-text-xs-size"), g.literal("--font-text-sm-size"), g.literal("--font-text-md-size"), g.literal("--font-text-lg-size"), g.literal("--font-heading-xs-size"), g.literal("--font-heading-sm-size"), g.literal("--font-heading-md-size"), g.literal("--font-heading-lg-size"), g.literal("--font-heading-xl-size"), g.literal("--font-heading-2xl-size"), g.literal("--font-heading-3xl-size"), g.literal("--font-text-xs-line-height"), g.literal("--font-text-sm-line-height"), g.literal("--font-text-md-line-height"), g.literal("--font-text-lg-line-height"), g.literal("--font-heading-xs-line-height"), g.literal("--font-heading-sm-line-height"), g.literal("--font-heading-md-line-height"), g.literal("--font-heading-lg-line-height"), g.literal("--font-heading-xl-line-height"), g.literal("--font-heading-2xl-line-height"), g.literal("--font-heading-3xl-line-height"), g.literal("--border-radius-xs"), g.literal("--border-radius-sm"), g.literal("--border-radius-md"), g.literal("--border-radius-lg"), g.literal("--border-radius-xl"), g.literal("--border-radius-full"), g.literal("--border-width-regular"), g.literal("--shadow-hairline"), g.literal("--shadow-sm"), g.literal("--shadow-md"), g.literal("--shadow-lg")]).describe("CSS variable keys available to MCP apps for theming.");
-var G6 = g.record(L6.describe(`Style variables for theming MCP apps.
-
-Individual style keys are optional - hosts may provide any subset of these values.
-Values are strings containing CSS values (colors, sizes, font stacks, etc.).
-
-Note: This type uses \`Record<K, string | undefined>\` rather than \`Partial<Record<K, string>>\`
-for compatibility with Zod schema generation. Both are functionally equivalent for validation.`), g.union([g.string(), g.undefined()]).describe(`Style variables for theming MCP apps.
-
-Individual style keys are optional - hosts may provide any subset of these values.
-Values are strings containing CSS values (colors, sizes, font stacks, etc.).
-
-Note: This type uses \`Record<K, string | undefined>\` rather than \`Partial<Record<K, string>>\`
-for compatibility with Zod schema generation. Both are functionally equivalent for validation.`)).describe(`Style variables for theming MCP apps.
-
-Individual style keys are optional - hosts may provide any subset of these values.
-Values are strings containing CSS values (colors, sizes, font stacks, etc.).
-
-Note: This type uses \`Record<K, string | undefined>\` rather than \`Partial<Record<K, string>>\`
-for compatibility with Zod schema generation. Both are functionally equivalent for validation.`);
-var W6 = g.object({ method: g.literal("ui/open-link"), params: g.object({ url: g.string().describe("URL to open in the host's browser") }) });
-var be = g.object({ isError: g.boolean().optional().describe("True if the host failed to open the URL (e.g., due to security policy).") }).passthrough();
-var _e = g.object({ isError: g.boolean().optional().describe("True if the host rejected or failed to deliver the message.") }).passthrough();
-var V6 = g.object({ method: g.literal("ui/notifications/sandbox-proxy-ready"), params: g.object({}) });
-var kv = g.object({ connectDomains: g.array(g.string()).optional().describe("Origins for network requests (fetch/XHR/WebSocket)."), resourceDomains: g.array(g.string()).optional().describe("Origins for static resources (scripts, images, styles, fonts)."), frameDomains: g.array(g.string()).optional().describe("Origins for nested iframes (frame-src directive)."), baseUriDomains: g.array(g.string()).optional().describe("Allowed base URIs for the document (base-uri directive).") });
-var Dv = g.object({ camera: g.object({}).optional().describe("Request camera access (Permission Policy `camera` feature)."), microphone: g.object({}).optional().describe("Request microphone access (Permission Policy `microphone` feature)."), geolocation: g.object({}).optional().describe("Request geolocation access (Permission Policy `geolocation` feature)."), clipboardWrite: g.object({}).optional().describe("Request clipboard write access (Permission Policy `clipboard-write` feature).") });
-var X6 = g.object({ method: g.literal("ui/notifications/size-changed"), params: g.object({ width: g.number().optional().describe("New width in pixels."), height: g.number().optional().describe("New height in pixels.") }) });
-var Ue = g.object({ method: g.literal("ui/notifications/tool-input"), params: g.object({ arguments: g.record(g.string(), g.unknown().describe("Complete tool call arguments as key-value pairs.")).optional().describe("Complete tool call arguments as key-value pairs.") }) });
-var ke = g.object({ method: g.literal("ui/notifications/tool-input-partial"), params: g.object({ arguments: g.record(g.string(), g.unknown().describe("Partial tool call arguments (incomplete, may change).")).optional().describe("Partial tool call arguments (incomplete, may change).") }) });
-var De = g.object({ method: g.literal("ui/notifications/tool-cancelled"), params: g.object({ reason: g.string().optional().describe('Optional reason for the cancellation (e.g., "user action", "timeout").') }) });
-var LI = g.object({ fonts: g.string().optional() });
-var GI = g.object({ variables: G6.optional().describe("CSS variables for theming the app."), css: LI.optional().describe("CSS blocks that apps can inject.") });
-var we = g.object({ method: g.literal("ui/resource-teardown"), params: g.object({}) });
-var E6 = g.record(g.string(), g.unknown());
-var ce = g.object({ text: g.object({}).optional().describe("Host supports text content blocks."), image: g.object({}).optional().describe("Host supports image content blocks."), audio: g.object({}).optional().describe("Host supports audio content blocks."), resource: g.object({}).optional().describe("Host supports resource content blocks."), resourceLink: g.object({}).optional().describe("Host supports resource link content blocks."), structuredContent: g.object({}).optional().describe("Host supports structured content.") });
-var WI = g.object({ experimental: g.object({}).optional().describe("Experimental features (structure TBD)."), openLinks: g.object({}).optional().describe("Host supports opening external URLs."), serverTools: g.object({ listChanged: g.boolean().optional().describe("Host supports tools/list_changed notifications.") }).optional().describe("Host can proxy tool calls to the MCP server."), serverResources: g.object({ listChanged: g.boolean().optional().describe("Host supports resources/list_changed notifications.") }).optional().describe("Host can proxy resource reads to the MCP server."), logging: g.object({}).optional().describe("Host accepts log messages."), sandbox: g.object({ permissions: Dv.optional().describe("Permissions granted by the host (camera, microphone, geolocation)."), csp: kv.optional().describe("CSP domains approved by the host.") }).optional().describe("Sandbox configuration applied by the host."), updateModelContext: ce.optional().describe("Host accepts context updates (ui/update-model-context) to be included in the model's context for future turns."), message: ce.optional().describe("Host supports receiving content messages (ui/message) from the view.") });
-var VI = g.object({ experimental: g.object({}).optional().describe("Experimental features (structure TBD)."), tools: g.object({ listChanged: g.boolean().optional().describe("App supports tools/list_changed notifications.") }).optional().describe("App exposes MCP-style tools that the host can call."), availableDisplayModes: g.array(pr).optional().describe("Display modes the app supports.") });
-var A6 = g.object({ method: g.literal("ui/notifications/initialized"), params: g.object({}).optional() });
-var K6 = g.object({ csp: kv.optional().describe("Content Security Policy configuration."), permissions: Dv.optional().describe("Sandbox permissions requested by the UI."), domain: g.string().optional().describe("Dedicated origin for view sandbox."), prefersBorder: g.boolean().optional().describe("Visual boundary preference - true if UI prefers a visible border.") });
-var q6 = g.object({ method: g.literal("ui/request-display-mode"), params: g.object({ mode: pr.describe("The display mode being requested.") }) });
-var Ne = g.object({ mode: pr.describe("The display mode that was actually set. May differ from requested if not supported.") }).passthrough();
-var XI = g.union([g.literal("model"), g.literal("app")]).describe("Tool visibility scope - who can access the tool.");
-var Q6 = g.object({ resourceUri: g.string().optional(), visibility: g.array(XI).optional().describe(`Who can access this tool. Default: ["model", "app"]
-- "model": Tool visible to and callable by the agent
-- "app": Tool callable by the app from this server only`) });
-var ZU = g.object({ mimeTypes: g.array(g.string()).optional().describe('Array of supported MIME types for UI resources.\nMust include `"text/html;profile=mcp-app"` for MCP Apps support.') });
-var Y6 = g.object({ method: g.literal("ui/message"), params: g.object({ role: g.literal("user").describe('Message role, currently only "user" is supported.'), content: g.array(ContentBlockSchema).describe("Message content blocks (text, image, etc.).") }) });
-var F6 = g.object({ method: g.literal("ui/notifications/sandbox-resource-ready"), params: g.object({ html: g.string().describe("HTML content to load into the inner iframe."), sandbox: g.string().optional().describe("Optional override for the inner iframe's sandbox attribute."), csp: kv.optional().describe("CSP configuration from resource metadata."), permissions: Dv.optional().describe("Sandbox permissions from resource metadata.") }) });
-var Oe = g.object({ method: g.literal("ui/notifications/tool-result"), params: CallToolResultSchema.describe("Standard MCP tool execution result.") });
-var ze = g.object({ toolInfo: g.object({ id: RequestIdSchema.optional().describe("JSON-RPC id of the tools/call request."), tool: ToolSchema.describe("Tool definition including name, inputSchema, etc.") }).optional().describe("Metadata of the tool call that instantiated this App."), theme: JI.optional().describe("Current color theme preference."), styles: GI.optional().describe("Style configuration for theming the app."), displayMode: pr.optional().describe("How the UI is currently displayed."), availableDisplayModes: g.array(pr).optional().describe("Display modes the host supports."), containerDimensions: g.union([g.object({ height: g.number().describe("Fixed container height in pixels.") }), g.object({ maxHeight: g.union([g.number(), g.undefined()]).optional().describe("Maximum container height in pixels.") })]).and(g.union([g.object({ width: g.number().describe("Fixed container width in pixels.") }), g.object({ maxWidth: g.union([g.number(), g.undefined()]).optional().describe("Maximum container width in pixels.") })])).optional().describe(`Container dimensions. Represents the dimensions of the iframe or other
-container holding the app. Specify either width or maxWidth, and either height or maxHeight.`), locale: g.string().optional().describe("User's language and region preference in BCP 47 format."), timeZone: g.string().optional().describe("User's timezone in IANA format."), userAgent: g.string().optional().describe("Host application identifier."), platform: g.union([g.literal("web"), g.literal("desktop"), g.literal("mobile")]).optional().describe("Platform type for responsive design decisions."), deviceCapabilities: g.object({ touch: g.boolean().optional().describe("Whether the device supports touch input."), hover: g.boolean().optional().describe("Whether the device supports hover interactions.") }).optional().describe("Device input capabilities."), safeAreaInsets: g.object({ top: g.number().describe("Top safe area inset in pixels."), right: g.number().describe("Right safe area inset in pixels."), bottom: g.number().describe("Bottom safe area inset in pixels."), left: g.number().describe("Left safe area inset in pixels.") }).optional().describe("Mobile safe area boundaries in pixels.") }).passthrough();
-var Se = g.object({ method: g.literal("ui/notifications/host-context-changed"), params: ze.describe("Partial context update containing only changed fields.") });
-var B6 = g.object({ method: g.literal("ui/update-model-context"), params: g.object({ content: g.array(ContentBlockSchema).optional().describe("Context content blocks (text, image, etc.)."), structuredContent: g.record(g.string(), g.unknown().describe("Structured content for machine-readable context data.")).optional().describe("Structured content for machine-readable context data.") }) });
-var m6 = g.object({ method: g.literal("ui/initialize"), params: g.object({ appInfo: ImplementationSchema.describe("App identification (name and version)."), appCapabilities: VI.describe("Features and capabilities this app provides."), protocolVersion: g.string().describe("Protocol version this app supports.") }) });
-var Pe = g.object({ protocolVersion: g.string().describe('Negotiated protocol version string (e.g., "2025-11-21").'), hostInfo: ImplementationSchema.describe("Host application identification and version."), hostCapabilities: WI.describe("Features and capabilities provided by the host."), hostContext: ze.describe("Rich context about the host environment.") }).passthrough();
-var je = "ui/resourceUri";
-var EI = "text/html;profile=mcp-app";
-
-class d6 extends Protocol {
-  _appInfo;
-  _capabilities;
-  options;
-  _hostCapabilities;
-  _hostInfo;
-  _hostContext;
-  constructor(r, i = {}, o = { autoResize: true }) {
-    super(o);
-    this._appInfo = r;
-    this._capabilities = i;
-    this.options = o;
-    this.setRequestHandler(PingRequestSchema, (t) => {
-      return console.log("Received ping:", t.params), {};
-    }), this.onhostcontextchanged = () => {};
-  }
-  getHostCapabilities() {
-    return this._hostCapabilities;
-  }
-  getHostVersion() {
-    return this._hostInfo;
-  }
-  getHostContext() {
-    return this._hostContext;
-  }
-  set ontoolinput(r) {
-    this.setNotificationHandler(Ue, (i) => r(i.params));
-  }
-  set ontoolinputpartial(r) {
-    this.setNotificationHandler(ke, (i) => r(i.params));
-  }
-  set ontoolresult(r) {
-    this.setNotificationHandler(Oe, (i) => r(i.params));
-  }
-  set ontoolcancelled(r) {
-    this.setNotificationHandler(De, (i) => r(i.params));
-  }
-  set onhostcontextchanged(r) {
-    this.setNotificationHandler(Se, (i) => {
-      this._hostContext = { ...this._hostContext, ...i.params }, r(i.params);
-    });
-  }
-  set onteardown(r) {
-    this.setRequestHandler(we, (i, o) => r(i.params, o));
-  }
-  set oncalltool(r) {
-    this.setRequestHandler(CallToolRequestSchema, (i, o) => r(i.params, o));
-  }
-  set onlisttools(r) {
-    this.setRequestHandler(ListToolsRequestSchema, (i, o) => r(i.params, o));
-  }
-  assertCapabilityForMethod(r) {}
-  assertRequestHandlerCapability(r) {
-    switch (r) {
-      case "tools/call":
-      case "tools/list":
-        if (!this._capabilities.tools)
-          throw Error(`Client does not support tool capability (required for ${r})`);
-        return;
-      case "ping":
-      case "ui/resource-teardown":
-        return;
-      default:
-        throw Error(`No handler for method ${r} registered`);
-    }
-  }
-  assertNotificationCapability(r) {}
-  assertTaskCapability(r) {
-    throw Error("Tasks are not supported in MCP Apps");
-  }
-  assertTaskHandlerCapability(r) {
-    throw Error("Task handlers are not supported in MCP Apps");
-  }
-  async callServerTool(r, i) {
-    return await this.request({ method: "tools/call", params: r }, CallToolResultSchema, i);
-  }
-  sendMessage(r, i) {
-    return this.request({ method: "ui/message", params: r }, _e, i);
-  }
-  sendLog(r) {
-    return this.notification({ method: "notifications/message", params: r });
-  }
-  updateModelContext(r, i) {
-    return this.request({ method: "ui/update-model-context", params: r }, EmptyResultSchema, i);
-  }
-  openLink(r, i) {
-    return this.request({ method: "ui/open-link", params: r }, be, i);
-  }
-  sendOpenLink = this.openLink;
-  requestDisplayMode(r, i) {
-    return this.request({ method: "ui/request-display-mode", params: r }, Ne, i);
-  }
-  sendSizeChanged(r) {
-    return this.notification({ method: "ui/notifications/size-changed", params: r });
-  }
-  setupSizeChangedNotifications() {
-    let r = false, i = 0, o = 0, t = () => {
-      if (r)
-        return;
-      r = true, requestAnimationFrame(() => {
-        r = false;
-        let v = document.documentElement, $ = v.style.width, u = v.style.height;
-        v.style.width = "fit-content", v.style.height = "fit-content";
-        let l = v.getBoundingClientRect();
-        v.style.width = $, v.style.height = u;
-        let e = window.innerWidth - v.clientWidth, c = Math.ceil(l.width + e), _ = Math.ceil(l.height);
-        if (c !== i || _ !== o)
-          i = c, o = _, this.sendSizeChanged({ width: c, height: _ });
-      });
-    };
-    t();
-    let n = new ResizeObserver(t);
-    return n.observe(document.documentElement), n.observe(document.body), () => n.disconnect();
-  }
-  async connect(r = new Qn(window.parent, window.parent), i) {
-    await super.connect(r);
-    try {
-      let o = await this.request({ method: "ui/initialize", params: { appCapabilities: this._capabilities, appInfo: this._appInfo, protocolVersion: wv } }, Pe, i);
-      if (o === undefined)
-        throw Error(`Server sent invalid initialize result: ${o}`);
-      if (this._hostCapabilities = o.hostCapabilities, this._hostInfo = o.hostInfo, this._hostContext = o.hostContext, await this.notification({ method: "ui/notifications/initialized" }), this.options?.autoResize)
-        this.setupSizeChangedNotifications();
-    } catch (o) {
-      throw this.close(), o;
-    }
-  }
-}
-function hk(r, i, o, t) {
-  let n = o._meta, v = n.ui, $ = n[je], u = n;
-  if (v?.resourceUri && !$)
-    u = { ...n, [je]: v.resourceUri };
-  else if ($ && !v?.resourceUri)
-    u = { ...n, ui: { ...v, resourceUri: $ } };
-  return r.registerTool(i, { ...o, _meta: u }, t);
-}
-function ak(r, i, o, t, n) {
-  r.registerResource(i, o, { mimeType: EI, ...t }, n);
 }
 
 // node_modules/@modelcontextprotocol/sdk/dist/esm/validation/ajv-provider.js
@@ -35756,12 +28376,9 @@ var EMPTY_COMPLETION_RESULT = {
 };
 
 // server.ts
-import fs from "node:fs/promises";
-import path from "node:path";
-var DIST_DIR = import.meta.filename.endsWith(".ts") ? path.join(import.meta.dirname, "dist") : import.meta.dirname;
 var RECALL_CHEAT_SHEET = `# Excalidraw Element Format
 
-Thanks for calling read_me! Do NOT call it again in this conversation — you will not see anything new. Now use create_view to draw.
+Thanks for calling read_me! Do NOT call it again in this conversation — you will not see anything new. Now use create_diagram to draw.
 
 ## Color Palette (use consistently across all tools)
 
@@ -35839,11 +28456,10 @@ Canvas background is white.
 Arrow: \`"startBinding": { "elementId": "r1", "fixedPoint": [1, 0.5] }\`
 fixedPoint: top=[0.5,0], bottom=[0.5,1], left=[0,0.5], right=[1,0.5]
 
-### Drawing Order (CRITICAL for streaming)
+### Drawing Order
 - Array order = z-order (first = back, last = front)
-- **Emit progressively**: background → shape → its label → its arrows → next shape
-- BAD: all rectangles → all texts → all arrows
-- GOOD: bg_shape → shape1 → text1 → arrow1 → shape2 → text2 → ...
+- Draw background zones first, then shapes with labels, then arrows
+- GOOD: bg_shape → shape1 → arrow1 → shape2 → arrow2 → ...
 
 ### Example: Two connected labeled boxes
 \`\`\`json
@@ -35857,7 +28473,7 @@ fixedPoint: top=[0.5,0], bottom=[0.5,1], left=[0,0.5], right=[1,0.5]
 
 ### Camera & Sizing (CRITICAL for readability)
 
-The diagram displays inline at ~700px width. Design for this constraint.
+Use a cameraUpdate as the first element to set the output PNG dimensions. Only the last cameraUpdate determines the final viewport.
 
 **Recommended camera sizes (4:3 aspect ratio ONLY):**
 - Camera **S**: width 400, height 300 — close-up on a small group (2-3 elements)
@@ -35883,8 +28499,6 @@ ALWAYS start with a \`cameraUpdate\` as the FIRST element:
 \`{ "type": "cameraUpdate", "width": 800, "height": 600, "x": 0, "y": 0 }\`
 
 - x, y: top-left corner of visible area (scene coordinates)
-- ALWAYS emit the cameraUpdate BEFORE drawing the elements it frames — camera moves first, then content appears
-- The camera animates smoothly between positions
 - Leave padding: don't match camera size to content size exactly (e.g., 500px content in 800x600 camera)
 
 Examples:
@@ -35892,23 +28506,15 @@ Examples:
 \`{ "type": "cameraUpdate", "width": 400, "height": 300, "x": 200, "y": 100 }\` — zoom into a detail
 \`{ "type": "cameraUpdate", "width": 1600, "height": 1200, "x": -50, "y": -50 }\` — panorama overview
 
-Tip: For large diagrams, emit a cameraUpdate to focus on each section as you draw it.
-
 ## Diagram Example
 
 Example prompt: "Explain how photosynthesis works"
 
-Uses 2 camera positions: start zoomed in (M) for title, then zoom out (L) to reveal the full diagram. Sun art drawn last as a finishing touch.
-
-- **Camera 1** (400x300): Draw the title "Photosynthesis" and formula subtitle zoomed in
-- **Camera 2** (800x600): Zoom out — draw the leaf zone, process flow (Light Reactions → Calvin Cycle), inputs (Sunlight, Water, CO2), outputs (O2, Glucose), and finally a cute 8-ray sun
-
 \`\`\`json
 [
-  {"type":"cameraUpdate","width":400,"height":300,"x":200,"y":-20},
+  {"type":"cameraUpdate","width":800,"height":600,"x":0,"y":-20},
   {"type":"text","id":"ti","x":280,"y":10,"text":"Photosynthesis","fontSize":28,"strokeColor":"#1e1e1e"},
   {"type":"text","id":"fo","x":245,"y":48,"text":"6CO2 + 6H2O --> C6H12O6 + 6O2","fontSize":16,"strokeColor":"#b0b0b0"},
-  {"type":"cameraUpdate","width":800,"height":600,"x":0,"y":-20},
   {"type":"rectangle","id":"lf","x":150,"y":90,"width":520,"height":380,"backgroundColor":"#d3f9d8","fillStyle":"solid","roundness":{"type":3},"strokeColor":"#22c55e","strokeWidth":1,"opacity":35},
   {"type":"text","id":"lfl","x":170,"y":96,"text":"Inside the Leaf","fontSize":16,"strokeColor":"#22c55e"},
   {"type":"rectangle","id":"lr","x":190,"y":190,"width":160,"height":70,"backgroundColor":"#fff3bf","fillStyle":"solid","roundness":{"type":3},"strokeColor":"#f59e0b","label":{"text":"Light Reactions","fontSize":16}},
@@ -35940,161 +28546,56 @@ Common mistakes to avoid:
 - **Camera size must match content with padding** — if your content is 500px tall, use 800x600 camera, not 500px. No padding = truncated edges
 - **Center titles relative to the diagram below** — estimate the diagram's total width and center the title text over it, not over the canvas
 - **Arrow labels need space** — long labels like "ATP + NADPH" overflow short arrows. Keep labels short or make arrows wider
-- **Elements overlap when y-coordinates are close** — always check that text, boxes, and labels don't stack on top of each other (e.g., an output box overlapping a zone label)
-- **Draw art/illustrations LAST** — cute decorations (sun, stars, icons) should appear as the final drawing step so they don't distract from the main content being built
-
-## Advanced Example — Storyboard
-
-Example prompt: "Create awesome storyboard excalidraw animation explaining how to install Excalidraw connector to claude.ai"
-
-This demonstrates camera panning across a large canvas to tell a story. Two browser windows are laid out side-by-side, and 6 cameraUpdates guide the viewer through the narrative:
-
-- **Camera 1** (800x600): Wide shot of the Claude.ai chat window — draw the empty browser chrome, title bar, tabs, logo, and "Claude.ai" text
-- **Camera 2** (600x450): Pull back to mid-view — draw the textarea with placeholder, + button, model selector, send button. Logo is now above the frame
-- **Camera 3** (400x300): Zoom into the + button area — draw the highlighted + button and dropdown menu with "Manage connectors" active
-- Draw the curved arrow connecting to Settings window (while still on Camera 3)
-- **Camera 4** (800x600): Pan right to Settings window — draw the full settings page with sidebar, connector list (Figma, GitHub, Slack), and "+ Add custom connector" button with arrow
-- **Camera 5** (600x450): Zoom into modal — draw the modal overlay with "excalidraw" name and server URL filled in, ending with arrows pointing to URL and Add button
-
-\`\`\`json
-[
-  {"type":"cameraUpdate","width":800,"height":600,"x":-30,"y":0},
-  {"type":"rectangle","id":"wf1","x":20,"y":40,"width":700,"height":500,"backgroundColor":"#fafaf7","fillStyle":"solid","roundness":{"type":3},"strokeColor":"#d4d4d0","strokeWidth":1},
-  {"type":"rectangle","id":"tb1","x":20,"y":40,"width":700,"height":38,"backgroundColor":"#ededed","fillStyle":"solid","strokeColor":"#d4d4d0","strokeWidth":1},
-  {"type":"ellipse","id":"dr1","x":42,"y":50,"width":12,"height":12,"backgroundColor":"#ff5f57","fillStyle":"solid","strokeColor":"#ff5f57","strokeWidth":1},
-  {"type":"ellipse","id":"dy1","x":60,"y":50,"width":12,"height":12,"backgroundColor":"#febc2e","fillStyle":"solid","strokeColor":"#febc2e","strokeWidth":1},
-  {"type":"ellipse","id":"dg1","x":78,"y":50,"width":12,"height":12,"backgroundColor":"#28c840","fillStyle":"solid","strokeColor":"#28c840","strokeWidth":1},
-  {"type":"rectangle","id":"chtab","x":310,"y":48,"width":56,"height":24,"backgroundColor":"#ffffff","fillStyle":"solid","roundness":{"type":3},"strokeColor":"#d4d4d0","strokeWidth":1,"label":{"text":"Chat","fontSize":14}},
-  {"type":"rectangle","id":"cwtab","x":370,"y":48,"width":70,"height":24,"roundness":{"type":3},"strokeColor":"#d4d4d0","strokeWidth":1,"label":{"text":"Cowork","fontSize":14}},
-  {"type":"text","id":"logo","x":345,"y":155,"text":"*","fontSize":64,"strokeColor":"#D77655"},
-  {"type":"text","id":"brnd","x":290,"y":225,"text":"Claude.ai","fontSize":28,"strokeColor":"#1e1e1e"},
-  {"type":"cameraUpdate","width":600,"height":450,"x":70,"y":145},
-  {"type":"rectangle","id":"ta","x":110,"y":340,"width":520,"height":100,"backgroundColor":"#ffffff","fillStyle":"solid","roundness":{"type":3},"strokeColor":"#d4d4d0","strokeWidth":1},
-  {"type":"text","id":"ph","x":130,"y":355,"text":"How can I help you today?","fontSize":18,"strokeColor":"#b0b0b0"},
-  {"type":"rectangle","id":"plus","x":125,"y":408,"width":32,"height":32,"roundness":{"type":3},"strokeColor":"#b0b0b0","strokeWidth":1,"label":{"text":"+","fontSize":18}},
-  {"type":"text","id":"mdl","x":510,"y":416,"text":"Opus 4.6","fontSize":14,"strokeColor":"#b0b0b0"},
-  {"type":"ellipse","id":"sendb","x":596,"y":410,"width":28,"height":28,"backgroundColor":"#c4795b","fillStyle":"solid","strokeColor":"#c4795b","strokeWidth":1},
-  {"type":"cameraUpdate","width":400,"height":300,"x":40,"y":290},
-  {"type":"text","id":"plushl","x":131,"y":406,"text":"+","fontSize":30,"strokeColor":"#4a9eed"},
-  {"type":"rectangle","id":"dd","x":115,"y":448,"width":250,"height":92,"backgroundColor":"#ffffff","fillStyle":"solid","roundness":{"type":3},"strokeColor":"#d4d4d0","strokeWidth":1},
-  {"type":"text","id":"dd1","x":130,"y":455,"text":"@ Add files and photos","fontSize":16,"strokeColor":"#555555"},
-  {"type":"text","id":"dd2","x":130,"y":480,"text":"~ Research","fontSize":16,"strokeColor":"#555555"},
-  {"type":"rectangle","id":"dd3h","x":119,"y":502,"width":242,"height":28,"backgroundColor":"#f5f0e8","fillStyle":"solid","roundness":{"type":3},"strokeColor":"transparent"},
-  {"type":"text","id":"dd3","x":130,"y":506,"text":"# Manage connectors","fontSize":16,"strokeColor":"#1e1e1e"},
-  {"type":"rectangle","id":"dd3a","x":119,"y":502,"width":242,"height":28,"backgroundColor":"#c4795b","fillStyle":"solid","roundness":{"type":3},"strokeColor":"#c4795b","opacity":15},
-  {"type":"arrow","id":"crv","x":365,"y":515,"width":460,"height":-180,"points":[[0,0],[180,-60],[460,-180]],"strokeColor":"#c4795b","strokeWidth":2,"strokeStyle":"dashed","endArrowhead":"arrow","startArrowhead":null},
-  {"type":"cameraUpdate","width":800,"height":600,"x":760,"y":0},
-  {"type":"rectangle","id":"sw","x":820,"y":40,"width":680,"height":500,"backgroundColor":"#fafaf7","fillStyle":"solid","roundness":{"type":3},"strokeColor":"#d4d4d0","strokeWidth":1},
-  {"type":"rectangle","id":"stb","x":820,"y":40,"width":680,"height":38,"backgroundColor":"#ededed","fillStyle":"solid","strokeColor":"#d4d4d0","strokeWidth":1},
-  {"type":"ellipse","id":"dr2","x":842,"y":50,"width":12,"height":12,"backgroundColor":"#ff5f57","fillStyle":"solid","strokeColor":"#ff5f57","strokeWidth":1},
-  {"type":"ellipse","id":"dy2","x":860,"y":50,"width":12,"height":12,"backgroundColor":"#febc2e","fillStyle":"solid","strokeColor":"#febc2e","strokeWidth":1},
-  {"type":"ellipse","id":"dg2","x":878,"y":50,"width":12,"height":12,"backgroundColor":"#28c840","fillStyle":"solid","strokeColor":"#28c840","strokeWidth":1},
-  {"type":"text","id":"sttl","x":845,"y":92,"text":"Settings","fontSize":28,"strokeColor":"#1e1e1e"},
-  {"type":"text","id":"sb1","x":845,"y":138,"text":"General","fontSize":16,"strokeColor":"#555555"},
-  {"type":"text","id":"sb2","x":845,"y":163,"text":"Account","fontSize":16,"strokeColor":"#555555"},
-  {"type":"text","id":"sb3","x":845,"y":188,"text":"Usage","fontSize":16,"strokeColor":"#555555"},
-  {"type":"text","id":"sb4","x":845,"y":213,"text":"Capabilities","fontSize":16,"strokeColor":"#555555"},
-  {"type":"rectangle","id":"sbhi","x":840,"y":237,"width":130,"height":28,"backgroundColor":"#f5f0e8","fillStyle":"solid","roundness":{"type":3},"strokeColor":"transparent"},
-  {"type":"text","id":"sb5","x":845,"y":239,"text":"Connectors","fontSize":16,"strokeColor":"#c4795b"},
-  {"type":"text","id":"sb6","x":845,"y":272,"text":"Claude Code","fontSize":16,"strokeColor":"#555555"},
-  {"type":"arrow","id":"div","x":975,"y":92,"width":0,"height":425,"points":[[0,0],[0,425]],"strokeColor":"#e8e8e8","strokeWidth":1,"endArrowhead":null,"startArrowhead":null},
-  {"type":"text","id":"cnh","x":1000,"y":92,"text":"Connectors","fontSize":24,"strokeColor":"#1e1e1e"},
-  {"type":"text","id":"cns","x":1000,"y":120,"text":"Allow Claude to reference apps and services.","fontSize":14,"strokeColor":"#b0b0b0"},
-  {"type":"rectangle","id":"bcb","x":1330,"y":92,"width":150,"height":32,"roundness":{"type":3},"strokeColor":"#d4d4d0","strokeWidth":1,"label":{"text":"Browse connectors","fontSize":14}},
-  {"type":"ellipse","id":"ci1","x":1005,"y":157,"width":28,"height":28,"backgroundColor":"#dbe4ff","fillStyle":"solid","strokeColor":"#d4d4d0","strokeWidth":1},
-  {"type":"text","id":"cn1","x":1045,"y":161,"text":"Figma","fontSize":16,"strokeColor":"#1e1e1e"},
-  {"type":"rectangle","id":"cb1","x":1380,"y":157,"width":90,"height":28,"roundness":{"type":3},"strokeColor":"#d4d4d0","strokeWidth":1,"label":{"text":"Connect","fontSize":14}},
-  {"type":"ellipse","id":"ci2","x":1005,"y":198,"width":28,"height":28,"backgroundColor":"#e8e8e8","fillStyle":"solid","strokeColor":"#d4d4d0","strokeWidth":1},
-  {"type":"text","id":"cn2","x":1045,"y":203,"text":"GitHub","fontSize":16,"strokeColor":"#1e1e1e"},
-  {"type":"rectangle","id":"cb2","x":1380,"y":198,"width":90,"height":28,"roundness":{"type":3},"strokeColor":"#d4d4d0","strokeWidth":1,"label":{"text":"Connect","fontSize":14}},
-  {"type":"ellipse","id":"ci3","x":1005,"y":240,"width":28,"height":28,"backgroundColor":"#d3f9d8","fillStyle":"solid","strokeColor":"#d4d4d0","strokeWidth":1},
-  {"type":"text","id":"cn3","x":1045,"y":244,"text":"Slack","fontSize":16,"strokeColor":"#1e1e1e"},
-  {"type":"rectangle","id":"cb3","x":1380,"y":240,"width":90,"height":28,"roundness":{"type":3},"strokeColor":"#d4d4d0","strokeWidth":1,"label":{"text":"Connect","fontSize":14}},
-  {"type":"arrow","id":"sep","x":1000,"y":282,"width":470,"height":0,"points":[[0,0],[470,0]],"strokeColor":"#e8e8e8","strokeWidth":1,"endArrowhead":null,"startArrowhead":null},
-  {"type":"rectangle","id":"acb","x":1000,"y":298,"width":220,"height":36,"backgroundColor":"#f5f0e8","fillStyle":"solid","roundness":{"type":3},"strokeColor":"#c4795b","strokeWidth":1,"label":{"text":"+ Add custom connector","fontSize":14}},
-  {"type":"cameraUpdate","width":600,"height":450,"x":850,"y":65},
-  {"type":"arrow","id":"cur","x":1250,"y":340,"width":-20,"height":-10,"points":[[0,0],[-20,-10]],"strokeColor":"#c4795b","strokeWidth":2,"endArrowhead":"arrow","startArrowhead":null},
-  {"type":"rectangle","id":"ov","x":820,"y":78,"width":680,"height":462,"backgroundColor":"#888888","fillStyle":"solid","strokeColor":"transparent","opacity":30},
-  {"type":"rectangle","id":"md","x":940,"y":150,"width":420,"height":280,"backgroundColor":"#ffffff","fillStyle":"solid","roundness":{"type":3},"strokeColor":"#d4d4d0","strokeWidth":1},
-  {"type":"text","id":"mdt","x":960,"y":168,"text":"Add custom connector","fontSize":22,"strokeColor":"#1e1e1e"},
-  {"type":"text","id":"nl","x":960,"y":210,"text":"Name","fontSize":16,"strokeColor":"#555555"},
-  {"type":"rectangle","id":"ni","x":960,"y":232,"width":380,"height":34,"backgroundColor":"#ffffff","fillStyle":"solid","roundness":{"type":3},"strokeColor":"#d4d4d0","strokeWidth":1},
-  {"type":"text","id":"nv","x":972,"y":238,"text":"Excalidraw","fontSize":18,"strokeColor":"#1e1e1e"},
-  {"type":"text","id":"ul","x":960,"y":278,"text":"Server URL","fontSize":16,"strokeColor":"#555555"},
-  {"type":"rectangle","id":"urli","x":960,"y":300,"width":380,"height":34,"backgroundColor":"#ffffff","fillStyle":"solid","roundness":{"type":3},"strokeColor":"#d4d4d0","strokeWidth":1},
-  {"type":"text","id":"uv","x":968,"y":306,"text":"https://excalidraw-mcp-app.vercel.app/mcp","fontSize":18,"strokeColor":"#1e1e1e"},
-  {"type":"text","id":"can","x":1220,"y":388,"text":"Cancel","fontSize":16,"strokeColor":"#999999"},
-  {"type":"rectangle","id":"addb","x":1260,"y":380,"width":100,"height":36,"backgroundColor":"#c4795b","fillStyle":"solid","roundness":{"type":3},"strokeColor":"#c4795b","strokeWidth":1},
-  {"type":"text","id":"addt","x":1288,"y":388,"text":"Add","fontSize":16,"strokeColor":"#ffffff"},
-  {"type":"arrow","id":"aurl","x":920,"y":317,"width":40,"height":0,"points":[[0,0],[40,0]],"strokeColor":"#4a9eed","strokeWidth":2,"endArrowhead":"arrow","startArrowhead":null},
-  {"type":"arrow","id":"ptr","x":1400,"y":420,"width":-60,"height":-20,"points":[[0,0],[-60,-20]],"strokeColor":"#4a9eed","strokeWidth":2,"endArrowhead":"arrow","startArrowhead":null},
-  {"type":"text","id":"enj","x":1080,"y":455,"text":"Enjoy!","fontSize":36,"strokeColor":"#4a9eed"},
-  {"type":"ellipse","id":"st1","x":1070,"y":465,"width":10,"height":10,"backgroundColor":"#f59e0b","fillStyle":"solid","strokeColor":"#f59e0b","strokeWidth":1},
-  {"type":"ellipse","id":"st2","x":1195,"y":460,"width":10,"height":10,"backgroundColor":"#22c55e","fillStyle":"solid","strokeColor":"#22c55e","strokeWidth":1},
-  {"type":"ellipse","id":"st3","x":1210,"y":475,"width":8,"height":8,"backgroundColor":"#8b5cf6","fillStyle":"solid","strokeColor":"#8b5cf6","strokeWidth":1},
-  {"type":"ellipse","id":"st4","x":1060,"y":480,"width":8,"height":8,"backgroundColor":"#ec4899","fillStyle":"solid","strokeColor":"#ec4899","strokeWidth":1}
-]
-\`\`\`
+- **Elements overlap when y-coordinates are close** — always check that text, boxes, and labels don't stack on top of each other
 
 ## Tips
 - Do NOT call read_me again — you already have everything you need
 - Use the color palette consistently
-- Make sure text is readable (never use same text color as background color) 
+- Make sure text is readable (never use same text color as background color)
 - Do NOT use emoji in text — they don't render in Excalidraw's font
-- cameraUpdate is MAGICAL and users love it! please use it a lot to guide the user's attention as you draw. It makes a huge difference in readability and engagement.
 `;
-function registerTools(server, distDir) {
-  const resourceUri = "ui://excalidraw/mcp-app.html";
+function registerTools(server) {
   server.registerTool("read_me", {
-    description: "Returns the Excalidraw element format reference with color palettes, examples, and tips. Call this BEFORE using create_view for the first time.",
+    description: "Returns the Excalidraw element format reference with color palettes, examples, and tips. Call this BEFORE using create_diagram for the first time.",
     annotations: { readOnlyHint: true }
   }, async () => {
     return { content: [{ type: "text", text: RECALL_CHEAT_SHEET }] };
   });
-  hk(server, "create_view", {
-    title: "Draw Diagram",
-    description: `Renders a hand-drawn diagram using Excalidraw elements.
-Elements stream in one by one with draw-on animations.
-Call read_me first to learn the element format.`,
+  server.registerTool("create_diagram", {
+    description: `Renders a hand-drawn Excalidraw diagram to a PNG file.
+Call read_me first to learn the element format.
+Returns the file path of the saved PNG.`,
     inputSchema: exports_external.object({
-      elements: exports_external.string().describe("JSON array string of Excalidraw elements. Must be valid JSON — no comments, no trailing commas. Keep compact. Call read_me first for format reference.")
+      elements: exports_external.string().describe("JSON array string of Excalidraw elements. Must be valid JSON — no comments, no trailing commas. Keep compact. Call read_me first for format reference."),
+      outputPath: exports_external.string().optional().describe("Optional absolute file path for the output PNG. If omitted, saves to a temp file.")
     }),
-    annotations: { readOnlyHint: true },
-    _meta: { ui: { resourceUri } }
-  }, async ({ elements }) => {
+    annotations: { readOnlyHint: true }
+  }, async ({ elements, outputPath }) => {
     try {
-      JSON.parse(elements);
+      const parsed = JSON.parse(elements);
+      if (!Array.isArray(parsed)) {
+        return {
+          content: [{ type: "text", text: "elements must be a JSON array." }],
+          isError: true
+        };
+      }
     } catch (e) {
       return {
         content: [{ type: "text", text: `Invalid JSON in elements: ${e.message}. Ensure no comments, no trailing commas, and proper quoting.` }],
         isError: true
       };
     }
-    return { content: [{ type: "text", text: "Diagram displayed. If the user edits the diagram in fullscreen, updated elements JSON is sent as model context." }] };
-  });
-  const cspMeta = {
-    ui: {
-      csp: {
-        resourceDomains: ["https://esm.sh"],
-        connectDomains: ["https://esm.sh"]
-      }
+    try {
+      const filePath = await renderToPng(elements, outputPath);
+      return {
+        content: [{ type: "text", text: `Diagram saved to: ${filePath}` }]
+      };
+    } catch (e) {
+      return {
+        content: [{ type: "text", text: `Render failed: ${e.message}` }],
+        isError: true
+      };
     }
-  };
-  ak(server, resourceUri, resourceUri, { mimeType: EI }, async () => {
-    const html = await fs.readFile(path.join(distDir, "mcp-app.html"), "utf-8");
-    return {
-      contents: [{
-        uri: resourceUri,
-        mimeType: EI,
-        text: html,
-        _meta: {
-          ui: {
-            ...cspMeta.ui,
-            prefersBorder: true
-          }
-        }
-      }]
-    };
   });
 }
 function createServer() {
@@ -36102,7 +28603,7 @@ function createServer() {
     name: "Excalidraw",
     version: "1.0.0"
   });
-  registerTools(server, DIST_DIR);
+  registerTools(server);
   return server;
 }
 export {
