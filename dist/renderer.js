@@ -81,6 +81,7 @@ var BROWSER_INIT_SCRIPT = `
   window.renderDiagram = async function(elementsJson, options) {
     options = options || {};
     const scale = options.scale || 2;
+    const filesMap = options.files || null;
     const elements = JSON.parse(elementsJson);
 
     let viewport = null;
@@ -125,7 +126,7 @@ var BROWSER_INIT_SCRIPT = `
     const svg = await exportToSvg({
       elements: excalidrawEls,
       appState: { viewBackgroundColor: "#ffffff", exportBackground: true },
-      files: null,
+      files: filesMap,
       exportPadding: EXPORT_PADDING,
       skipInliningFonts: false,
     });
@@ -181,12 +182,12 @@ async function ensureBrowser() {
   pageReady = true;
   return browser;
 }
-async function renderInBrowser(elementsJson, scale) {
+async function renderInBrowser(elementsJson, scale, files) {
   const mgr = await ensureBrowser();
   const page = mgr.getPage();
   const result = await page.evaluate(async ({ json, opts }) => {
     return await globalThis.renderDiagram(json, opts);
-  }, { json: elementsJson, opts: { scale } });
+  }, { json: elementsJson, opts: { scale, files: files ?? null } });
   return { page, svgMarkup: result.svg, width: result.width, height: result.height, elementCount: result.elementCount, inputCount: result.inputCount };
 }
 function ensureDir(filePath) {
@@ -197,7 +198,7 @@ function ensureDir(filePath) {
 }
 async function renderToPng(elementsJson, outputPath, options) {
   const scale = options?.scale ?? 2;
-  const { page, width, height, elementCount, inputCount } = await renderInBrowser(elementsJson, scale);
+  const { page, width, height, elementCount, inputCount } = await renderInBrowser(elementsJson, scale, options?.files);
   const svgLocator = page.locator("#canvas > svg");
   await svgLocator.waitFor({ state: "visible", timeout: 1e4 });
   const dest = outputPath ? path.resolve(outputPath) : path.join(os.tmpdir(), `excalidraw-${Date.now()}.png`);
@@ -205,8 +206,8 @@ async function renderToPng(elementsJson, outputPath, options) {
   await svgLocator.screenshot({ path: dest, type: "png" });
   return { path: dest, width, height, elementCount, inputCount };
 }
-async function renderToSvg(elementsJson, outputPath) {
-  const { svgMarkup, width, height, elementCount, inputCount } = await renderInBrowser(elementsJson, 1);
+async function renderToSvg(elementsJson, outputPath, options) {
+  const { svgMarkup, width, height, elementCount, inputCount } = await renderInBrowser(elementsJson, 1, options?.files);
   const dest = outputPath ? path.resolve(outputPath) : path.join(os.tmpdir(), `excalidraw-${Date.now()}.svg`);
   ensureDir(dest);
   fs.writeFileSync(dest, svgMarkup, "utf-8");

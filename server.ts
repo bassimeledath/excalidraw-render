@@ -51,8 +51,10 @@ Thanks for calling excalidraw_read_me! Do NOT call it again in this conversation
 \`type\`, \`id\` (unique string), \`x\`, \`y\`, \`width\`, \`height\`
 
 ### Defaults (skip these)
-strokeColor="#1e1e1e", backgroundColor="transparent", fillStyle="solid", strokeWidth=2, roughness=1, opacity=100
+strokeColor="#1e1e1e", backgroundColor="transparent", fillStyle="solid", strokeWidth=2, strokeStyle="solid", roughness=1, opacity=100
 Canvas background is white.
+- \`strokeStyle\`: "solid" (default) | "dashed" | "dotted" — use dashed for async messages, lifelines, FK relationships; dotted for optional/weak connections
+- \`opacity\`: 0-100 (default 100) — works on ALL element types. Use 30-40 for background zones, 50 for de-emphasized elements
 
 ### Element Types
 
@@ -73,6 +75,7 @@ Canvas background is white.
 - Text auto-centers and container auto-resizes to fit
 - Saves tokens vs separate text elements
 - Multi-line labels: use \`\\n\` in label text for line breaks
+- Auto-resize: when label text exceeds the manually set width/height, the container grows to fit. For multi-line labels with long lines, set width to 280+ or keep all lines under ~15 characters to avoid unexpected growth
 - Zone labels: don't use the zone rectangle's own \`label\` (it centers in the middle). Instead use a separate standalone text element near the top-left of the zone rectangle
 
 **Labeled arrow**: \`"label": { "text": "connects" }\` on an arrow element.
@@ -83,10 +86,18 @@ Canvas background is white.
 - estimatedWidth ≈ text.length × fontSize × 0.5
 - Do NOT rely on textAlign or width for positioning — they only affect multi-line wrapping
 
+**Line**: Same as arrow but \`type: "line"\`. No arrowheads. Use for decorative lines, borders, and closed shapes (set last point = [0,0] to close the path).
+
+**Image**: \`{ "type": "image", "id": "i1", "fileId": "img1", "x": 100, "y": 100, "width": 200, "height": 150 }\`
+- Requires passing a \`files\` parameter to create_excalidraw_diagram with the image data
+- Files format: \`{ "img1": { "mimeType": "image/png", "dataURL": "data:image/png;base64,..." } }\`
+- Supported formats: PNG, JPEG, SVG, GIF
+
 **Arrow**: \`{ "type": "arrow", "id": "a1", "x": 300, "y": 150, "width": 200, "height": 0, "points": [[0,0],[200,0]], "endArrowhead": "arrow" }\`
 - points: [dx, dy] offsets from element x,y
 - endArrowhead: null | "arrow" | "bar" | "dot" | "triangle"
 - startArrowhead: same options — use for bidirectional arrows (e.g., WebSocket, sync)
+- Common arrowhead combos: 1:1 = bar→bar, 1:N = bar→arrow, N:M = arrow→arrow, composition = dot→arrow
 
 ### Arrow Bindings (IMPORTANT — read carefully)
 Arrow: \`"startBinding": { "elementId": "r1", "fixedPoint": [1, 0.5] }\`
@@ -116,6 +127,8 @@ Use 3+ points in the \`points\` array to create right-angle paths:
 
 Set \`width\` and \`height\` to the bounding box of your points array (max dx, max dy).
 
+**Labels on multi-segment arrows** render at the geometric midpoint of the point sequence — this often falls on a bend or overlap zone. For complex paths (self-calls, U-shapes), use a nearby standalone text element instead of an arrow label.
+
 Example — right-angle arrow from shape A (right edge at x:300,y:150) to shape B (left edge at x:500,y:400):
 \`\`\`json
 {
@@ -132,6 +145,30 @@ Example — right-angle arrow from shape A (right edge at x:300,y:150) to shape 
 - Array order = z-order (first = back, last = front)
 - Draw background zones first, then shapes with labels, then arrows
 - GOOD: bg_shape → shape1 → arrow1 → shape2 → arrow2 → ...
+
+### Spatial Layout Rules (CRITICAL for readable diagrams)
+
+**NEVER route arrows through shapes.** Arrows must go AROUND shapes, not through them.
+- Before placing an arrow, check if its straight-line path crosses any shape
+- If it does, use a multi-segment arrow (L-shape, Z-shape, or U-shape) to route around the obstacle
+- Leave at least 30px clearance between arrow paths and shape edges
+
+**Plan spatial layout BEFORE placing elements:**
+1. Sketch a mental grid — place connected elements adjacent to each other
+2. Keep relationship elements (diamonds, labels) on the direct path between their connected shapes
+3. Group related elements in spatial clusters, not scattered across the canvas
+4. Leave wide corridors (80-100px) between element groups for arrow routing
+
+**Arrow clearance rules:**
+- Minimum 30px gap between an arrow path and any shape it passes near
+- Minimum 40px between parallel arrows
+- Arrow labels need 60px+ clear space around them (no overlapping shapes or other arrows)
+- If an arrow must cross another arrow, cross at 90° angles (perpendicular), never at shallow angles
+
+**Dense diagrams (8+ elements):**
+- Use a grid or column layout — don't scatter elements randomly
+- Dedicate empty lanes/corridors specifically for arrow routing
+- Consider breaking into sub-diagrams if arrows become unmanageable
 
 ### Example: Two connected labeled boxes
 \`\`\`json
@@ -162,7 +199,7 @@ ALWAYS use one of these exact sizes. Non-4:3 viewports cause distortion.
 |--------|-------------|--------------|--------|-------------|
 | S/M    | 16+         | 14+          | 20+    | 14+         |
 | L      | 16+         | 16+          | 20+    | 14+         |
-| XL     | 18+         | 16+          | 24+    | 16+         |
+| XL     | 18+         | 18+          | 24+    | 16+         |
 | XXL    | 20+         | 18+          | 28+    | 18+         |
 
 - NEVER use fontSize below 14 for any camera size
@@ -170,6 +207,7 @@ ALWAYS use one of these exact sizes. Non-4:3 viewports cause distortion.
 
 **Element sizing rules:**
 - Minimum shape size: 120×60 for labeled rectangles/ellipses
+- Unlabeled decorative shapes (activation boxes, dividers, spacers) can be any size — the 120×60 minimum only applies to shapes with labels
 - Leave 20-30px gaps between elements minimum
 - Prefer fewer, larger elements over many tiny ones
 
@@ -220,12 +258,34 @@ Example prompt: "Explain how photosynthesis works"
 ]
 \`\`\`
 
+## Sequence Diagram Pattern
+
+Minimal 2-actor sequence diagram: actor boxes at top, dashed lifelines, solid request arrows, dashed response arrows.
+
+\`\`\`json
+[
+  {"type":"cameraUpdate","width":600,"height":450,"x":0,"y":0},
+  {"type":"rectangle","id":"ac1","x":80,"y":20,"width":140,"height":50,"backgroundColor":"#a5d8ff","fillStyle":"solid","roundness":{"type":3},"label":{"text":"Client","fontSize":18}},
+  {"type":"rectangle","id":"ac2","x":380,"y":20,"width":140,"height":50,"backgroundColor":"#b2f2bb","fillStyle":"solid","roundness":{"type":3},"label":{"text":"Server","fontSize":18}},
+  {"type":"arrow","id":"lf1","x":150,"y":70,"width":0,"height":340,"points":[[0,0],[0,340]],"strokeStyle":"dashed","strokeColor":"#b0b0b0","endArrowhead":null,"startArrowhead":null},
+  {"type":"arrow","id":"lf2","x":450,"y":70,"width":0,"height":340,"points":[[0,0],[0,340]],"strokeStyle":"dashed","strokeColor":"#b0b0b0","endArrowhead":null,"startArrowhead":null},
+  {"type":"rectangle","id":"act1","x":143,"y":110,"width":14,"height":120,"backgroundColor":"#a5d8ff","fillStyle":"solid","strokeColor":"#4a9eed"},
+  {"type":"arrow","id":"m1","x":157,"y":130,"width":293,"height":0,"points":[[0,0],[293,0]],"endArrowhead":"arrow","label":{"text":"Request","fontSize":14}},
+  {"type":"arrow","id":"m2","x":450,"y":200,"width":-293,"height":0,"points":[[0,0],[-293,0]],"strokeStyle":"dashed","endArrowhead":"arrow","label":{"text":"Response","fontSize":14}},
+  {"type":"arrow","id":"m3","x":157,"y":280,"width":293,"height":0,"points":[[0,0],[293,0]],"endArrowhead":"arrow","label":{"text":"POST /data","fontSize":14}},
+  {"type":"arrow","id":"m4","x":450,"y":350,"width":-293,"height":0,"points":[[0,0],[-293,0]],"strokeStyle":"dashed","endArrowhead":"arrow","label":{"text":"200 OK","fontSize":14}}
+]
+\`\`\`
+
 Common mistakes to avoid:
+- **NEVER route arrows through shapes** — this is the #1 cause of unreadable diagrams. If a straight arrow from A to B would cross shape C, use a multi-segment arrow to route around C. Check EVERY arrow against ALL shapes in its path
+- **Elements must not overlap or crowd** — leave 30px minimum between any two elements. Arrow labels need 60px clear space. If elements are too close, make the camera bigger or reduce element count
 - **Camera size must match content with padding** — if your content is 500px tall, use 800x600 camera, not 500px. No padding = truncated edges
 - **Center titles relative to the diagram below** — estimate the diagram's total width and center the title text over it, not over the canvas
 - **Arrow labels need space** — long labels like "ATP + NADPH" overflow short arrows. Keep labels short or make arrows wider
 - **Elements overlap when y-coordinates are close** — always check that text, boxes, and labels don't stack on top of each other
 - **Arrow labels cluster when many arrows share an element** — stagger arrows using different fixedPoint positions (e.g., [0.3,1], [0.5,1], [0.7,1] for bottom edge) and make arrows long enough (200px+) to separate labels. For very dense areas, omit labels on obvious connections or use a legend instead
+- **Fan-out from a single element** — when 3+ arrows leave the same edge, use different fixedPoint positions AND offset the arrow start x,y slightly (+-15px) to separate them visually. For very dense nodes, use multi-segment arrows to route around neighbors: one goes straight, one does an L-shape to avoid the first
 - **Arrow labels render at the path midpoint** — no offset control. Keep labels to 1-3 words. For long annotations, use a nearby standalone text element instead
 
 ## Tips
@@ -272,10 +332,18 @@ Returns the file path of the saved file.`,
         format: z.enum(["png", "svg"]).optional().describe(
           "Output format: 'png' (default, rasterized) or 'svg' (vector, scalable). SVG is best for high-quality output that needs to scale to any size."
         ),
+        files: z.record(z.string(),
+          z.object({
+            mimeType: z.string(),
+            dataURL: z.string(),
+          })
+        ).optional().describe(
+          "Optional map of file ID to image data for image elements. Each entry needs mimeType (e.g., 'image/png') and dataURL (e.g., 'data:image/png;base64,...'). Referenced by image elements via fileId."
+        ),
       }),
       annotations: { readOnlyHint: true },
     },
-    async ({ elements, outputPath, format }): Promise<CallToolResult> => {
+    async ({ elements, outputPath, format, files }): Promise<CallToolResult> => {
       // Validate JSON before attempting render
       try {
         const parsed = JSON.parse(elements);
@@ -294,9 +362,10 @@ Returns the file path of the saved file.`,
 
       try {
         const outputFormat = format ?? "png";
+        const filesTyped = files as Record<string, { mimeType: string; dataURL: string }> | undefined;
         const result = outputFormat === "svg"
-          ? await renderToSvg(elements, outputPath)
-          : await renderToPng(elements, outputPath);
+          ? await renderToSvg(elements, outputPath, { files: filesTyped })
+          : await renderToPng(elements, outputPath, { files: filesTyped });
         return {
           content: [{ type: "text", text: `${outputFormat.toUpperCase()} (${result.width}x${result.height}, ${result.elementCount}/${result.inputCount} elements) saved to: ${result.path}` }],
         };

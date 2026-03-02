@@ -16,6 +16,10 @@
  */
 export declare function renderToPng(elementsJson: string, outputPath?: string, options?: {
     scale?: number;
+    files?: Record<string, {
+        mimeType: string;
+        dataURL: string;
+    }> | null;
 }): Promise<{
     path: string;
     width: number;
@@ -30,7 +34,12 @@ export declare function renderToPng(elementsJson: string, outputPath?: string, o
  * @param outputPath - Optional output file path. If not provided, uses a temp file.
  * @returns Absolute path to the saved SVG file
  */
-export declare function renderToSvg(elementsJson: string, outputPath?: string): Promise<{
+export declare function renderToSvg(elementsJson: string, outputPath?: string, options?: {
+    files?: Record<string, {
+        mimeType: string;
+        dataURL: string;
+    }> | null;
+}): Promise<{
     path: string;
     width: number;
     height: number;

@@ -68,6 +68,7 @@ const BROWSER_INIT_SCRIPT = `
   window.renderDiagram = async function(elementsJson, options) {
     options = options || {};
     const scale = options.scale || 2;
+    const filesMap = options.files || null;
     const elements = JSON.parse(elementsJson);
 
     let viewport = null;
@@ -112,7 +113,7 @@ const BROWSER_INIT_SCRIPT = `
     const svg = await exportToSvg({
       elements: excalidrawEls,
       appState: { viewBackgroundColor: "#ffffff", exportBackground: true },
-      files: null,
+      files: filesMap,
       exportPadding: EXPORT_PADDING,
       skipInliningFonts: false,
     });
@@ -184,15 +185,16 @@ async function ensureBrowser(): Promise<BrowserManager> {
 async function renderInBrowser(
   elementsJson: string,
   scale: number,
+  files?: Record<string, { mimeType: string; dataURL: string }> | null,
 ): Promise<{ page: any; svgMarkup: string; width: number; height: number; elementCount: number; inputCount: number }> {
   const mgr = await ensureBrowser();
   const page = mgr.getPage();
 
   const result = await page.evaluate(
-    async ({ json, opts }: { json: string; opts: { scale: number } }) => {
+    async ({ json, opts }: { json: string; opts: { scale: number; files?: Record<string, { mimeType: string; dataURL: string }> | null } }) => {
       return await (globalThis as any).renderDiagram(json, opts);
     },
-    { json: elementsJson, opts: { scale } },
+    { json: elementsJson, opts: { scale, files: files ?? null } },
   );
 
   return { page, svgMarkup: result.svg, width: result.width, height: result.height, elementCount: result.elementCount, inputCount: result.inputCount };
@@ -219,10 +221,10 @@ function ensureDir(filePath: string): void {
 export async function renderToPng(
   elementsJson: string,
   outputPath?: string,
-  options?: { scale?: number },
+  options?: { scale?: number; files?: Record<string, { mimeType: string; dataURL: string }> | null },
 ): Promise<{ path: string; width: number; height: number; elementCount: number; inputCount: number }> {
   const scale = options?.scale ?? 2;
-  const { page, width, height, elementCount, inputCount } = await renderInBrowser(elementsJson, scale);
+  const { page, width, height, elementCount, inputCount } = await renderInBrowser(elementsJson, scale, options?.files);
 
   const svgLocator = page.locator("#canvas > svg");
   await svgLocator.waitFor({ state: "visible", timeout: 10_000 });
@@ -247,8 +249,9 @@ export async function renderToPng(
 export async function renderToSvg(
   elementsJson: string,
   outputPath?: string,
+  options?: { files?: Record<string, { mimeType: string; dataURL: string }> | null },
 ): Promise<{ path: string; width: number; height: number; elementCount: number; inputCount: number }> {
-  const { svgMarkup, width, height, elementCount, inputCount } = await renderInBrowser(elementsJson, 1);
+  const { svgMarkup, width, height, elementCount, inputCount } = await renderInBrowser(elementsJson, 1, options?.files);
 
   const dest = outputPath
     ? path.resolve(outputPath)
