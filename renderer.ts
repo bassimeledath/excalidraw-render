@@ -14,6 +14,7 @@ import path from "node:path";
 
 let browser: BrowserManager | null = null;
 let pageReady = false;
+let launchPromise: Promise<BrowserManager> | null = null;
 
 /**
  * Browser-side initialization script. Runs inside headless Chromium.
@@ -154,28 +155,40 @@ async function ensureBrowser(): Promise<BrowserManager> {
       try { await browser.close(); } catch { /* ignore */ }
       browser = null;
       pageReady = false;
+      launchPromise = null;
     }
   }
 
-  browser = new BrowserManager();
-  await browser.launch({ id: "excalidraw", action: "launch", headless: true });
+  if (launchPromise) return launchPromise;
 
-  const page = browser.getPage();
+  launchPromise = (async () => {
+    browser = new BrowserManager();
+    await browser.launch({ id: "excalidraw", action: "launch", headless: true });
 
-  // Navigate to esm.sh so relative module imports resolve correctly
-  await page.goto("https://esm.sh", { waitUntil: "domcontentloaded" });
+    const page = browser.getPage();
 
-  // Initialize Excalidraw in the browser context
-  await page.evaluate(BROWSER_INIT_SCRIPT);
+    // Navigate to esm.sh so relative module imports resolve correctly
+    await page.goto("https://esm.sh", { waitUntil: "domcontentloaded" });
 
-  // Verify initialization succeeded
-  const ready = await page.evaluate(() => (globalThis as any).__RENDER_READY__ === true);
-  if (!ready) {
-    throw new Error("Excalidraw initialization failed in headless browser");
+    // Initialize Excalidraw in the browser context
+    await page.evaluate(BROWSER_INIT_SCRIPT);
+
+    // Verify initialization succeeded
+    const ready = await page.evaluate(() => (globalThis as any).__RENDER_READY__ === true);
+    if (!ready) {
+      throw new Error("Excalidraw initialization failed in headless browser");
+    }
+
+    pageReady = true;
+    return browser!;
+  })();
+
+  try {
+    return await launchPromise;
+  } catch (e) {
+    launchPromise = null;
+    throw e;
   }
-
-  pageReady = true;
-  return browser;
 }
 
 /**

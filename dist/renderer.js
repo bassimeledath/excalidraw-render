@@ -32,6 +32,7 @@ import os from "node:os";
 import path from "node:path";
 var browser = null;
 var pageReady = false;
+var launchPromise = null;
 var BROWSER_INIT_SCRIPT = `
 (async () => {
   document.body.innerHTML = '<div id="canvas" style="display:inline-block"></div>';
@@ -159,8 +160,8 @@ var BROWSER_INIT_SCRIPT = `
 async function ensureBrowser() {
   if (browser) {
     try {
-      const page2 = browser.getPage();
-      await page2.evaluate(() => true);
+      const page = browser.getPage();
+      await page.evaluate(() => true);
       return browser;
     } catch {
       try {
@@ -168,19 +169,30 @@ async function ensureBrowser() {
       } catch {}
       browser = null;
       pageReady = false;
+      launchPromise = null;
     }
   }
-  browser = new BrowserManager;
-  await browser.launch({ id: "excalidraw", action: "launch", headless: true });
-  const page = browser.getPage();
-  await page.goto("https://esm.sh", { waitUntil: "domcontentloaded" });
-  await page.evaluate(BROWSER_INIT_SCRIPT);
-  const ready = await page.evaluate(() => globalThis.__RENDER_READY__ === true);
-  if (!ready) {
-    throw new Error("Excalidraw initialization failed in headless browser");
+  if (launchPromise)
+    return launchPromise;
+  launchPromise = (async () => {
+    browser = new BrowserManager;
+    await browser.launch({ id: "excalidraw", action: "launch", headless: true });
+    const page = browser.getPage();
+    await page.goto("https://esm.sh", { waitUntil: "domcontentloaded" });
+    await page.evaluate(BROWSER_INIT_SCRIPT);
+    const ready = await page.evaluate(() => globalThis.__RENDER_READY__ === true);
+    if (!ready) {
+      throw new Error("Excalidraw initialization failed in headless browser");
+    }
+    pageReady = true;
+    return browser;
+  })();
+  try {
+    return await launchPromise;
+  } catch (e) {
+    launchPromise = null;
+    throw e;
   }
-  pageReady = true;
-  return browser;
 }
 async function renderInBrowser(elementsJson, scale, files) {
   const mgr = await ensureBrowser();

@@ -80,11 +80,15 @@ Canvas background is white.
 
 **Labeled arrow**: \`"label": { "text": "connects" }\` on an arrow element.
 
-**Standalone text** (titles, annotations only):
+**Title (PREFERRED for headings)**: Use a transparent rectangle spanning the diagram width. The label auto-centers perfectly — no math needed.
+\`{ "type": "rectangle", "id": "title", "x": DIAGRAM_LEFT, "y": TOP, "width": DIAGRAM_WIDTH, "height": 40, "strokeColor": "transparent", "backgroundColor": "transparent", "strokeWidth": 0, "label": { "text": "My Title", "fontSize": 28 } }\`
+For subtitle: same pattern with height: 30, fontSize: 16, optionally strokeColor: "#b0b0b0" to add a subtle separator line.
+
+**Standalone text** (annotations, zone labels — NOT for titles):
 \`{ "type": "text", "id": "t1", "x": 150, "y": 138, "text": "Hello", "fontSize": 20 }\`
-- x is the LEFT edge of the text. To center text at position cx: set x = cx - estimatedWidth/2
-- estimatedWidth ≈ text.length × fontSize × 0.5
-- Do NOT rely on textAlign or width for positioning — they only affect multi-line wrapping
+- x is the LEFT edge of the text
+- Use for zone labels (top-left of zone rectangle) and small annotations
+- Do NOT use for titles or headings — centering is unreliable. Use a transparent labeled rectangle instead
 
 **Line**: Same as arrow but \`type: "line"\`. No arrowheads. Use for decorative lines, borders, and closed shapes (set last point = [0,0] to close the path).
 
@@ -92,6 +96,16 @@ Canvas background is white.
 - Requires passing a \`files\` parameter to create_excalidraw_diagram with the image data
 - Files format: \`{ "img1": { "mimeType": "image/png", "dataURL": "data:image/png;base64,..." } }\`
 - Supported formats: PNG, JPEG, SVG, GIF
+
+**Image with files parameter — complete example:**
+\`\`\`
+elements: [
+  { "type": "cameraUpdate", "width": 400, "height": 300, "x": 0, "y": 0 },
+  { "type": "image", "id": "i1", "fileId": "logo", "x": 100, "y": 80, "width": 200, "height": 140 }
+]
+files: { "logo": { "mimeType": "image/png", "dataURL": "data:image/png;base64,iVBOR..." } }
+\`\`\`
+Every image element's \`fileId\` must have a matching key in the \`files\` map — missing fileIds will error.
 
 **Arrow**: \`{ "type": "arrow", "id": "a1", "x": 300, "y": 150, "width": 200, "height": 0, "points": [[0,0],[200,0]], "endArrowhead": "arrow" }\`
 - points: [dx, dy] offsets from element x,y
@@ -216,6 +230,7 @@ ALWAYS start with a \`cameraUpdate\` as the FIRST element:
 
 - x, y: top-left corner of visible area (scene coordinates)
 - Leave padding: don't match camera size to content size exactly (e.g., 500px content in 800x600 camera)
+- After placing all elements, verify the rightmost/bottommost elements have 40px+ padding from the camera edge. Edge clipping is the #2 most common layout error
 
 Examples:
 \`{ "type": "cameraUpdate", "width": 800, "height": 600, "x": 0, "y": 0 }\` — standard view
@@ -229,8 +244,8 @@ Example prompt: "Explain how photosynthesis works"
 \`\`\`json
 [
   {"type":"cameraUpdate","width":800,"height":600,"x":0,"y":-20},
-  {"type":"text","id":"ti","x":280,"y":10,"text":"Photosynthesis","fontSize":28,"strokeColor":"#1e1e1e"},
-  {"type":"text","id":"fo","x":245,"y":48,"text":"6CO2 + 6H2O --> C6H12O6 + 6O2","fontSize":16,"strokeColor":"#b0b0b0"},
+  {"type":"rectangle","id":"ti","x":0,"y":-10,"width":800,"height":40,"strokeColor":"transparent","backgroundColor":"transparent","strokeWidth":0,"label":{"text":"Photosynthesis","fontSize":28}},
+  {"type":"rectangle","id":"fo","x":0,"y":30,"width":800,"height":30,"strokeColor":"transparent","backgroundColor":"transparent","strokeWidth":0,"label":{"text":"6CO2 + 6H2O --> C6H12O6 + 6O2","fontSize":16,"strokeColor":"#b0b0b0"}},
   {"type":"rectangle","id":"lf","x":150,"y":90,"width":520,"height":380,"backgroundColor":"#d3f9d8","fillStyle":"solid","roundness":{"type":3},"strokeColor":"#22c55e","strokeWidth":1,"opacity":35},
   {"type":"text","id":"lfl","x":170,"y":96,"text":"Inside the Leaf","fontSize":16,"strokeColor":"#22c55e"},
   {"type":"rectangle","id":"lr","x":190,"y":190,"width":160,"height":70,"backgroundColor":"#fff3bf","fillStyle":"solid","roundness":{"type":3},"strokeColor":"#f59e0b","label":{"text":"Light Reactions","fontSize":16}},
@@ -265,17 +280,56 @@ Minimal 2-actor sequence diagram: actor boxes at top, dashed lifelines, solid re
 \`\`\`json
 [
   {"type":"cameraUpdate","width":600,"height":450,"x":0,"y":0},
-  {"type":"rectangle","id":"ac1","x":80,"y":20,"width":140,"height":50,"backgroundColor":"#a5d8ff","fillStyle":"solid","roundness":{"type":3},"label":{"text":"Client","fontSize":18}},
-  {"type":"rectangle","id":"ac2","x":380,"y":20,"width":140,"height":50,"backgroundColor":"#b2f2bb","fillStyle":"solid","roundness":{"type":3},"label":{"text":"Server","fontSize":18}},
-  {"type":"arrow","id":"lf1","x":150,"y":70,"width":0,"height":340,"points":[[0,0],[0,340]],"strokeStyle":"dashed","strokeColor":"#b0b0b0","endArrowhead":null,"startArrowhead":null},
-  {"type":"arrow","id":"lf2","x":450,"y":70,"width":0,"height":340,"points":[[0,0],[0,340]],"strokeStyle":"dashed","strokeColor":"#b0b0b0","endArrowhead":null,"startArrowhead":null},
-  {"type":"rectangle","id":"act1","x":143,"y":110,"width":14,"height":120,"backgroundColor":"#a5d8ff","fillStyle":"solid","strokeColor":"#4a9eed"},
-  {"type":"arrow","id":"m1","x":157,"y":130,"width":293,"height":0,"points":[[0,0],[293,0]],"endArrowhead":"arrow","label":{"text":"Request","fontSize":14}},
-  {"type":"arrow","id":"m2","x":450,"y":200,"width":-293,"height":0,"points":[[0,0],[-293,0]],"strokeStyle":"dashed","endArrowhead":"arrow","label":{"text":"Response","fontSize":14}},
-  {"type":"arrow","id":"m3","x":157,"y":280,"width":293,"height":0,"points":[[0,0],[293,0]],"endArrowhead":"arrow","label":{"text":"POST /data","fontSize":14}},
-  {"type":"arrow","id":"m4","x":450,"y":350,"width":-293,"height":0,"points":[[0,0],[-293,0]],"strokeStyle":"dashed","endArrowhead":"arrow","label":{"text":"200 OK","fontSize":14}}
+  {"type":"rectangle","id":"stitle","x":0,"y":5,"width":600,"height":35,"strokeColor":"transparent","backgroundColor":"transparent","strokeWidth":0,"label":{"text":"Client-Server Flow","fontSize":20}},
+  {"type":"rectangle","id":"ac1","x":80,"y":50,"width":140,"height":50,"backgroundColor":"#a5d8ff","fillStyle":"solid","roundness":{"type":3},"label":{"text":"Client","fontSize":18}},
+  {"type":"rectangle","id":"ac2","x":380,"y":50,"width":140,"height":50,"backgroundColor":"#b2f2bb","fillStyle":"solid","roundness":{"type":3},"label":{"text":"Server","fontSize":18}},
+  {"type":"arrow","id":"lf1","x":150,"y":100,"width":0,"height":310,"points":[[0,0],[0,310]],"strokeStyle":"dashed","strokeColor":"#b0b0b0","endArrowhead":null,"startArrowhead":null},
+  {"type":"arrow","id":"lf2","x":450,"y":100,"width":0,"height":310,"points":[[0,0],[0,310]],"strokeStyle":"dashed","strokeColor":"#b0b0b0","endArrowhead":null,"startArrowhead":null},
+  {"type":"rectangle","id":"act1","x":143,"y":140,"width":14,"height":120,"backgroundColor":"#a5d8ff","fillStyle":"solid","strokeColor":"#4a9eed"},
+  {"type":"arrow","id":"m1","x":157,"y":160,"width":293,"height":0,"points":[[0,0],[293,0]],"endArrowhead":"arrow","label":{"text":"Request","fontSize":14}},
+  {"type":"arrow","id":"m2","x":450,"y":230,"width":-293,"height":0,"points":[[0,0],[-293,0]],"strokeStyle":"dashed","endArrowhead":"arrow","label":{"text":"Response","fontSize":14}},
+  {"type":"arrow","id":"m3","x":157,"y":310,"width":293,"height":0,"points":[[0,0],[293,0]],"endArrowhead":"arrow","label":{"text":"POST /data","fontSize":14}},
+  {"type":"arrow","id":"m4","x":450,"y":380,"width":-293,"height":0,"points":[[0,0],[-293,0]],"strokeStyle":"dashed","endArrowhead":"arrow","label":{"text":"200 OK","fontSize":14}}
 ]
 \`\`\`
+
+## Bar Chart Pattern (Horizontal)
+Background rectangles as bars, with text labels left-aligned and value labels right-aligned.
+- Bar: \`{ "type": "rectangle", "width": VALUE_PROPORTIONAL, "height": 30, "backgroundColor": "#4a9eed", "fillStyle": "solid" }\`
+- Label: standalone text to the left (x = bar.x - labelWidth - 10)
+- Value: standalone text to the right (x = bar.x + bar.width + 10)
+- Stack bars vertically with 15-20px gaps
+
+## KPI Card Pattern
+Rounded rectangle with multi-line label showing metric name, value, and trend.
+- \`{ "type": "rectangle", "width": 180, "height": 80, "roundness": { "type": 3 }, "backgroundColor": "#a5d8ff", "fillStyle": "solid", "label": { "text": "Revenue\\n$4.2M\\n+12%", "fontSize": 16 } }\`
+- Arrange 3-4 cards in a horizontal row with 20px gaps
+- Use different background colors per card for visual variety
+
+## Progress Bar Pattern
+Two overlapping rectangles: background (full width, lighter) + fill (proportional width, darker).
+Draw background FIRST (z-order), then fill on top.
+- Background: \`{ "type": "rectangle", "width": 200, "height": 20, "backgroundColor": "#dbe4ff", "fillStyle": "solid", "roundness": { "type": 3 } }\`
+- Fill: \`{ "type": "rectangle", "x": SAME, "y": SAME, "width": 200 * PERCENTAGE, "height": 20, "backgroundColor": "#4a9eed", "fillStyle": "solid", "roundness": { "type": 3 } }\`
+
+## Gantt Chart / Timeline Pattern
+Phase labels in a left column, horizontal bars as durations, diamonds as milestones.
+- Phase label: \`{ "type": "rectangle", "x": LEFT_COL, "width": 140, "height": 40, "roundness": { "type": 3 }, "backgroundColor": COLOR, "label": { "text": "Phase", "fontSize": 16 } }\`
+- Duration bar: \`{ "type": "rectangle", "x": TIMELINE_START + offset, "y": same_row, "width": DURATION_PX, "height": 40, "backgroundColor": COLOR, "fillStyle": "solid" }\`
+- Progress overlay: same as bar but width: DURATION_PX * COMPLETION, backgroundColor: DARKER_COLOR
+- Milestone: \`{ "type": "diamond", "width": 30, "height": 30 }\` at phase endpoint
+- Month separators: vertical dashed lines across the chart area
+- "Today" marker: vertical dashed line in red
+- Use camera XL (1200x900) or XXL (1600x1200) for timelines with 5+ phases
+
+## Radial Mind Map Pattern
+Central ellipse with branches radiating outward at clock positions.
+- Center: large ellipse (200x140), prominent color
+- Branches: medium ellipses (150x80) at clock positions (12, 2, 4, 6, 8, 10)
+- Sub-topics: small rectangles (120x50) extending from branches
+- Use fixedPoint bindings for diagonal arrows: [1, 0.25] for upper-right, [0, 0.75] for lower-left, etc.
+- Color-code each branch family (same hue for parent + children)
+- Camera XL (1200x900) recommended
 
 Common mistakes to avoid:
 - **NEVER route arrows through shapes** — this is the #1 cause of unreadable diagrams. If a straight arrow from A to B would cross shape C, use a multi-segment arrow to route around C. Check EVERY arrow against ALL shapes in its path
@@ -287,12 +341,14 @@ Common mistakes to avoid:
 - **Arrow labels cluster when many arrows share an element** — stagger arrows using different fixedPoint positions (e.g., [0.3,1], [0.5,1], [0.7,1] for bottom edge) and make arrows long enough (200px+) to separate labels. For very dense areas, omit labels on obvious connections or use a legend instead
 - **Fan-out from a single element** — when 3+ arrows leave the same edge, use different fixedPoint positions AND offset the arrow start x,y slightly (+-15px) to separate them visually. For very dense nodes, use multi-segment arrows to route around neighbors: one goes straight, one does an L-shape to avoid the first
 - **Arrow labels render at the path midpoint** — no offset control. Keep labels to 1-3 words. For long annotations, use a nearby standalone text element instead
+- **Don't use standalone text for titles** — the centering formula is unreliable. Use a transparent labeled rectangle spanning the content width instead. Labels auto-center perfectly
 
 ## Tips
 - Do NOT call excalidraw_read_me again — you already have everything you need
 - Use the color palette consistently
 - Make sure text is readable (never use same text color as background color)
 - Do NOT use emoji in text — they don't render in Excalidraw's font
+- True pie/donut segments are not possible — Excalidraw has no arc shapes. Use concentric rings with a legend, or a stacked bar as an alternative representation
 `;
 
 /**
@@ -345,8 +401,9 @@ Returns the file path of the saved file.`,
     },
     async ({ elements, outputPath, format, files }): Promise<CallToolResult> => {
       // Validate JSON before attempting render
+      let parsed: any[];
       try {
-        const parsed = JSON.parse(elements);
+        parsed = JSON.parse(elements);
         if (!Array.isArray(parsed)) {
           return {
             content: [{ type: "text", text: "elements must be a JSON array." }],
@@ -360,14 +417,34 @@ Returns the file path of the saved file.`,
         };
       }
 
+      // Validate image fileIds against files map
+      const imageEls = parsed.filter((el: any) => el.type === "image");
+      if (imageEls.length > 0 && !files) {
+        return {
+          content: [{ type: "text", text: "Image elements found but no 'files' parameter provided." }],
+          isError: true,
+        };
+      }
+      if (imageEls.length > 0 && files) {
+        const missing = imageEls.filter((el: any) => el.fileId && !files[el.fileId]);
+        if (missing.length > 0) {
+          const ids = missing.map((el: any) => el.fileId).join(", ");
+          return {
+            content: [{ type: "text", text: `Image element(s) reference missing fileId(s): ${ids}. Add them to the 'files' parameter.` }],
+            isError: true,
+          };
+        }
+      }
+
       try {
         const outputFormat = format ?? "png";
         const filesTyped = files as Record<string, { mimeType: string; dataURL: string }> | undefined;
         const result = outputFormat === "svg"
           ? await renderToSvg(elements, outputPath, { files: filesTyped })
           : await renderToPng(elements, outputPath, { files: filesTyped });
+        const imgNote = imageEls.length > 0 ? `, ${imageEls.length} image${imageEls.length > 1 ? 's' : ''} embedded` : '';
         return {
-          content: [{ type: "text", text: `${outputFormat.toUpperCase()} (${result.width}x${result.height}, ${result.elementCount}/${result.inputCount} elements) saved to: ${result.path}` }],
+          content: [{ type: "text", text: `${outputFormat.toUpperCase()} (${result.width}x${result.height}, ${result.inputCount} shapes rendered${imgNote}) saved to: ${result.path}` }],
         };
       } catch (e) {
         return {
