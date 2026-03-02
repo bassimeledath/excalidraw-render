@@ -31,8 +31,8 @@ const BROWSER_INIT_SCRIPT = `
   );
 
   // Virgil font is loaded by Excalidraw internally and inlined by exportToSvg.
-  // Wait briefly for Excalidraw's font loader to finish.
-  await new Promise(function(r) { setTimeout(r, 1000); });
+  // Wait for all queued font loads (including Virgil) to complete.
+  await document.fonts.ready;
 
   const EXPORT_PADDING = 20;
 
@@ -82,6 +82,26 @@ const BROWSER_INIT_SCRIPT = `
 
     if (drawElements.length === 0) throw new Error("No drawable elements provided");
 
+    if (viewport && drawElements.length > 0) {
+      let maxX = -Infinity, maxY = -Infinity, elMinX = Infinity, elMinY = Infinity;
+      for (const el of drawElements) {
+        if (el.x != null) {
+          elMinX = Math.min(elMinX, el.x);
+          elMinY = Math.min(elMinY, el.y);
+          maxX = Math.max(maxX, el.x + (el.width || 0));
+          maxY = Math.max(maxY, el.y + (el.height || 0));
+        }
+      }
+      const camRight = viewport.x + viewport.width;
+      const camBottom = viewport.y + viewport.height;
+      if (maxX < viewport.x || elMinX > camRight || maxY < viewport.y || elMinY > camBottom) {
+        console.warn("WARNING: No elements visible in camera viewport. Elements span [" +
+          elMinX + "," + elMinY + "] to [" + maxX + "," + maxY +
+          "] but camera covers [" + viewport.x + "," + viewport.y +
+          "] to [" + camRight + "," + camBottom + "]");
+      }
+    }
+
     const withLabelDefaults = drawElements.map(function(el) {
       return el.label ? Object.assign({}, el, { label: Object.assign({ textAlign: "center", verticalAlign: "middle" }, el.label) }) : el;
     });
@@ -116,7 +136,7 @@ const BROWSER_INIT_SCRIPT = `
     canvas.innerHTML = "";
     canvas.appendChild(svg);
 
-    return { width: w, height: h, svg: svgMarkup };
+    return { width: w, height: h, svg: svgMarkup, elementCount: excalidrawEls.length, inputCount: drawElements.length };
   };
 
   window.__RENDER_READY__ = true;
@@ -164,7 +184,7 @@ async function ensureBrowser(): Promise<BrowserManager> {
 async function renderInBrowser(
   elementsJson: string,
   scale: number,
-): Promise<{ page: any; svgMarkup: string }> {
+): Promise<{ page: any; svgMarkup: string; width: number; height: number; elementCount: number; inputCount: number }> {
   const mgr = await ensureBrowser();
   const page = mgr.getPage();
 
@@ -175,7 +195,7 @@ async function renderInBrowser(
     { json: elementsJson, opts: { scale } },
   );
 
-  return { page, svgMarkup: result.svg };
+  return { page, svgMarkup: result.svg, width: result.width, height: result.height, elementCount: result.elementCount, inputCount: result.inputCount };
 }
 
 /**
@@ -200,9 +220,9 @@ export async function renderToPng(
   elementsJson: string,
   outputPath?: string,
   options?: { scale?: number },
-): Promise<string> {
+): Promise<{ path: string; width: number; height: number; elementCount: number; inputCount: number }> {
   const scale = options?.scale ?? 2;
-  const { page } = await renderInBrowser(elementsJson, scale);
+  const { page, width, height, elementCount, inputCount } = await renderInBrowser(elementsJson, scale);
 
   const svgLocator = page.locator("#canvas > svg");
   await svgLocator.waitFor({ state: "visible", timeout: 10_000 });
@@ -214,7 +234,7 @@ export async function renderToPng(
   ensureDir(dest);
   await svgLocator.screenshot({ path: dest, type: "png" });
 
-  return dest;
+  return { path: dest, width, height, elementCount, inputCount };
 }
 
 /**
@@ -227,8 +247,8 @@ export async function renderToPng(
 export async function renderToSvg(
   elementsJson: string,
   outputPath?: string,
-): Promise<string> {
-  const { svgMarkup } = await renderInBrowser(elementsJson, 1);
+): Promise<{ path: string; width: number; height: number; elementCount: number; inputCount: number }> {
+  const { svgMarkup, width, height, elementCount, inputCount } = await renderInBrowser(elementsJson, 1);
 
   const dest = outputPath
     ? path.resolve(outputPath)
@@ -237,7 +257,7 @@ export async function renderToSvg(
   ensureDir(dest);
   fs.writeFileSync(dest, svgMarkup, "utf-8");
 
-  return dest;
+  return { path: dest, width, height, elementCount, inputCount };
 }
 
 /**

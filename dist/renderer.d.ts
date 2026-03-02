@@ -16,7 +16,13 @@
  */
 export declare function renderToPng(elementsJson: string, outputPath?: string, options?: {
     scale?: number;
-}): Promise<string>;
+}): Promise<{
+    path: string;
+    width: number;
+    height: number;
+    elementCount: number;
+    inputCount: number;
+}>;
 /**
  * Render Excalidraw elements JSON to an SVG file.
  *
@@ -24,7 +30,13 @@ export declare function renderToPng(elementsJson: string, outputPath?: string, o
  * @param outputPath - Optional output file path. If not provided, uses a temp file.
  * @returns Absolute path to the saved SVG file
  */
-export declare function renderToSvg(elementsJson: string, outputPath?: string): Promise<string>;
+export declare function renderToSvg(elementsJson: string, outputPath?: string): Promise<{
+    path: string;
+    width: number;
+    height: number;
+    elementCount: number;
+    inputCount: number;
+}>;
 /**
  * Close the headless browser. Call on process shutdown.
  */

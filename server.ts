@@ -63,12 +63,17 @@ Canvas background is white.
 **Ellipse**: \`{ "type": "ellipse", "id": "e1", "x": 100, "y": 100, "width": 150, "height": 150 }\`
 
 **Diamond**: \`{ "type": "diamond", "id": "d1", "x": 100, "y": 100, "width": 150, "height": 150 }\`
+- Diamond labels have ~40% less horizontal space than the diamond width (text is inscribed)
+- Use width 180+ for 2-word labels, 220+ for 3+ words, or abbreviate
+- Keep labels short: "In Stock?" not "Is the item in stock?"
 
 **Labeled shape (PREFERRED)**: Add \`label\` to any shape for auto-centered text. No separate text element needed.
 \`{ "type": "rectangle", "id": "r1", "x": 100, "y": 100, "width": 200, "height": 80, "label": { "text": "Hello", "fontSize": 20 } }\`
 - Works on rectangle, ellipse, diamond
 - Text auto-centers and container auto-resizes to fit
 - Saves tokens vs separate text elements
+- Multi-line labels: use \`\\n\` in label text for line breaks
+- Zone labels: don't use the zone rectangle's own \`label\` (it centers in the middle). Instead use a separate standalone text element near the top-left of the zone rectangle
 
 **Labeled arrow**: \`"label": { "text": "connects" }\` on an arrow element.
 
@@ -81,10 +86,47 @@ Canvas background is white.
 **Arrow**: \`{ "type": "arrow", "id": "a1", "x": 300, "y": 150, "width": 200, "height": 0, "points": [[0,0],[200,0]], "endArrowhead": "arrow" }\`
 - points: [dx, dy] offsets from element x,y
 - endArrowhead: null | "arrow" | "bar" | "dot" | "triangle"
+- startArrowhead: same options — use for bidirectional arrows (e.g., WebSocket, sync)
 
-### Arrow Bindings
+### Arrow Bindings (IMPORTANT — read carefully)
 Arrow: \`"startBinding": { "elementId": "r1", "fixedPoint": [1, 0.5] }\`
 fixedPoint: top=[0.5,0], bottom=[0.5,1], left=[0,0.5], right=[1,0.5]
+
+**⚠ Bindings do NOT auto-route.** The \`points\` array defines the actual rendered path — bindings only create a logical association. Your arrow's \`points\` must physically reach from the start element to the end element. If \`points: [[0,0],[150,0]]\` only goes 150px right, but the target is 400px away, the arrow will end in empty space.
+
+**⚠ Arrow x,y must be near the start element's edge.** Set the arrow's \`x, y\` to approximately the edge where \`startBinding.fixedPoint\` points. A far-off origin causes misalignment.
+
+**Connecting two shapes checklist:**
+1. Set arrow \`x, y\` to the start shape's edge (e.g., right edge = shape.x + shape.width, y = shape.y + shape.height/2)
+2. Calculate dx, dy to the target shape's edge
+3. Set \`points: [[0,0],[dx, dy]]\` for straight lines, or \`[[0,0],[dx,0],[dx,dy]]\` for right-angle routing
+4. Set \`startBinding\` and \`endBinding\` with appropriate \`fixedPoint\` values
+
+### Multi-Segment Arrows (for routing around obstacles)
+Use 3+ points in the \`points\` array to create right-angle paths:
+
+**L-shape (go right, then down):**
+\`"points": [[0,0],[200,0],[200,150]]\` — horizontal then vertical
+
+**Z-shape (go right, down, then right again):**
+\`"points": [[0,0],[100,0],[100,150],[300,150]]\` — step pattern
+
+**U-shape (go down, right, then up):**
+\`"points": [[0,0],[0,100],[250,100],[250,-50]]\` — route around an obstacle
+
+Set \`width\` and \`height\` to the bounding box of your points array (max dx, max dy).
+
+Example — right-angle arrow from shape A (right edge at x:300,y:150) to shape B (left edge at x:500,y:400):
+\`\`\`json
+{
+  "type": "arrow", "id": "a1", "x": 300, "y": 150,
+  "width": 200, "height": 250,
+  "points": [[0,0],[100,0],[100,250],[200,250]],
+  "endArrowhead": "arrow",
+  "startBinding": { "elementId": "A", "fixedPoint": [1, 0.5] },
+  "endBinding": { "elementId": "B", "fixedPoint": [0, 0.5] }
+}
+\`\`\`
 
 ### Drawing Order
 - Array order = z-order (first = back, last = front)
@@ -114,11 +156,17 @@ Use a cameraUpdate as the first element to set the output PNG dimensions. Only t
 
 ALWAYS use one of these exact sizes. Non-4:3 viewports cause distortion.
 
-**Font size rules:**
-- Minimum fontSize: **16** for body text, labels, descriptions
-- Minimum fontSize: **20** for titles and headings
-- Minimum fontSize: **14** for secondary annotations only (sparingly)
-- NEVER use fontSize below 14 — it becomes unreadable at display scale
+**Font size rules (scaled by camera size):**
+
+| Camera | Shape labels | Arrow labels | Titles | Annotations |
+|--------|-------------|--------------|--------|-------------|
+| S/M    | 16+         | 14+          | 20+    | 14+         |
+| L      | 16+         | 16+          | 20+    | 14+         |
+| XL     | 18+         | 16+          | 24+    | 16+         |
+| XXL    | 20+         | 18+          | 28+    | 18+         |
+
+- NEVER use fontSize below 14 for any camera size
+- Arrow labels should be short (1-3 words) since they render at the arrow midpoint with no offset control
 
 **Element sizing rules:**
 - Minimum shape size: 120×60 for labeled rectangles/ellipses
@@ -177,6 +225,8 @@ Common mistakes to avoid:
 - **Center titles relative to the diagram below** — estimate the diagram's total width and center the title text over it, not over the canvas
 - **Arrow labels need space** — long labels like "ATP + NADPH" overflow short arrows. Keep labels short or make arrows wider
 - **Elements overlap when y-coordinates are close** — always check that text, boxes, and labels don't stack on top of each other
+- **Arrow labels cluster when many arrows share an element** — stagger arrows using different fixedPoint positions (e.g., [0.3,1], [0.5,1], [0.7,1] for bottom edge) and make arrows long enough (200px+) to separate labels. For very dense areas, omit labels on obvious connections or use a legend instead
+- **Arrow labels render at the path midpoint** — no offset control. Keep labels to 1-3 words. For long annotations, use a nearby standalone text element instead
 
 ## Tips
 - Do NOT call excalidraw_read_me again — you already have everything you need
@@ -244,11 +294,11 @@ Returns the file path of the saved file.`,
 
       try {
         const outputFormat = format ?? "png";
-        const filePath = outputFormat === "svg"
+        const result = outputFormat === "svg"
           ? await renderToSvg(elements, outputPath)
           : await renderToPng(elements, outputPath);
         return {
-          content: [{ type: "text", text: `Diagram saved to: ${filePath}` }],
+          content: [{ type: "text", text: `${outputFormat.toUpperCase()} (${result.width}x${result.height}, ${result.elementCount}/${result.inputCount} elements) saved to: ${result.path}` }],
         };
       } catch (e) {
         return {
