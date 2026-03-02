@@ -28499,9 +28499,9 @@ Canvas background is white.
 
 **Labeled arrow**: \`"label": { "text": "connects" }\` on an arrow element.
 
-**Title (PREFERRED for headings)**: Use a transparent rectangle spanning the diagram width. The label auto-centers perfectly — no math needed.
-\`{ "type": "rectangle", "id": "title", "x": DIAGRAM_LEFT, "y": TOP, "width": DIAGRAM_WIDTH, "height": 40, "strokeColor": "transparent", "backgroundColor": "transparent", "strokeWidth": 0, "label": { "text": "My Title", "fontSize": 28 } }\`
-For subtitle: same pattern with height: 30, fontSize: 16, optionally strokeColor: "#b0b0b0" to add a subtle separator line.
+**Title (PREFERRED for headings)**: Use a transparent rectangle spanning the diagram width with a subtle bottom border. The label auto-centers perfectly — no math needed.
+\`{ "type": "rectangle", "id": "title", "x": DIAGRAM_LEFT, "y": TOP, "width": DIAGRAM_WIDTH, "height": 40, "strokeColor": "#e0e0e0", "backgroundColor": "transparent", "strokeWidth": 1, "label": { "text": "My Title", "fontSize": 28 } }\`
+For subtitle: same pattern with height: 30, fontSize: 16, strokeColor: "#b0b0b0".
 
 **Standalone text** (annotations, zone labels — NOT for titles):
 \`{ "type": "text", "id": "t1", "x": 150, "y": 138, "text": "Hello", "fontSize": 20 }\`
@@ -28637,6 +28637,7 @@ ALWAYS use one of these exact sizes. Non-4:3 viewports cause distortion.
 
 - NEVER use fontSize below 14 for any camera size
 - Arrow labels should be short (1-3 words) since they render at the arrow midpoint with no offset control
+- Labeled arrows need minimum 150px length — shorter arrows cause labels to overlap arrowheads
 
 **Element sizing rules:**
 - Minimum shape size: 120×60 for labeled rectangles/ellipses
@@ -28663,7 +28664,7 @@ Example prompt: "Explain how photosynthesis works"
 \`\`\`json
 [
   {"type":"cameraUpdate","width":800,"height":600,"x":0,"y":-20},
-  {"type":"rectangle","id":"ti","x":0,"y":-10,"width":800,"height":40,"strokeColor":"transparent","backgroundColor":"transparent","strokeWidth":0,"label":{"text":"Photosynthesis","fontSize":28}},
+  {"type":"rectangle","id":"ti","x":0,"y":-10,"width":800,"height":40,"strokeColor":"#e0e0e0","backgroundColor":"transparent","strokeWidth":1,"label":{"text":"Photosynthesis","fontSize":28}},
   {"type":"rectangle","id":"fo","x":0,"y":30,"width":800,"height":30,"strokeColor":"transparent","backgroundColor":"transparent","strokeWidth":0,"label":{"text":"6CO2 + 6H2O --> C6H12O6 + 6O2","fontSize":16,"strokeColor":"#b0b0b0"}},
   {"type":"rectangle","id":"lf","x":150,"y":90,"width":520,"height":380,"backgroundColor":"#d3f9d8","fillStyle":"solid","roundness":{"type":3},"strokeColor":"#22c55e","strokeWidth":1,"opacity":35},
   {"type":"text","id":"lfl","x":170,"y":96,"text":"Inside the Leaf","fontSize":16,"strokeColor":"#22c55e"},
@@ -28699,7 +28700,7 @@ Minimal 2-actor sequence diagram: actor boxes at top, dashed lifelines, solid re
 \`\`\`json
 [
   {"type":"cameraUpdate","width":600,"height":450,"x":0,"y":0},
-  {"type":"rectangle","id":"stitle","x":0,"y":5,"width":600,"height":35,"strokeColor":"transparent","backgroundColor":"transparent","strokeWidth":0,"label":{"text":"Client-Server Flow","fontSize":20}},
+  {"type":"rectangle","id":"stitle","x":0,"y":5,"width":600,"height":35,"strokeColor":"#e0e0e0","backgroundColor":"transparent","strokeWidth":1,"label":{"text":"Client-Server Flow","fontSize":20}},
   {"type":"rectangle","id":"ac1","x":80,"y":50,"width":140,"height":50,"backgroundColor":"#a5d8ff","fillStyle":"solid","roundness":{"type":3},"label":{"text":"Client","fontSize":18}},
   {"type":"rectangle","id":"ac2","x":380,"y":50,"width":140,"height":50,"backgroundColor":"#b2f2bb","fillStyle":"solid","roundness":{"type":3},"label":{"text":"Server","fontSize":18}},
   {"type":"arrow","id":"lf1","x":150,"y":100,"width":0,"height":310,"points":[[0,0],[0,310]],"strokeStyle":"dashed","strokeColor":"#b0b0b0","endArrowhead":null,"startArrowhead":null},
@@ -28755,7 +28756,7 @@ Common mistakes to avoid:
 - **Elements must not overlap or crowd** — leave 30px minimum between any two elements. Arrow labels need 60px clear space. If elements are too close, make the camera bigger or reduce element count
 - **Camera size must match content with padding** — if your content is 500px tall, use 800x600 camera, not 500px. No padding = truncated edges
 - **Center titles relative to the diagram below** — estimate the diagram's total width and center the title text over it, not over the canvas
-- **Arrow labels need space** — long labels like "ATP + NADPH" overflow short arrows. Keep labels short or make arrows wider
+- **Arrow labels need space** — long labels like "ATP + NADPH" overflow short arrows. Keep labels short or make arrows wider. Labeled arrows must be 150px+ long to avoid arrowhead overlap
 - **Elements overlap when y-coordinates are close** — always check that text, boxes, and labels don't stack on top of each other
 - **Arrow labels cluster when many arrows share an element** — stagger arrows using different fixedPoint positions (e.g., [0.3,1], [0.5,1], [0.7,1] for bottom edge) and make arrows long enough (200px+) to separate labels. For very dense areas, omit labels on obvious connections or use a legend instead
 - **Fan-out from a single element** — when 3+ arrows leave the same edge, use different fixedPoint positions AND offset the arrow start x,y slightly (+-15px) to separate them visually. For very dense nodes, use multi-segment arrows to route around neighbors: one goes straight, one does an L-shape to avoid the first
