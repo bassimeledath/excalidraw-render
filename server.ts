@@ -184,6 +184,13 @@ Example — right-angle arrow from shape A (right edge at x:300,y:150) to shape 
 - Dedicate empty lanes/corridors specifically for arrow routing
 - Consider breaking into sub-diagrams if arrows become unmanageable
 
+**⚠ ARROW VERIFICATION (do this AFTER placing all elements):**
+For EACH arrow in your diagram:
+1. List every shape between the arrow's start and end points
+2. Trace the arrow's path segment by segment — does it cross through any shape?
+3. If YES: replace with a multi-segment arrow that routes AROUND the shape (add waypoints)
+This is the most common quality defect. A single arrow through a shape ruins the whole diagram.
+
 ### Example: Two connected labeled boxes
 \`\`\`json
 [
@@ -225,6 +232,26 @@ ALWAYS use one of these exact sizes. Non-4:3 viewports cause distortion.
 - Unlabeled decorative shapes (activation boxes, dividers, spacers) can be any size — the 120×60 minimum only applies to shapes with labels
 - Leave 20-30px gaps between elements minimum
 - Prefer fewer, larger elements over many tiny ones
+
+**⚠ TEXT OVERFLOW — Size rectangles to fit labels!**
+Labels that exceed their container width will overflow and look broken. Use this table:
+
+| fontSize | Chars per px | Width formula | Example |
+|----------|-------------|---------------|---------|
+| 16 | ~11px/char | width >= chars × 11 | "API Server" (10 chars) → width 120+ |
+| 20 | ~14px/char | width >= chars × 14 | "API Server" (10 chars) → width 150+ |
+| 24 | ~16px/char | width >= chars × 16 | "API Server" (10 chars) → width 170+ |
+| 28 | ~18px/char | width >= chars × 18 | "My Title" (8 chars) → width 150+ |
+
+Quick reference — max characters that fit by width:
+| Width | fontSize 16 | fontSize 20 | fontSize 24 |
+|-------|------------|------------|------------|
+| 120px | ~10 chars | ~8 chars | ~7 chars |
+| 160px | ~14 chars | ~11 chars | ~9 chars |
+| 200px | ~17 chars | ~14 chars | ~12 chars |
+| 280px | ~25 chars | ~19 chars | ~17 chars |
+
+**Always count your label characters and check the table above.** If in doubt, make the rectangle wider — extra width looks fine, but overflow looks broken.
 
 ALWAYS start with a \`cameraUpdate\` as the FIRST element:
 \`{ "type": "cameraUpdate", "width": 800, "height": 600, "x": 0, "y": 0 }\`
@@ -333,7 +360,8 @@ Central ellipse with branches radiating outward at clock positions.
 - Camera XL (1200x900) recommended
 
 Common mistakes to avoid:
-- **NEVER route arrows through shapes** — this is the #1 cause of unreadable diagrams. If a straight arrow from A to B would cross shape C, use a multi-segment arrow to route around C. Check EVERY arrow against ALL shapes in its path
+- **Text overflow — ALWAYS size rectangles to fit labels.** Use width >= label_chars × 11 for fontSize 16, or label_chars × 14 for fontSize 20. Example: "Deployment" (10 chars) at fontSize 16 needs width 120+. Check the sizing table above BEFORE setting width. Overflow is the #1 visual defect
+- **NEVER route arrows through shapes** — this is the #1 visual quality defect after text overflow. If a straight arrow from A to B would cross shape C, you MUST use a multi-segment arrow to route around C. After placing all arrows, run the ARROW VERIFICATION checklist above — trace every arrow path and confirm zero shape crossings
 - **Elements must not overlap or crowd** — leave 30px minimum between any two elements. Arrow labels need 60px clear space. If elements are too close, make the camera bigger or reduce element count
 - **Camera size must match content with padding** — if your content is 500px tall, use 800x600 camera, not 500px. No padding = truncated edges
 - **Center titles relative to the diagram below** — estimate the diagram's total width and center the title text over it, not over the canvas
